@@ -1,0 +1,13 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+
+logging:
+  file: geode-support-shell.log
+
+---
+
+app:
+  history:
+    file: .geode-support-shell.history

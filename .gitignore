@@ -1,0 +1,13 @@
+out/
+build/
+gradle/
+build-eclipse/
+
+.idea/
+.gradle/
+.settings/
+
+*.iml
+.project
+.DS_store
+.classpath
