@@ -1,3 +1,17 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.support.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,10 +26,10 @@ import java.time.temporal.TemporalAdjusters;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.util.StringUtils;
 
 @RunWith(JUnitParamsRunner.class)
 public class IntervalTest {
@@ -92,7 +106,7 @@ public class IntervalTest {
         .isInstanceOf(NullPointerException.class)
         .hasMessageMatching("ZoneId can't be null");
 
-    ZoneId newZoneId = StringUtils.isEmpty(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
+    ZoneId newZoneId = StringUtils.isBlank(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
 
     Interval newNoonInterval = noonInterval.withZoneSameInterval(newZoneId);
     assertThat(noonInterval.getStart().toInstant()).isEqualTo(newNoonInterval.getStart().toInstant());
@@ -119,7 +133,7 @@ public class IntervalTest {
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai", "America/Chicago" })
   public void containsShouldWorkCorrectlyWhenUsingDifferentTimeZones(String timeZoneId) {
-    ZoneId filterZoneId = StringUtils.isEmpty(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
+    ZoneId filterZoneId = StringUtils.isBlank(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
 
     assertThat(todayInterval.contains(ZonedDateTime.ofInstant(noon, filterZoneId))).isTrue();
     assertThat(todayInterval.contains(ZonedDateTime.ofInstant(oneHourBeforeNoon, filterZoneId))).isTrue();
@@ -159,7 +173,7 @@ public class IntervalTest {
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai", "America/Chicago" })
   public void containsIntervalShouldWorkCorrectlyWhenUsingDifferentTimeZones(String timeZoneId) {
-    ZoneId filterZoneId = StringUtils.isEmpty(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
+    ZoneId filterZoneId = StringUtils.isBlank(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
 
     // Minutes Within Hours
     assertThat(noonInterval.contains(noonInterval.withZoneSameInterval(filterZoneId))).isTrue();
@@ -205,7 +219,7 @@ public class IntervalTest {
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai", "America/Chicago" })
   public void overlapsShouldWorkCorrectlyWhenUsingDifferentTimeZones(String timeZoneId) {
-    ZoneId filterZoneId = StringUtils.isEmpty(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
+    ZoneId filterZoneId = StringUtils.isBlank(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
 
     // Interval of Hours
     assertThat(noonInterval.overlaps(noonInterval.withZoneSameInterval(filterZoneId))).isTrue();

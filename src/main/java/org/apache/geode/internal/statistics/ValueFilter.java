@@ -16,6 +16,8 @@ package org.apache.geode.internal.statistics;
 
 import java.io.File;
 
+import org.apache.geode.support.domain.marker.GeodeExtension;
+
 /**
  * Specifies what data from a statistic archive will be of interest to the reader. This is used
  * when loading a statistic archive file to reduce the memory footprint. Only statistic data that
@@ -27,7 +29,10 @@ public interface ValueFilter {
    * Returns true if the specified archive file matches this spec. Any archives whose name does
    * not match this spec will not be selected for loading by this spec.
    */
-  boolean archiveMatches(File archive);
+  @GeodeExtension(reason = "Default behavior is to match statistics files (whether they are compressed or not), so it makes sense to have this here.")
+  default boolean archiveMatches(File archive) {
+    return (archive.getName().endsWith(".gz") || archive.getName().endsWith(".gfs"));
+  }
 
   /**
    * Returns true if the specified type name matches this spec. Any types whose name does not

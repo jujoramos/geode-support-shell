@@ -1,5 +1,21 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.support.service;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +26,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,9 +45,10 @@ import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
  */
 @Service
 class DefaultStatisticsService implements StatisticsService {
+  private static final int BUFFER_SIZE = 1024 * 1024;
   private static final Logger logger = LoggerFactory.getLogger(DefaultStatisticsService.class);
   /* This particular Statistic must be present in all statistics files, that's why we use it as the default */
-  protected final SimpleValueFilter defaultValueFilter = new SimpleValueFilter("VMStats", "", "cpus");
+  protected final SimpleValueFilter defaultValueFilter = new SimpleValueFilter("VMStats", "", "cpus", null);
 
   /**
    *
@@ -157,5 +175,49 @@ class DefaultStatisticsService implements StatisticsService {
     }
 
     return parsingResults;
+  }
+
+  @Override
+  public void decompress(Path sourcePath, Path targetPath) throws IOException {
+    logger.debug(String.format("Decompressing file %s...", sourcePath.toString()));
+
+    byte[] buffer = new byte[BUFFER_SIZE];
+    GZIPInputStream compressedInputStream = null;
+    FileOutputStream uncompressedOutputStream = null;
+
+    try {
+      uncompressedOutputStream = new FileOutputStream(targetPath.toString());
+      compressedInputStream = new GZIPInputStream(new FileInputStream(sourcePath.toFile()));
+
+      int readBytes;
+      while ((readBytes = compressedInputStream.read(buffer)) > 0) {
+        uncompressedOutputStream.write(buffer, 0, readBytes);
+      }
+
+      logger.debug(String.format("Decompressing file %s... Done!.", sourcePath.toString()));
+    } catch (IOException ioException) {
+      logger.error(String.format("Decompressing file %s... Error!.", sourcePath.toString()), ioException);
+
+      // Delete the file if it was created.
+      Files.delete(targetPath);
+      throw ioException;
+    } finally {
+
+      if (compressedInputStream != null) {
+        try {
+          compressedInputStream.close();
+        } catch (IOException ioException) {
+          logger.warn(String.format("File %s wasn't correctly closed.", sourcePath.toAbsolutePath().toString()), ioException);
+        }
+      }
+
+      if (uncompressedOutputStream != null) {
+        try {
+          uncompressedOutputStream.close();
+        } catch (IOException ioException) {
+          logger.warn(String.format("File %s wasn't correctly closed.", targetPath.toAbsolutePath().toString()), ioException);
+        }
+      }
+    }
   }
 }

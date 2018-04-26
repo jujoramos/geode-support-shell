@@ -1,4 +1,18 @@
-package org.apache.geode.support.command;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.apache.geode.support.command.statistics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,18 +34,18 @@ import java.util.Random;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
-import org.springframework.util.StringUtils;
 
-import org.apache.geode.support.MockUtils;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
+import org.apache.geode.support.test.MockUtils;
 import org.apache.geode.support.utils.FormatUtils;
 
 @RunWith(JUnitParamsRunner.class)
@@ -39,7 +53,7 @@ public class ShowStatisticsMetadataCommandTest {
   private File mockedFolderFile;
   private FilesService filesService;
   private StatisticsService statisticsService;
-  private StatisticsCommands statisticsCommands;
+  private ShowStatisticsMetadataCommand statisticsCommands;
 
   @Before
   public void setUp() {
@@ -51,7 +65,7 @@ public class ShowStatisticsMetadataCommandTest {
 
     filesService = mock(FilesService.class);
     statisticsService = mock(StatisticsService.class);
-    statisticsCommands = new StatisticsCommands(filesService, statisticsService);
+    statisticsCommands = new ShowStatisticsMetadataCommand(filesService, statisticsService);
   }
 
   @Test
@@ -85,7 +99,7 @@ public class ShowStatisticsMetadataCommandTest {
 
   @Test
   public void showStatisticsMetadataShouldReturnOnlyErrorTableIfParsingFailsForAllFiles() {
-    Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs");
+    Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs", false);
     ParsingResult<StatisticFileMetadata> errorResult = new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception"));
     List<ParsingResult<StatisticFileMetadata>> mockedResults = Collections.singletonList(errorResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
@@ -110,12 +124,12 @@ public class ShowStatisticsMetadataCommandTest {
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
   public void showStatisticsMetadataShouldReturnOnlyMetadataTableIfParsingSucceedsForAllFiles(String timeZoneId) {
-    ZoneId zoneId = StringUtils.isEmpty(timeZoneId) ? null : ZoneId.of(timeZoneId);
+    ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     StatisticFileMetadata mockedMetadata = mock(StatisticFileMetadata.class);
     when(mockedMetadata.getTimeZoneId()).thenReturn(ZoneId.systemDefault());
     when(mockedMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
-    ParsingResult<StatisticFileMetadata> correctResult = new ParsingResult<>(MockUtils.mockPath("temporal.gfs"), mockedMetadata);
+    ParsingResult<StatisticFileMetadata> correctResult = new ParsingResult<>(MockUtils.mockPath("temporal.gfs", false), mockedMetadata);
     List<ParsingResult<StatisticFileMetadata>> mockedResults = Collections.singletonList(correctResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
@@ -141,13 +155,13 @@ public class ShowStatisticsMetadataCommandTest {
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
   public void showStatisticsMetadataShouldReturnErrorAndMetadataTablesInOrder(String timeZoneId) {
-    Path regularFile1 = MockUtils.mockPath("/temp/mocked/regularFile1");
-    Path regularFile2 = MockUtils.mockPath("/temp/mocked/regularFile2");
-    Path unparseableFile1 = MockUtils.mockPath("/temp/mocked/unparseableFile1");
-    Path unparseableFile2 = MockUtils.mockPath("/temp/mocked/unparseableFile2");
-    Path unparseableFile3 = MockUtils.mockPath("/temp/mocked/unparseableFile3");
+    Path regularFile1 = MockUtils.mockPath("/temp/mocked/regularFile1", false);
+    Path regularFile2 = MockUtils.mockPath("/temp/mocked/regularFile2", false);
+    Path unparseableFile1 = MockUtils.mockPath("/temp/mocked/unparseableFile1", false);
+    Path unparseableFile2 = MockUtils.mockPath("/temp/mocked/unparseableFile2", false);
+    Path unparseableFile3 = MockUtils.mockPath("/temp/mocked/unparseableFile3", false);
 
-    ZoneId zoneId = StringUtils.isEmpty(timeZoneId) ? null : ZoneId.of(timeZoneId);
+    ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     List<String> timeZoneIds = new ArrayList<>(ZoneId.getAvailableZoneIds());
     ZoneId defaultTimeZone = ZoneId.systemDefault();
@@ -155,16 +169,16 @@ public class ShowStatisticsMetadataCommandTest {
 
     StatisticFileMetadata metadata1 = new StatisticFileMetadata("/regularFile1", 1, true, defaultTimeZone, 1L, 1L, "productVersion1", "operatingSystem1");
     StatisticFileMetadata metadata2 = new StatisticFileMetadata("/regularFile2", 2, true, nonDefaultTimeZone, 2L, 2L, "productVersion2", "operatingSystem2");
-    List<StatisticFileMetadata> mockedMetadata = Arrays.asList(new StatisticFileMetadata[] { metadata1, metadata2 });
+    List<StatisticFileMetadata> mockedMetadata = Arrays.asList(metadata1, metadata2);
     ParsingResult<StatisticFileMetadata> correctResult1 = new ParsingResult<>(regularFile1, mockedMetadata.get(0));
     ParsingResult<StatisticFileMetadata> correctResult2 = new ParsingResult<>(regularFile2, mockedMetadata.get(1));
 
-    List<Exception> mockedExceptions = Arrays.asList(new Exception[] { new Exception("Mocked Exception1"), new RuntimeException("Mocked RuntimeException2"), new IllegalArgumentException("Mocked IllegalArgumentException3") });
+    List<Exception> mockedExceptions = Arrays.asList(new Exception("Mocked Exception1"), new RuntimeException("Mocked RuntimeException2"), new IllegalArgumentException("Mocked IllegalArgumentException3"));
     ParsingResult<StatisticFileMetadata> errorResult1 = new ParsingResult<>(unparseableFile1, mockedExceptions.get(0));
     ParsingResult<StatisticFileMetadata> errorResult2 = new ParsingResult<>(unparseableFile2, mockedExceptions.get(1));
     ParsingResult<StatisticFileMetadata> errorResult3 = new ParsingResult<>(unparseableFile3, mockedExceptions.get(2));
 
-    List<ParsingResult<StatisticFileMetadata>> mockedResults = Arrays.asList(new ParsingResult[] { correctResult1, correctResult2, errorResult1, errorResult2, errorResult3 });
+    List<ParsingResult<StatisticFileMetadata>> mockedResults = Arrays.asList(correctResult1, correctResult2, errorResult1, errorResult2, errorResult3);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.showStatisticsMetadata(mockedFolderFile, zoneId);

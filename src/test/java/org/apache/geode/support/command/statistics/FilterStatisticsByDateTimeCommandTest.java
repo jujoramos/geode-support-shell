@@ -1,4 +1,18 @@
-package org.apache.geode.support.command;
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package org.apache.geode.support.command.statistics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,21 +35,21 @@ import java.util.List;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
-import org.springframework.util.StringUtils;
 
-import org.apache.geode.support.MockUtils;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
+import org.apache.geode.support.test.MockUtils;
 
 @RunWith(JUnitParamsRunner.class)
-public class ArrangeStatisticsByDateTimeCommandTest {
+public class FilterStatisticsByDateTimeCommandTest {
   private File mockedSourceFolder;
   private Path mockedSourceFolderPath;
   private File mockedMatchingFolder;
@@ -45,7 +59,7 @@ public class ArrangeStatisticsByDateTimeCommandTest {
 
   private FilesService filesService;
   private StatisticsService statisticsService;
-  private StatisticsCommands statisticsCommands;
+  private FilterStatisticsByDateTimeCommand statisticsCommands;
 
   @Before
   public void setUp() {
@@ -69,50 +83,50 @@ public class ArrangeStatisticsByDateTimeCommandTest {
 
     filesService = mock(FilesService.class);
     statisticsService = mock(StatisticsService.class);
-    statisticsCommands = new StatisticsCommands(filesService, statisticsService);
+    statisticsCommands = new FilterStatisticsByDateTimeCommand(filesService, statisticsService);
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldThrowExceptionWhenSourceFolderIsNotReadable() {
+  public void filterStatisticsByDateTimeShouldThrowExceptionWhenSourceFolderIsNotReadable() {
     doThrow(new IllegalArgumentException("Mocked IllegalArgumentException.")).when(filesService).assertFolderReadability(mockedSourceFolderPath);
-    assertThatThrownBy(() -> statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
+    assertThatThrownBy(() -> statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageMatching("^Mocked IllegalArgumentException.$");
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldThrowExceptionWhenFoldersAreEquals() {
+  public void filterStatisticsByDateTimeShouldThrowExceptionWhenFoldersAreEquals() {
     doThrow(new IllegalArgumentException("sourceFolder can't be the same as matchingFolder.")).when(filesService).assertPathsInequality(mockedSourceFolderPath, mockedMatchingFolderPath, "sourceFolder", "matchingFolder");
-    assertThatThrownBy(() -> statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
+    assertThatThrownBy(() -> statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageMatching("^sourceFolder can't be the same as matchingFolder.$");
 
     doNothing().when(filesService).assertPathsInequality(mockedSourceFolderPath, mockedMatchingFolderPath, "sourceFolder", "matchingFolder");
     doThrow(new IllegalArgumentException("sourceFolder can't be the same as nonMatchingFolder.")).when(filesService).assertPathsInequality(mockedSourceFolderPath, mockedNonMatchingFolderPath, "sourceFolder", "nonMatchingFolder");
-    assertThatThrownBy(() -> statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
+    assertThatThrownBy(() -> statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageMatching("^sourceFolder can't be the same as nonMatchingFolder.$");
 
     doNothing().when(filesService).assertPathsInequality(mockedSourceFolderPath, mockedMatchingFolderPath, "sourceFolder", "matchingFolder");
     doNothing().when(filesService).assertPathsInequality(mockedSourceFolderPath, mockedNonMatchingFolderPath, "sourceFolder", "nonMatchingFolder");
     doThrow(new IllegalArgumentException("matchingFolder can't be the same as nonMatchingFolder.")).when(filesService).assertPathsInequality(mockedMatchingFolderPath, mockedNonMatchingFolderPath, "matchingFolder", "nonMatchingFolder");
-    assertThatThrownBy(() -> statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
+    assertThatThrownBy(() -> statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageMatching("^matchingFolder can't be the same as nonMatchingFolder.$");
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldPropagateExceptionsThrownByTheServiceLayer() {
+  public void filterStatisticsByDateTimeShouldPropagateExceptionsThrownByTheServiceLayer() {
     doThrow(new RuntimeException()).when(statisticsService).parseMetadata(any());
-    assertThatThrownBy(() -> statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
+    assertThatThrownBy(() -> statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null))
         .isInstanceOf(RuntimeException.class);
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldReturnStringWhenNoFilesAreFound() {
+  public void filterStatisticsByDateTimeShouldReturnStringWhenNoFilesAreFound() {
     when(statisticsService.parseMetadata(any())).thenReturn(Collections.emptyList());
 
-    Object resultObject = statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
@@ -123,13 +137,13 @@ public class ArrangeStatisticsByDateTimeCommandTest {
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldReturnOnlyErrorTableIfParsingFailsForAllFiles() {
-    Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs");
+  public void filterStatisticsByDateTimeShouldReturnOnlyErrorTableIfParsingFailsForAllFiles() {
+    Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs", false);
     ParsingResult<StatisticFileMetadata> errorResult = new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception"));
     List<ParsingResult<StatisticFileMetadata>> mockedResults = Collections.singletonList(errorResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
-    Object resultObject = statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
@@ -147,15 +161,15 @@ public class ArrangeStatisticsByDateTimeCommandTest {
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() {
+  public void filterStatisticsByDateTimeShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() {
     StatisticFileMetadata mockedMetadata = mock(StatisticFileMetadata.class);
     when(mockedMetadata.getTimeZoneId()).thenReturn(ZoneId.systemDefault());
     when(mockedMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
-    ParsingResult<StatisticFileMetadata> correctResult = new ParsingResult<>(MockUtils.mockPath("temporal.gfs"), mockedMetadata);
+    ParsingResult<StatisticFileMetadata> correctResult = new ParsingResult<>(MockUtils.mockPath("temporal.gfs", false), mockedMetadata);
     List<ParsingResult<StatisticFileMetadata>> mockedResults = Collections.singletonList(correctResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
-    Object resultObject = statisticsCommands.arrangeStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
@@ -171,31 +185,31 @@ public class ArrangeStatisticsByDateTimeCommandTest {
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldReturnErrorsAndResultsTableIfParsingSucceedsButFileMovementFails() throws Exception {
+  public void filterStatisticsByDateTimeShouldReturnErrorsAndResultsTableIfParsingSucceedsButFileCopyFails() throws Exception {
     ZoneId mockedZoneId = ZoneId.systemDefault();
-    Path mockedMatchingPath = MockUtils.mockPath("matching.gfs");
+    Path mockedMatchingPath = MockUtils.mockPath("matching.gfs", false);
     StatisticFileMetadata mockedMatchingMetadata = mock(StatisticFileMetadata.class);
     when(mockedMatchingMetadata.getTimeZoneId()).thenReturn(mockedZoneId);
     when(mockedMatchingMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
     when(mockedMatchingMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 01, 01, 00, 00, 00, mockedZoneId));
     when(mockedMatchingMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 02, 01, 00, 00, 00, mockedZoneId)));
 
-    Path mockedNonMatchingPath = MockUtils.mockPath("nonMatching.gfs");
+    Path mockedNonMatchingPath = MockUtils.mockPath("nonMatching.gfs", false);
     StatisticFileMetadata mockedNonMatchingMetadata = mock(StatisticFileMetadata.class);
     when(mockedNonMatchingMetadata.getTimeZoneId()).thenReturn(mockedZoneId);
     when(mockedNonMatchingMetadata.getProductVersion()).thenReturn("GemFire 8.2.0 #build 0");
     when(mockedNonMatchingMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2019, 01, 01, 00, 00, 00, mockedZoneId));
     when(mockedNonMatchingMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2019, 02, 01, 00, 00, 00, mockedZoneId)));
 
-    doThrow(new IOException("Mocked IOException for mockedMatchingPath.")).when(filesService).moveFile(mockedMatchingPath, mockedMatchingFolderPath);
-    doThrow(new IOException("Mocked IOException for mockedNonMatchingPath.")).when(filesService).moveFile(mockedNonMatchingPath, mockedNonMatchingFolderPath);
+    doThrow(new IOException("Mocked IOException for mockedMatchingPath.")).when(filesService).copyFile(mockedMatchingPath, mockedMatchingFolderPath);
+    doThrow(new IOException("Mocked IOException for mockedNonMatchingPath.")).when(filesService).copyFile(mockedNonMatchingPath, mockedNonMatchingFolderPath);
 
     ParsingResult<StatisticFileMetadata> mockedMatchingResult = new ParsingResult<>(mockedMatchingPath, mockedMatchingMetadata);
     ParsingResult<StatisticFileMetadata> mockedNonMatchingResult = new ParsingResult<>(mockedNonMatchingPath, mockedNonMatchingMetadata);
     List<ParsingResult<StatisticFileMetadata>> mockedResults = Arrays.asList(mockedMatchingResult, mockedNonMatchingResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
-    Object resultObject = statisticsCommands.arrangeStatisticsByDateTime(2018, 01, 25, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    Object resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 25, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
@@ -231,11 +245,11 @@ public class ArrangeStatisticsByDateTimeCommandTest {
 
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
-  public void arrangeStatisticsByDateTimeShouldUseFileZoneIdForFilteringWhenNoCustomZoneIdIsSpecified(String timeZoneId) throws Exception {
-    ZoneId zoneId = StringUtils.isEmpty(timeZoneId) ? ZoneId.systemDefault() : ZoneId.of(timeZoneId);
+  public void filterStatisticsByDateTimeShouldUseFileZoneIdForFilteringWhenNoCustomZoneIdIsSpecified(String timeZoneId) throws Exception {
+    ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? ZoneId.systemDefault() : ZoneId.of(timeZoneId);
 
     // 05/01/2018 12:00 - 15/01/2018 16:00
-    Path januaryFifthTwelveAMToJanuaryFifteenthFourPMPath = MockUtils.mockPath("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs");
+    Path januaryFifthTwelveAMToJanuaryFifteenthFourPMPath = MockUtils.mockPath("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs", false);
     StatisticFileMetadata januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata = mock(StatisticFileMetadata.class);
     when(januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata.getTimeZoneId()).thenReturn(zoneId);
     when(januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
@@ -243,7 +257,7 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     when(januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 01, 15, 04, 00, 00, zoneId)));
 
     // 10/01/2018 13:30 - 10/01/2018 14:30
-    Path januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath = MockUtils.mockPath("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs");
+    Path januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath = MockUtils.mockPath("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs", false);
     StatisticFileMetadata januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata = mock(StatisticFileMetadata.class);
     when(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata.getTimeZoneId()).thenReturn(zoneId);
     when(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata.getProductVersion()).thenReturn("GemFire 7.0.2 #build 0");
@@ -251,7 +265,7 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     when(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 01, 10, 14, 30, 00, zoneId)));
 
     // 10/01/2018 14:30 - 13/01/2018 17:30
-    Path januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath = MockUtils.mockPath("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs");
+    Path januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath = MockUtils.mockPath("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs", false);
     StatisticFileMetadata januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata = mock(StatisticFileMetadata.class);
     when(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata.getTimeZoneId()).thenReturn(zoneId);
     when(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata.getProductVersion()).thenReturn("GemFire 7.0.2 #build 0");
@@ -266,7 +280,7 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     // Filter by deterministic point in time: 14/01/2018 12:05 AM
-    Object resultObject = statisticsCommands.arrangeStatisticsByDateTime(2018, 01, 14, 12, 05, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    Object resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 14, 12, 05, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
@@ -284,13 +298,13 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     assertThat(resultTableModel.getValue(2, 1)).isEqualTo("false");
     assertThat(resultTableModel.getValue(3, 0)).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs");
     assertThat(resultTableModel.getValue(3, 1)).isEqualTo("false");
-    verify(filesService, times(1)).moveFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedNonMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedNonMatchingFolderPath);
     reset(filesService);
 
     // Filter by day and hour : 10/01/2018 14 PM
-    resultObject = statisticsCommands.arrangeStatisticsByDateTime(2018, 01, 10, 14, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 10, 14, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     resultList = (List)resultObject;
@@ -308,13 +322,13 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     assertThat(resultTableModel.getValue(2, 1)).isEqualTo("true");
     assertThat(resultTableModel.getValue(3, 0)).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs");
     assertThat(resultTableModel.getValue(3, 1)).isEqualTo("true");
-    verify(filesService, times(1)).moveFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedMatchingFolderPath);
     reset(filesService);
 
     // Filter by day only: 13/01/2018
-    resultObject = statisticsCommands.arrangeStatisticsByDateTime(2018, 01, 13, null, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 13, null, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     resultList = (List)resultObject;
@@ -332,21 +346,21 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     assertThat(resultTableModel.getValue(2, 1)).isEqualTo("false");
     assertThat(resultTableModel.getValue(3, 0)).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs");
     assertThat(resultTableModel.getValue(3, 1)).isEqualTo("true");
-    verify(filesService, times(1)).moveFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedNonMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedMatchingFolderPath);
     reset(filesService);
   }
 
   @Test
-  public void arrangeStatisticsByDateTimeShouldUseCustomZoneIdForFilteringWhenSpecified() throws Exception {
+  public void filterStatisticsByDateTimeShouldUseCustomZoneIdForFilteringWhenSpecified() throws Exception {
     ZoneId dublinZoneId = ZoneId.of("Europe/Dublin");
     ZoneId chicagoZoneId = ZoneId.of("America/Chicago");
     ZoneId filterZoneId = ZoneId.of("America/Argentina/Buenos_Aires");
 
     // 05/01/2018 14:00 - 07/01/2018 01:00 [Dublin]
     // 05/01/2018 10:00 - 06/01/2018 21:00 [Buenos_Aires]
-    Path dublinServerPath = MockUtils.mockPath("dublinServer.gfs");
+    Path dublinServerPath = MockUtils.mockPath("dublinServer.gfs", false);
     StatisticFileMetadata dublinServerMetadata = mock(StatisticFileMetadata.class);
     when(dublinServerMetadata.getTimeZoneId()).thenReturn(dublinZoneId);
     when(dublinServerMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
@@ -355,7 +369,7 @@ public class ArrangeStatisticsByDateTimeCommandTest {
 
     // 05/01/2018 06:00 - 06/01/2018 23:00 [Chicago]
     // 05/01/2018 08:00 - 07/01/2018 01:00 [Buenos_Aires]
-    Path chicagoLocatorPath = MockUtils.mockPath("chicagoLocator.gfs");
+    Path chicagoLocatorPath = MockUtils.mockPath("chicagoLocator.gfs", false);
     StatisticFileMetadata chicagoLocatorMetadata = mock(StatisticFileMetadata.class);
     when(chicagoLocatorMetadata.getTimeZoneId()).thenReturn(chicagoZoneId);
     when(chicagoLocatorMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
@@ -368,7 +382,7 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     // Filter by deterministic point in time: 06/01/2018 12:05 AM [America/Buenos_Aires]
-    Object resultObject = statisticsCommands.arrangeStatisticsByDateTime(2018, 01, 06, 12, 05, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
+    Object resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 06, 12, 05, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
@@ -384,12 +398,12 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     assertThat(resultTableModel.getValue(1, 1)).isEqualTo("true");
     assertThat(resultTableModel.getValue(2, 0)).isEqualTo("chicagoLocator.gfs");
     assertThat(resultTableModel.getValue(2, 1)).isEqualTo("true");
-    verify(filesService, times(1)).moveFile(dublinServerPath, mockedMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(chicagoLocatorPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
     reset(filesService);
 
     // Filter by day and hour: 05/01/2018 07:30 [America/Buenos_Aires]
-    resultObject = statisticsCommands.arrangeStatisticsByDateTime(2018, 01, 05, 07, 30, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
+    resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 05, 07, 30, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     resultList = (List)resultObject;
@@ -405,12 +419,12 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     assertThat(resultTableModel.getValue(1, 1)).isEqualTo("false");
     assertThat(resultTableModel.getValue(2, 0)).isEqualTo("chicagoLocator.gfs");
     assertThat(resultTableModel.getValue(2, 1)).isEqualTo("false");
-    verify(filesService, times(1)).moveFile(dublinServerPath, mockedNonMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(chicagoLocatorPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedNonMatchingFolderPath);
     reset(filesService);
 
     // Filter by day only: 07/01/2018 [America/Buenos_Aires]
-    resultObject = statisticsCommands.arrangeStatisticsByDateTime(2018, 01, 07, null, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
+    resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 07, null, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     resultList = (List)resultObject;
@@ -426,8 +440,8 @@ public class ArrangeStatisticsByDateTimeCommandTest {
     assertThat(resultTableModel.getValue(1, 1)).isEqualTo("false");
     assertThat(resultTableModel.getValue(2, 0)).isEqualTo("chicagoLocator.gfs");
     assertThat(resultTableModel.getValue(2, 1)).isEqualTo("true");
-    verify(filesService, times(1)).moveFile(dublinServerPath, mockedNonMatchingFolderPath);
-    verify(filesService, times(1)).moveFile(chicagoLocatorPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
     reset(filesService);
   }
 }

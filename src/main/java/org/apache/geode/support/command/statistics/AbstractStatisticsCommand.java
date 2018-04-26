@@ -12,19 +12,21 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.domain.marker;
+package org.apache.geode.support.command.statistics;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * Indicates that the method or attribute has been added to the original Geode class.
- */
-@Retention(RetentionPolicy.SOURCE)
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })
-public @interface GeodeExtension {
+import org.apache.geode.support.service.FilesService;
+import org.apache.geode.support.service.StatisticsService;
 
-  String reason() default  "";
+// TODO: Spring doesn't know how to convert from String to Path. Add a custom converter and use Path instead of the old File class.
+public class AbstractStatisticsCommand {
+  protected FilesService filesService;
+  protected StatisticsService statisticsService;
+
+  @Autowired
+  public AbstractStatisticsCommand(FilesService filesService, StatisticsService statisticsService) {
+    this.filesService = filesService;
+    this.statisticsService = statisticsService;
+  }
 }

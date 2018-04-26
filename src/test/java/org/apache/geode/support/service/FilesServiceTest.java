@@ -1,3 +1,17 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.support.service;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -42,24 +56,6 @@ public class FilesServiceTest {
   }
 
   @Test
-  public void assertFolderExistenceTest() {
-    when(Files.exists(any())).thenReturn(false);
-    assertThatThrownBy(() -> filesService.assertFolderExistence(mockedFolder))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageMatching("^Folder (.*) does not exist.$");
-
-    when(Files.exists(any())).thenReturn(true);
-    when(Files.isDirectory(any())).thenReturn(false);
-    assertThatThrownBy(() -> filesService.assertFolderExistence(mockedFolder))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageMatching("^Folder (.*) is not a directory.$");
-
-    when(Files.exists(any())).thenReturn(true);
-    when(Files.isDirectory(any())).thenReturn(true);
-    assertThatCode(() -> filesService.assertFolderExistence(mockedFolder)).doesNotThrowAnyException();
-  }
-
-  @Test
   public void assertFileReadabilityTest() {
     when(Files.exists(any())).thenReturn(false);
     assertThatThrownBy(() -> filesService.assertFileReadability(mockedFile))
@@ -75,6 +71,42 @@ public class FilesServiceTest {
     when(Files.exists(any())).thenReturn(true);
     when(Files.isReadable(any())).thenReturn(true);
     assertThatCode(() -> filesService.assertFileReadability(mockedFile)).doesNotThrowAnyException();
+  }
+
+  @Test
+  public void assertFileExecutabilityTest() {
+    when(Files.exists(any())).thenReturn(false);
+    assertThatThrownBy(() -> filesService.assertFileExecutability(mockedFile))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageMatching("^File (.*) does not exist.$");
+
+    when(Files.exists(any())).thenReturn(true);
+    when(Files.isExecutable(any())).thenReturn(false);
+    assertThatThrownBy(() -> filesService.assertFileExecutability(mockedFile))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageMatching("^File (.*) is not executable.$");
+
+    when(Files.exists(any())).thenReturn(true);
+    when(Files.isExecutable(any())).thenReturn(true);
+    assertThatCode(() -> filesService.assertFileExecutability(mockedFile)).doesNotThrowAnyException();
+  }
+
+  @Test
+  public void assertFolderExistenceTest() {
+    when(Files.exists(any())).thenReturn(false);
+    assertThatThrownBy(() -> filesService.assertFolderExistence(mockedFolder))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageMatching("^Folder (.*) does not exist.$");
+
+    when(Files.exists(any())).thenReturn(true);
+    when(Files.isDirectory(any())).thenReturn(false);
+    assertThatThrownBy(() -> filesService.assertFolderExistence(mockedFolder))
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessageMatching("^Folder (.*) is not a directory.$");
+
+    when(Files.exists(any())).thenReturn(true);
+    when(Files.isDirectory(any())).thenReturn(true);
+    assertThatCode(() -> filesService.assertFolderExistence(mockedFolder)).doesNotThrowAnyException();
   }
 
   @Test
@@ -143,6 +175,36 @@ public class FilesServiceTest {
   }
 
   @Test
+  public void createDirectoriesTest() throws Exception {
+    when(Files.exists(mockedFolder)).thenReturn(true);
+    assertThatCode(() -> filesService.createDirectories(mockedFolder)).doesNotThrowAnyException();
+
+    when(Files.exists(mockedFolder)).thenReturn(false);
+    assertThatCode(() -> filesService.createDirectories(mockedFolder)).doesNotThrowAnyException();
+
+    when(Files.exists(mockedFolder)).thenReturn(false);
+    when(Files.createDirectories(mockedFolder)).thenThrow(new IOException("Mocked IOException When Creating Folder."));
+    assertThatThrownBy(() -> filesService.createDirectories(mockedFolder))
+        .isInstanceOf(IOException.class)
+        .hasMessage("Mocked IOException When Creating Folder.");
+  }
+
+  @Test
+  public void copyFileTest() throws Exception {
+    when(Files.exists(mockedFolder)).thenReturn(false);
+    when(Files.createDirectories(mockedFolder)).thenThrow(new IOException("Mocked IOException When Creating Folder."));
+    assertThatThrownBy(() -> filesService.copyFile(mockedFile, mockedFolder))
+        .isInstanceOf(IOException.class)
+        .hasMessage("Mocked IOException When Creating Folder.");
+
+    when(Files.exists(mockedFolder)).thenReturn(true);
+    when(Files.copy(any(Path.class), any(), any())).thenThrow(new IOException("Mocked IOException When Moving File."));
+    assertThatThrownBy(() -> filesService.copyFile(mockedFile, mockedFolder))
+        .isInstanceOf(IOException.class)
+        .hasMessage("Mocked IOException When Moving File.");
+  }
+
+  @Test
   public void moveFileTest() throws Exception {
     when(Files.exists(mockedFolder)).thenReturn(false);
     when(Files.createDirectories(mockedFolder)).thenThrow(new IOException("Mocked IOException When Creating Folder."));
@@ -151,7 +213,7 @@ public class FilesServiceTest {
         .hasMessage("Mocked IOException When Creating Folder.");
 
     when(Files.exists(mockedFolder)).thenReturn(true);
-    when(Files.move(any(), any())).thenThrow(new IOException("Mocked IOException When Moving File."));
+    when(Files.move(any(), any(), any())).thenThrow(new IOException("Mocked IOException When Moving File."));
     assertThatThrownBy(() -> filesService.moveFile(mockedFile, mockedFolder))
         .isInstanceOf(IOException.class)
         .hasMessage("Mocked IOException When Moving File.");

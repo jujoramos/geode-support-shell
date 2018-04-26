@@ -1,31 +1,48 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.support.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import org.apache.geode.support.SampleDataUtils;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
+import org.apache.geode.support.test.SampleDataUtils;
 
 public class StatisticsServiceIntegrationTest {
   private StatisticsService statisticsService;
 
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
   @Before
   public void setUp() {
     this.statisticsService = new DefaultStatisticsService();
-  }
-
-  @Test
-  @Ignore
-  public void manualTestForDebugging() {
-    statisticsService.parseMetadata(null);
   }
 
   @Test
@@ -35,17 +52,16 @@ public class StatisticsServiceIntegrationTest {
     assertThat(parsingResults.size()).isEqualTo(1);
     ParsingResult<StatisticFileMetadata> parsingResult = parsingResults.get(0);
     assertThat(parsingResult.isSuccess()).isFalse();
-    System.out.println(parsingResult.getException());
     assertThat(parsingResult.getException()).isNotNull();
     assertThat(parsingResult.getException()).isInstanceOf(NoSuchFileException.class).hasMessage("nonExistingFile.gfs");
   }
 
   @Test
-  public void parseMetadataShouldCorrectlyHandleCompressedAndRegularFilesFromDifferentMemberTypes() {
+  public void parseMetadataShouldHandleCompressedAndRegularAndCorruptedFiles() {
     List<ParsingResult<StatisticFileMetadata>> parsingResults = statisticsService.parseMetadata(SampleDataUtils.rootFolder.toPath());
 
     assertThat(parsingResults).isNotNull();
-    assertThat(parsingResults.size()).isEqualTo(8);
+    assertThat(parsingResults.size()).isEqualTo(9);
 
     // unparseableFile.gfs
     String unparseableFilePath = SampleDataUtils.SampleType.UNPARSEABLE.getFilePath();
@@ -55,6 +71,15 @@ public class StatisticsServiceIntegrationTest {
     assertThat(unparseableResult.getFile().toAbsolutePath().toString()).isEqualTo(unparseableFilePath);
     Exception unparseableException = unparseableResult.getException();
     assertThat(unparseableException).isInstanceOf(RuntimeException.class).hasMessage("There was a problem while parsing file " + unparseableFilePath + ".");
+
+    // unparseableFile.gfs
+    String unparseableCompressedFilePath = SampleDataUtils.SampleType.UNPARSEABLE.getFilePath();
+    ParsingResult<StatisticFileMetadata> unparseableCompressedResult = parsingResults.stream().filter(result -> result.getFile().toAbsolutePath().toString().equals(unparseableCompressedFilePath)).findAny().get();
+    assertThat(unparseableCompressedResult.isSuccess()).isFalse();
+    assertThat(unparseableCompressedResult.getException()).isNotNull();
+    assertThat(unparseableCompressedResult.getFile().toAbsolutePath().toString()).isEqualTo(unparseableCompressedFilePath);
+    Exception unparseableCompressedException = unparseableCompressedResult.getException();
+    assertThat(unparseableCompressedException).isInstanceOf(RuntimeException.class).hasMessage("There was a problem while parsing file " + unparseableCompressedFilePath + ".");
 
     // SampleClient.gfs
     String sampleClientFilePath = SampleDataUtils.SampleType.CLIENT.getFilePath();
@@ -118,5 +143,45 @@ public class StatisticsServiceIntegrationTest {
     assertThat(clusterTwoServerTwoResult.getFile().toAbsolutePath().toString()).isEqualTo(clusterTwoServerTwoFilePath);
     StatisticFileMetadata clusterTwoServerTwoMetadata = clusterTwoServerTwoResult.getData();
     SampleDataUtils.assertClusterTwoServerTwoMetadata(clusterTwoServerTwoMetadata);
+  }
+
+  @Test
+  public void decompressShouldThrowExceptionWhenFileIsNotCompressed() throws Exception {
+    File mockedFile = temporaryFolder.newFile();
+    String clusterOneServerOneFilePath = SampleDataUtils.SampleType.CLUSTER1_SERVER1.getFilePath();
+    assertThatThrownBy(() -> statisticsService.decompress(Paths.get(clusterOneServerOneFilePath), mockedFile.toPath()))
+        .isInstanceOf(IOException.class);
+  }
+
+  @Test
+  public void decompressShouldDeleteTargetFileIfDecompressionFails() throws Exception {
+    File uncompressedFile = temporaryFolder.newFile("cluster1-locator.gfs");
+    String clusterOneLocatorFilePath = SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getFilePath();
+
+    assertThatThrownBy(() -> statisticsService.decompress(Paths.get(clusterOneLocatorFilePath), uncompressedFile.toPath()))
+        .isInstanceOf(IOException.class)
+        .hasMessage("Not in GZIP format");
+
+    assertThat(Files.list(temporaryFolder.getRoot().toPath()).count()).isEqualTo(0);
+  }
+
+  @Test
+  public void decompressShouldExecuteCorrectly() throws Exception {
+    File uncompressedFile = temporaryFolder.newFile("cluster1-locator.gfs");
+    String clusterOneLocatorFilePath = SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getFilePath();
+
+    assertThatCode(() -> statisticsService.decompress(Paths.get(clusterOneLocatorFilePath), uncompressedFile.toPath())).doesNotThrowAnyException();
+    assertThat(Files.list(temporaryFolder.getRoot().toPath()).count()).isEqualTo(1);
+    assertThat(Files.list(temporaryFolder.getRoot().toPath()).filter(path -> Files.isRegularFile(path) && path.getFileName().toString().equals("cluster1-locator.gfs")).count()).isEqualTo(1);
+
+    // TODO: find a better way to asses the decompression result.
+    StatisticFileMetadata decompressedMetadata = statisticsService.parseMetadata(uncompressedFile.toPath()).stream().findFirst().get().getData();
+    StatisticFileMetadata uncompressedMetadata = statisticsService.parseMetadata(Paths.get(SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getFilePath())).stream().findFirst().get().getData();
+    assertThat(decompressedMetadata.getVersion()).isEqualTo(uncompressedMetadata.getVersion());
+    assertThat(decompressedMetadata.getTimeZoneId()).isEqualTo(uncompressedMetadata.getTimeZoneId());
+    assertThat(decompressedMetadata.getStartTimeStamp()).isEqualTo(uncompressedMetadata.getStartTimeStamp());
+    assertThat(decompressedMetadata.getProductVersion()).isEqualTo(uncompressedMetadata.getProductVersion());
+    assertThat(decompressedMetadata.getFinishTimeStamp()).isEqualTo(uncompressedMetadata.getFinishTimeStamp());
+    assertThat(decompressedMetadata.getOperatingSystem()).isEqualTo(uncompressedMetadata.getOperatingSystem());
   }
 }

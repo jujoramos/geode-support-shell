@@ -1,8 +1,24 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.support.service;
 
 import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 import org.springframework.stereotype.Service;
 
@@ -25,6 +41,30 @@ public class FilesService {
 
   /**
    *
+   * @param file
+   * @throws IllegalArgumentException
+   */
+  public void assertFileReadability(Path file) throws IllegalArgumentException {
+    assertFileExistence(file);
+    if (!Files.isReadable(file)) {
+      throw new IllegalArgumentException(String.format("File %s is not readable.", file.toAbsolutePath()));
+    }
+  }
+
+  /**
+   *
+   * @param file
+   * @throws IllegalArgumentException
+   */
+  public void assertFileExecutability(Path file) throws IllegalArgumentException {
+    assertFileExistence(file);
+    if (!Files.isExecutable(file)) {
+      throw new IllegalArgumentException(String.format("File %s is not executable.", file.toAbsolutePath()));
+    }
+  }
+
+  /**
+   *
    * @param folder
    * @throws IllegalArgumentException
    */
@@ -35,18 +75,6 @@ public class FilesService {
 
     if (!Files.isDirectory(folder)) {
       throw new IllegalArgumentException(String.format("Folder %s is not a directory.", folder.toAbsolutePath()));
-    }
-  }
-
-  /**
-   *
-   * @param file
-   * @throws IllegalArgumentException
-   */
-  public void assertFileReadability(Path file) throws IllegalArgumentException {
-    assertFileExistence(file);
-    if (!Files.isReadable(file)) {
-      throw new IllegalArgumentException(String.format("File %s is not readable.", file.toAbsolutePath()));
     }
   }
 
@@ -90,16 +118,35 @@ public class FilesService {
 
   /**
    *
+   * @param folder
+   * @throws IOException
+   */
+  public void createDirectories(Path folder) throws IOException {
+    // Create Directory if it doesn't exist.
+    if (!Files.exists(folder)) {
+      Files.createDirectories(folder);
+    }
+  }
+
+  /**
+   *
    * @param sourceFile
    * @param targetFolder
    * @throws IOException
    */
   public void moveFile(Path sourceFile, Path targetFolder) throws IOException {
-    // Create Directory if it doesn't exist.
-    if (!Files.exists(targetFolder)) {
-      Files.createDirectories(targetFolder);
-    }
+    createDirectories(targetFolder);
+    Files.move(sourceFile, targetFolder.resolve(sourceFile.getFileName()), new CopyOption[] { StandardCopyOption.REPLACE_EXISTING });
+  }
 
-    Files.move(sourceFile, targetFolder.resolve(sourceFile.getFileName()));
+  /**
+   *
+   * @param sourceFile
+   * @param targetFolder
+   * @throws IOException
+   */
+  public void copyFile(Path sourceFile, Path targetFolder) throws IOException {
+    createDirectories(targetFolder);
+    Files.copy(sourceFile, targetFolder.resolve(sourceFile.getFileName()), new CopyOption[] { StandardCopyOption.REPLACE_EXISTING });
   }
 }

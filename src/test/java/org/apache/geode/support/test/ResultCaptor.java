@@ -12,19 +12,26 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.domain.marker;
+package org.apache.geode.support.test;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 /**
- * Indicates that the method or attribute has been added to the original Geode class.
+ * Captures output of specific methods invoked on spy instances.
+ * @param <T>
  */
-@Retention(RetentionPolicy.SOURCE)
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })
-public @interface GeodeExtension {
+public class ResultCaptor<T> implements Answer {
+  private T result = null;
 
-  String reason() default  "";
+  public T getResult() {
+    return result;
+  }
+
+  @Override
+  public T answer(InvocationOnMock invocationOnMock) throws Throwable {
+    result = (T) invocationOnMock.callRealMethod();
+
+    return result;
+  }
 }

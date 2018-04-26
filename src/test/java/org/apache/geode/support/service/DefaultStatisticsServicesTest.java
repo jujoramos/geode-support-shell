@@ -1,3 +1,17 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work for additional information regarding
+ * copyright ownership. The ASF licenses this file to You under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package org.apache.geode.support.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,16 +49,14 @@ import org.apache.geode.internal.statistics.StatArchiveFile;
 import org.apache.geode.internal.statistics.StatArchiveReader;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
+import org.apache.geode.support.test.MockUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Files.class, DefaultStatisticsService.class })
 public class DefaultStatisticsServicesTest {
   private Path mockedRegularPath;
-  private File mockedRegularFile;
   private Path mockedCompressedPath;
-  private File mockedCompressedFile;
   private Path mockedDirectoryPath;
-  private File mockedDirectoryFile;
   private Stream<Path> mockedDirectoryStream;
 
   @Spy
@@ -52,26 +64,9 @@ public class DefaultStatisticsServicesTest {
 
   @Before
   public void setUp() {
-    mockedDirectoryPath = mock(Path.class);
-    mockedDirectoryFile = mock(File.class);
-    when(mockedDirectoryFile.getName()).thenReturn("/mockedDirectory");
-    when(mockedDirectoryPath.toFile()).thenReturn(mockedDirectoryFile);
-    when(mockedDirectoryPath.toAbsolutePath()).thenReturn(mock(Path.class));
-    when(mockedDirectoryPath.toAbsolutePath().toString()).thenReturn("/mockedDirectory");
-
-    mockedRegularPath = mock(Path.class);
-    mockedRegularFile = mock(File.class);
-    when(mockedRegularFile.getName()).thenReturn("mockedFile.gfs");
-    when(mockedRegularPath.toFile()).thenReturn(mockedRegularFile);
-    when(mockedRegularPath.toAbsolutePath()).thenReturn(mock(Path.class));
-    when(mockedRegularPath.toAbsolutePath().toString()).thenReturn("/mockedDirectory/mockedFile.gfs");
-
-    mockedCompressedPath = mock(Path.class);
-    mockedCompressedFile = mock(File.class);
-    when(mockedCompressedFile.getName()).thenReturn("mockedFile.gz");
-    when(mockedCompressedPath.toFile()).thenReturn(mockedCompressedFile);
-    when(mockedCompressedPath.toAbsolutePath()).thenReturn(mock(Path.class));
-    when(mockedCompressedPath.toAbsolutePath().toString()).thenReturn("/mockedDirectory/mockedFile.gz");
+    mockedDirectoryPath = MockUtils.mockPath("/mockedDirectory", true);
+    mockedRegularPath = MockUtils.mockPath("/mockedDirectory/mockedFile.gfs", false);
+    mockedCompressedPath = MockUtils.mockPath("/mockedDirectory/mockedFile.gz", false);
 
     mockedDirectoryStream = Stream.of(mockedRegularPath, mockedCompressedPath);
     PowerMockito.mockStatic(Files.class);
@@ -271,7 +266,7 @@ public class DefaultStatisticsServicesTest {
     assertThat(regularStatFileResult.getData()).isNotNull();
     assertThat(regularStatFileResult.getFile()).isEqualTo(mockedRegularPath);
     StatisticFileMetadata regularArchiveMetadata = regularStatFileResult.getData();
-    assertThat(regularArchiveMetadata.getFileName()).isEqualTo(mockedRegularFile.getName());
+    assertThat(regularArchiveMetadata.getFileName()).isEqualTo(mockedRegularPath.getFileName().toString());
     assertThat(regularArchiveMetadata.getVersion()).isEqualTo(1);
     assertThat(regularArchiveMetadata.getTimeZoneId()).isEqualTo(defaultTimeZone.toZoneId());
     assertThat(regularArchiveMetadata.isCompressed()).isFalse();
@@ -285,7 +280,7 @@ public class DefaultStatisticsServicesTest {
     assertThat(compressedStatFileResult.getData()).isNotNull();
     assertThat(compressedStatFileResult.getFile()).isEqualTo(mockedCompressedPath);
     StatisticFileMetadata compressedArchiveMetadata = compressedStatFileResult.getData();
-    assertThat(compressedArchiveMetadata.getFileName()).isEqualTo(mockedCompressedFile.getName());
+    assertThat(compressedArchiveMetadata.getFileName()).isEqualTo(mockedCompressedPath.getFileName().toString());
     assertThat(compressedArchiveMetadata.getVersion()).isEqualTo(2);
     assertThat(compressedArchiveMetadata.getTimeZoneId()).isEqualTo(nonDefaultTimeZone.toZoneId());
     assertThat(compressedArchiveMetadata.isCompressed()).isTrue();
