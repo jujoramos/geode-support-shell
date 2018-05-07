@@ -198,10 +198,10 @@ public class FilesServiceTest {
         .hasMessage("Mocked IOException When Creating Folder.");
 
     when(Files.exists(mockedFolder)).thenReturn(true);
-    when(Files.copy(any(Path.class), any(), any())).thenThrow(new IOException("Mocked IOException When Moving File."));
+    when(Files.copy(any(Path.class), any(), any())).thenThrow(new IOException("Mocked IOException When Moving Sampling."));
     assertThatThrownBy(() -> filesService.copyFile(mockedFile, mockedFolder))
         .isInstanceOf(IOException.class)
-        .hasMessage("Mocked IOException When Moving File.");
+        .hasMessage("Mocked IOException When Moving Sampling.");
   }
 
   @Test
@@ -213,9 +213,9 @@ public class FilesServiceTest {
         .hasMessage("Mocked IOException When Creating Folder.");
 
     when(Files.exists(mockedFolder)).thenReturn(true);
-    when(Files.move(any(), any(), any())).thenThrow(new IOException("Mocked IOException When Moving File."));
+    when(Files.move(any(), any(), any())).thenThrow(new IOException("Mocked IOException When Moving Sampling."));
     assertThatThrownBy(() -> filesService.moveFile(mockedFile, mockedFolder))
         .isInstanceOf(IOException.class)
-        .hasMessage("Mocked IOException When Moving File.");
+        .hasMessage("Mocked IOException When Moving Sampling.");
   }
 }

@@ -15,6 +15,8 @@
 package org.apache.geode.support.utils;
 
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
@@ -24,11 +26,16 @@ import java.util.Locale;
 
 public class FormatUtils {
   private static final DateTimeFormatter defaultDateTimeFormatter;
+  private static final ThreadLocal<NumberFormat> defaultNumberFormatter = ThreadLocal.withInitial(() -> new DecimalFormat("#0.00"));
 
   static {
     defaultDateTimeFormatter = DateTimeFormatter.ofPattern(DateTimeFormatterBuilder
         .getLocalizedDateTimePattern(FormatStyle.MEDIUM, FormatStyle.MEDIUM, IsoChronology.INSTANCE, Locale
             .getDefault()));
+  }
+
+  public static NumberFormat getNumberFormatter() {
+    return defaultNumberFormatter.get();
   }
 
   public static DateTimeFormatter getDateTimeFormatter() {

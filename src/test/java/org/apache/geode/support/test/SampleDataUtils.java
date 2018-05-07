@@ -21,22 +21,31 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
+import org.apache.geode.internal.statistics.ValueFilter;
+import org.apache.geode.support.domain.statistics.Category;
+import org.apache.geode.support.domain.statistics.Sampling;
+import org.apache.geode.support.domain.statistics.SamplingMetadata;
+import org.apache.geode.support.domain.statistics.Statistic;
+import org.apache.geode.support.domain.statistics.filters.SimpleValueFilter;
 import org.apache.geode.support.utils.FormatUtils;
 
 /**
  * Class used in integration tests to store and assert the hardcoded contents of the statistic files within the samples directory.
- * This should be removed once the tool has the ability to generate statistics files on its own, without using already created files for testing.
+ * TODO: This should be removed once the tool has the ability to generate statistics files on its own, without using already created files for testing.
  */
 public final class SampleDataUtils {
-  private static final StatisticFileMetadata clientMetadata;
-  private static final StatisticFileMetadata cluster1locatorMetadata;
-  private static final StatisticFileMetadata cluster1Server1Metadata;
-  private static final StatisticFileMetadata cluster1Server2Metadata;
-  private static final StatisticFileMetadata cluster2locatorMetadata;
-  private static final StatisticFileMetadata cluster2Server1Metadata;
-  private static final StatisticFileMetadata cluster2Server2Metadata;
+  public static final List<ValueFilter> filters;
+  private static final SamplingMetadata clientMetadata;
+  private static final SamplingMetadata cluster1locatorMetadata;
+  private static final SamplingMetadata cluster1Server1Metadata;
+  private static final SamplingMetadata cluster1Server2Metadata;
+  private static final SamplingMetadata cluster2locatorMetadata;
+  private static final SamplingMetadata cluster2Server1Metadata;
+  private static final SamplingMetadata cluster2Server2Metadata;
   public static final File rootFolder = new File(SampleDataUtils.class.getResource("/samples").getFile());
   public static final File corruptedFolder = rootFolder.toPath().resolve("corrupted").toFile();
   public static final File uncorruptedFolder = rootFolder.toPath().resolve("uncorrupted").toFile();
@@ -88,13 +97,28 @@ public final class SampleDataUtils {
 
   static {
     String basePath = uncorruptedFolder.getAbsolutePath() + File.separator;
-    clientMetadata = new StatisticFileMetadata(basePath + "sampleClient.gfs", 4, false, ZoneId.of("Europe/Dublin"), 1521727611058L, 1521731228603L, "GemFire 9.1.0 #root 26 as of 2017-07-11 18:00:39 +0000", "Mac OS X 10.13.3");
-    cluster1locatorMetadata = new StatisticFileMetadata(basePath + "cluster1-locator.gz", 4, true, ZoneId.of("Europe/Dublin"), 1521727569159L, 1521731825118L, "GemFire 9.3.0 #root 12 as of 2018-01-26 16:35:20 +0000", "Mac OS X 10.13.3");
-    cluster1Server1Metadata = new StatisticFileMetadata(basePath + "cluster1-server1.gfs", 4, false, ZoneId.of("Europe/Dublin"), 1521727582894L, 1521731826120L, "GemFire 9.3.0 #root 12 as of 2018-01-26 16:35:20 +0000", "Mac OS X 10.13.3");
-    cluster1Server2Metadata = new StatisticFileMetadata(basePath + "cluster1-server2.gfs", 4, false, ZoneId.of("Europe/Dublin"), 1521727582886L, 1521731825048L, "GemFire 9.3.0 #root 12 as of 2018-01-26 16:35:20 +0000", "Mac OS X 10.13.3");
-    cluster2locatorMetadata = new StatisticFileMetadata(basePath + "cluster2-locator.gz", 4, true, ZoneId.of("America/Chicago"), 1521727584309L, 1521731824225L, "GemFire 8.2.8 #build 29 as of Tue, 5 Dec 2017 11:51:14 -0800", "Mac OS X 10.13.3");
-    cluster2Server1Metadata = new StatisticFileMetadata(basePath + "cluster2-server1.gfs", 4, false, ZoneId.of("America/Chicago"), 1521727593055L, 1521731823828L, "GemFire 8.2.8 #build 29 as of Tue, 5 Dec 2017 11:51:14 -0800", "Mac OS X 10.13.3");
-    cluster2Server2Metadata = new StatisticFileMetadata(basePath + "cluster2-server2.gfs", 4, false, ZoneId.of("America/Chicago"), 1521727593056L, 1521731824281L, "GemFire 8.2.8 #build 29 as of Tue, 5 Dec 2017 11:51:14 -0800", "Mac OS X 10.13.3");
+    clientMetadata = new SamplingMetadata(basePath + "sampleClient.gfs", 4, false, ZoneId.of("Europe/Dublin"), 1521727611058L, 1521731228603L, "GemFire 9.1.0 #root 26 as of 2017-07-11 18:00:39 +0000", "Mac OS X 10.13.3");
+    cluster1locatorMetadata = new SamplingMetadata(basePath + "cluster1-locator.gz", 4, true, ZoneId.of("Europe/Dublin"), 1521727569159L, 1521731825118L, "GemFire 9.3.0 #root 12 as of 2018-01-26 16:35:20 +0000", "Mac OS X 10.13.3");
+    cluster1Server1Metadata = new SamplingMetadata(basePath + "cluster1-server1.gfs", 4, false, ZoneId.of("Europe/Dublin"), 1521727582894L, 1521731826120L, "GemFire 9.3.0 #root 12 as of 2018-01-26 16:35:20 +0000", "Mac OS X 10.13.3");
+    cluster1Server2Metadata = new SamplingMetadata(basePath + "cluster1-server2.gfs", 4, false, ZoneId.of("Europe/Dublin"), 1521727582886L, 1521731825048L, "GemFire 9.3.0 #root 12 as of 2018-01-26 16:35:20 +0000", "Mac OS X 10.13.3");
+    cluster2locatorMetadata = new SamplingMetadata(basePath + "cluster2-locator.gz", 4, true, ZoneId.of("America/Chicago"), 1521727584309L, 1521731824225L, "GemFire 8.2.8 #build 29 as of Tue, 5 Dec 2017 11:51:14 -0800", "Mac OS X 10.13.3");
+    cluster2Server1Metadata = new SamplingMetadata(basePath + "cluster2-server1.gfs", 4, false, ZoneId.of("America/Chicago"), 1521727593055L, 1521731823828L, "GemFire 8.2.8 #build 29 as of Tue, 5 Dec 2017 11:51:14 -0800", "Mac OS X 10.13.3");
+    cluster2Server2Metadata = new SamplingMetadata(basePath + "cluster2-server2.gfs", 4, false, ZoneId.of("America/Chicago"), 1521727593056L, 1521731824281L, "GemFire 8.2.8 #build 29 as of Tue, 5 Dec 2017 11:51:14 -0800", "Mac OS X 10.13.3");
+
+    filters = new ArrayList<>();
+    // Shared by all members.
+    filters.add(new SimpleValueFilter("VMStats", null, "threads", null));
+    filters.add(new SimpleValueFilter("StatSampler", null, "delayDuration", null));
+    // Client only.
+    filters.add(new SimpleValueFilter("PoolStats", null, "clientOps", null));
+    // Servers and locators only.
+    filters.add(new SimpleValueFilter("DistributionStats", null, "replyWaitsInProgress", null));
+    // Locator Only.
+    filters.add(new SimpleValueFilter("LocatorStats", null, "serverLoadUpdates", null));
+    // Servers only.
+    filters.add(new SimpleValueFilter("GatewaySenderStatistics", null, "eventsDistributed", null));
+    filters.add(new SimpleValueFilter("GatewayReceiverStatistics", null, "createRequests", null));
+
   }
 
   /**
@@ -102,7 +126,7 @@ public final class SampleDataUtils {
    * @param expectedMetadata
    * @param actualMetadata
    */
-  private static void assertStatisticArchiveMetadata(StatisticFileMetadata expectedMetadata, StatisticFileMetadata actualMetadata) {
+  private static void assertStatisticArchiveMetadata(SamplingMetadata expectedMetadata, SamplingMetadata actualMetadata) {
     assertThat(actualMetadata.getFileName()).isEqualTo(expectedMetadata.getFileName());
     assertThat(actualMetadata.getVersion()).isEqualTo(expectedMetadata.getVersion());
     assertThat(actualMetadata.isCompressed()).isEqualTo(expectedMetadata.isCompressed());
@@ -113,7 +137,7 @@ public final class SampleDataUtils {
     assertThat(actualMetadata.getOperatingSystem()).isEqualTo(expectedMetadata.getOperatingSystem());
   }
 
-  private static void assertStatisticArchiveMetadata(StatisticFileMetadata metadata, Path basePath, ZoneId zoneId, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
+  private static void assertStatisticArchiveMetadata(SamplingMetadata metadata, Path basePath, ZoneId zoneId, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
     ZoneId formatZoneId = zoneId != null ? zoneId : metadata.getTimeZoneId();
     Instant startInstant = Instant.ofEpochMilli(metadata.getStartTimeStamp());
     Instant finishInstant = Instant.ofEpochMilli(metadata.getFinishTimeStamp());
@@ -130,31 +154,31 @@ public final class SampleDataUtils {
     assertThat(finishTimeStamp).isEqualTo(finishTime.format(FormatUtils.getDateTimeFormatter()));
   }
 
-  public static void assertClientMetadata(StatisticFileMetadata actualMetadata) {
+  public static void assertClientMetadata(SamplingMetadata actualMetadata) {
     assertStatisticArchiveMetadata(clientMetadata, actualMetadata);
   }
 
-  public static void assertClusterOneLocatorMetadata(StatisticFileMetadata actualMetadata) {
+  public static void assertClusterOneLocatorMetadata(SamplingMetadata actualMetadata) {
     assertStatisticArchiveMetadata(cluster1locatorMetadata, actualMetadata);
   }
 
-  public static void assertClusterOneServerOneMetadata(StatisticFileMetadata actualMetadata) {
+  public static void assertClusterOneServerOneMetadata(SamplingMetadata actualMetadata) {
     assertStatisticArchiveMetadata(cluster1Server1Metadata, actualMetadata);
   }
 
-  public static void assertClusterOneServerTwoMetadata(StatisticFileMetadata actualMetadata) {
+  public static void assertClusterOneServerTwoMetadata(SamplingMetadata actualMetadata) {
     assertStatisticArchiveMetadata(cluster1Server2Metadata, actualMetadata);
   }
 
-  public static void assertClusterTwoLocatorMetadata(StatisticFileMetadata actualMetadata) {
+  public static void assertClusterTwoLocatorMetadata(SamplingMetadata actualMetadata) {
     assertStatisticArchiveMetadata(cluster2locatorMetadata, actualMetadata);
   }
 
-  public static void assertClusterTwoServerOneMetadata(StatisticFileMetadata actualMetadata) {
+  public static void assertClusterTwoServerOneMetadata(SamplingMetadata actualMetadata) {
     assertStatisticArchiveMetadata(cluster2Server1Metadata, actualMetadata);
   }
 
-  public static void assertClusterTwoServerTwoMetadata(StatisticFileMetadata actualMetadata) {
+  public static void assertClusterTwoServerTwoMetadata(SamplingMetadata actualMetadata) {
     assertStatisticArchiveMetadata(cluster2Server2Metadata, actualMetadata);
   }
 
@@ -184,5 +208,72 @@ public final class SampleDataUtils {
 
   public static void assertClusterTwoServerTwoMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
     assertStatisticArchiveMetadata(cluster2Server2Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+  }
+
+  private static void assertStatistic(Statistic statistic, String name, String description, boolean isCounter, String units) {
+    assertThat(statistic.getName()).isEqualTo(name);
+    assertThat(statistic.getDescription()).isEqualTo(description);
+    assertThat(statistic.getUnits()).isEqualTo(units);
+    assertThat(statistic.isCounter()).isEqualTo(isCounter);
+  }
+
+  private static void assertCommonCategories(Map<String, Category> categoryMap) {
+    assertThat(categoryMap.containsKey("StatSampler")).isTrue();
+    Category statSamplerCategory = categoryMap.get("StatSampler");
+    assertThat(statSamplerCategory.hasStatistic("delayDuration"));
+    assertStatistic(statSamplerCategory.getStatistic("delayDuration"), "delayDuration", "Actual duration of sampling delay taken before taking this sample.", false, "milliseconds");
+
+    assertThat(categoryMap.containsKey("VMStats")).isTrue();
+    Category vmStatsCategory = categoryMap.get("VMStats");
+    assertThat(vmStatsCategory.hasStatistic("threads"));
+    assertStatistic(vmStatsCategory.getStatistic("threads"), "threads", "Current number of live threads (both daemon and non-daemon) in this VM.", false, "threads");
+  }
+
+  private static void assertDistributionStatsCategory(Map<String, Category> categoryMap) {
+    assertThat(categoryMap.containsKey("DistributionStats")).isTrue();
+    Category distributionStatsCategory = categoryMap.get("DistributionStats");
+    assertThat(distributionStatsCategory.hasStatistic("replyWaitsInProgress"));
+    assertStatistic(distributionStatsCategory.getStatistic("replyWaitsInProgress"), "replyWaitsInProgress", "Current number of threads waiting for a reply.", false, "operations");
+  }
+
+  public static void assertClientSampling(Sampling clientSampling) {
+    assertStatisticArchiveMetadata(clientMetadata, clientSampling.getMetadata());
+    assertThat(clientSampling.getCategories()).isNotNull();
+    Map<String, Category> categoryMap = clientSampling.getCategories();
+    assertCommonCategories(categoryMap);
+
+    assertThat(categoryMap.containsKey("PoolStats")).isTrue();
+    Category poolStatsCategory = categoryMap.get("PoolStats");
+    assertThat(poolStatsCategory.hasStatistic("clientOps"));
+    assertStatistic(poolStatsCategory.getStatistic("clientOps"), "clientOps", "Total number of clientOps completed successfully", true, "clientOps");
+  }
+
+  public static void assertLocatorSampling(Sampling locatorSampling) {
+    assertThat(locatorSampling.getCategories()).isNotNull();
+    Map<String, Category> categoryMap = locatorSampling.getCategories();
+    assertCommonCategories(categoryMap);
+    assertDistributionStatsCategory(categoryMap);
+
+    assertThat(categoryMap.containsKey("LocatorStats")).isTrue();
+    Category poolStatsCategory = categoryMap.get("LocatorStats");
+    assertThat(poolStatsCategory.hasStatistic("serverLoadUpdates"));
+    assertStatistic(poolStatsCategory.getStatistic("serverLoadUpdates"), "serverLoadUpdates", "Total number of times a server load update has been received.", true, "updates");
+  }
+
+  public static void assertServerSampling(Sampling serverSampling) {
+    assertThat(serverSampling.getCategories()).isNotNull();
+    Map<String, Category> categoryMap = serverSampling.getCategories();
+    assertCommonCategories(categoryMap);
+    assertDistributionStatsCategory(categoryMap);
+
+    assertThat(categoryMap.containsKey("GatewaySenderStatistics")).isTrue();
+    Category poolStatsCategory = categoryMap.get("GatewaySenderStatistics");
+    assertThat(poolStatsCategory.hasStatistic("eventsDistributed"));
+    assertStatistic(poolStatsCategory.getStatistic("eventsDistributed"), "eventsDistributed", "Number of events removed from the event queue and sent.", true, "operations");
+
+    assertThat(categoryMap.containsKey("GatewayReceiverStatistics")).isTrue();
+    Category distributionStatsCategory = categoryMap.get("GatewayReceiverStatistics");
+    assertThat(distributionStatsCategory.hasStatistic("createRequests"));
+    assertStatistic(distributionStatsCategory.getStatistic("createRequests"), "createRequests", "total number of create operations received by this GatewayReceiver", true, "operations");
   }
 }

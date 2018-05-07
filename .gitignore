@@ -11,5 +11,5 @@ build-eclipse/
 .project
 .DS_store
 .classpath
-geode-support-shell.log
+geode-support-shell.log*
 .geode-support-shell.history

@@ -33,7 +33,7 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
 import org.apache.geode.support.domain.ParsingResult;
-import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
+import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
 import org.apache.geode.support.utils.FormatUtils;
@@ -49,18 +49,18 @@ public class ShowStatisticsMetadataCommand extends AbstractStatisticsCommand {
 
   @ShellMethod(key = "show statistics metadata", value = "Show general information about statistics files.")
   public List<?> showStatisticsMetadata(
-      @ShellOption(help = "Path to statistics file, or directory to scan for statistics files.", value = "--path") File file,
+      @ShellOption(help = "Path to statistics file, or directory to scan for statistics files.", value = "--path") File source,
       @ShellOption(help = "Time Zone Id to use when showing results. If not set, the default from the statistics file will be used.", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId) {
 
     // Use paths from here.
-    Path path = file.toPath();
+    Path sourcePath = source.toPath();
 
     // Check permissions.
-    filesService.assertFileReadability(path);
+    filesService.assertFileReadability(sourcePath);
 
     List<Object> commandResult = new ArrayList<>();
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
-    List<ParsingResult<StatisticFileMetadata>> parsingResults = statisticsService.parseMetadata(path);
+    List<ParsingResult<SamplingMetadata>> parsingResults = statisticsService.parseMetadata(sourcePath);
     TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Error Description");
     TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Product Version").addValue("Operating System").addValue("Time Zone").addValue("Start Time" + zoneIdDesc).addValue("Finish Time" + zoneIdDesc);
 
@@ -70,10 +70,10 @@ public class ShowStatisticsMetadataCommand extends AbstractStatisticsCommand {
       parsingResults.sort(Comparator.comparing(ParsingResult::getFile));
       parsingResults.stream().forEach(
           parsingResult -> {
-            String filePath = FormatUtils.relativizePath(path, parsingResult.getFile());
+            String filePath = FormatUtils.relativizePath(sourcePath, parsingResult.getFile());
 
             if (parsingResult.isSuccess()) {
-              StatisticFileMetadata metadataFile = parsingResult.getData();
+              SamplingMetadata metadataFile = parsingResult.getData();
               ZoneId formattingZoneId = zoneId != null ? zoneId : metadataFile.getTimeZoneId();
 
               // Show dates using local format, but original time zone.

@@ -19,7 +19,7 @@ import java.time.ZoneId;
 /**
  *
  */
-public class StatisticFileMetadata {
+public class SamplingMetadata {
   private final int version;
   private final String fileName;
   private final ZoneId timeZoneId;
@@ -40,7 +40,7 @@ public class StatisticFileMetadata {
    * @param productVersion
    * @param operatingSystem
    */
-  public StatisticFileMetadata(String fileName, int version, boolean compressed, ZoneId timeZoneId, long startTimeStamp, long finishTimeStamp, String productVersion, String operatingSystem) {
+  public SamplingMetadata(String fileName, int version, boolean compressed, ZoneId timeZoneId, long startTimeStamp, long finishTimeStamp, String productVersion, String operatingSystem) {
     this.fileName = fileName;
     this.version = version;
     this.timeZoneId = timeZoneId;
@@ -51,34 +51,66 @@ public class StatisticFileMetadata {
     this.operatingSystem = operatingSystem;
   }
 
+  /**
+   *
+   * @return
+   */
   public String getFileName() {
     return fileName;
   }
 
+  /**
+   *
+   * @return
+   */
   public int getVersion() {
     return version;
   }
 
+  /**
+   *
+   * @return
+   */
   public ZoneId getTimeZoneId() {
     return timeZoneId;
   }
 
+  /**
+   *
+   * @return
+   */
   public boolean isCompressed() {
     return compressed;
   }
 
+  /**
+   *
+   * @return
+   */
   public long getStartTimeStamp() {
     return startTimeStamp;
   }
 
+  /**
+   *
+   * @return
+   */
   public long getFinishTimeStamp() {
     return finishTimeStamp;
   }
 
+  /**
+   *
+   * @return
+   */
   public String getProductVersion() {
     return productVersion;
   }
 
+  /**
+   *
+   * @return
+   */
   public String getOperatingSystem() {
     return operatingSystem;
   }
@@ -89,7 +121,7 @@ public class StatisticFileMetadata {
    */
   @Override
   public String toString() {
-    return "StatisticFileMetadata[" +
+    return "SamplingMetadata[" +
         "fileName='" + fileName + '\'' +
         ", version=" + version +
         ", timeZoneId=" + timeZoneId +

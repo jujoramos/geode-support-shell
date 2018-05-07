@@ -43,7 +43,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
 import org.apache.geode.support.domain.ParsingResult;
-import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
+import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
 import org.apache.geode.support.test.MockUtils;
@@ -139,8 +139,8 @@ public class FilterStatisticsByDateTimeCommandTest {
   @Test
   public void filterStatisticsByDateTimeShouldReturnOnlyErrorTableIfParsingFailsForAllFiles() {
     Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs", false);
-    ParsingResult<StatisticFileMetadata> errorResult = new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception"));
-    List<ParsingResult<StatisticFileMetadata>> mockedResults = Collections.singletonList(errorResult);
+    ParsingResult<SamplingMetadata> errorResult = new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception"));
+    List<ParsingResult<SamplingMetadata>> mockedResults = Collections.singletonList(errorResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
@@ -162,11 +162,11 @@ public class FilterStatisticsByDateTimeCommandTest {
 
   @Test
   public void filterStatisticsByDateTimeShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() {
-    StatisticFileMetadata mockedMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata mockedMetadata = mock(SamplingMetadata.class);
     when(mockedMetadata.getTimeZoneId()).thenReturn(ZoneId.systemDefault());
     when(mockedMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
-    ParsingResult<StatisticFileMetadata> correctResult = new ParsingResult<>(MockUtils.mockPath("temporal.gfs", false), mockedMetadata);
-    List<ParsingResult<StatisticFileMetadata>> mockedResults = Collections.singletonList(correctResult);
+    ParsingResult<SamplingMetadata> correctResult = new ParsingResult<>(MockUtils.mockPath("temporal.gfs", false), mockedMetadata);
+    List<ParsingResult<SamplingMetadata>> mockedResults = Collections.singletonList(correctResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
@@ -188,14 +188,14 @@ public class FilterStatisticsByDateTimeCommandTest {
   public void filterStatisticsByDateTimeShouldReturnErrorsAndResultsTableIfParsingSucceedsButFileCopyFails() throws Exception {
     ZoneId mockedZoneId = ZoneId.systemDefault();
     Path mockedMatchingPath = MockUtils.mockPath("matching.gfs", false);
-    StatisticFileMetadata mockedMatchingMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata mockedMatchingMetadata = mock(SamplingMetadata.class);
     when(mockedMatchingMetadata.getTimeZoneId()).thenReturn(mockedZoneId);
     when(mockedMatchingMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
     when(mockedMatchingMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 01, 01, 00, 00, 00, mockedZoneId));
     when(mockedMatchingMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 02, 01, 00, 00, 00, mockedZoneId)));
 
     Path mockedNonMatchingPath = MockUtils.mockPath("nonMatching.gfs", false);
-    StatisticFileMetadata mockedNonMatchingMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata mockedNonMatchingMetadata = mock(SamplingMetadata.class);
     when(mockedNonMatchingMetadata.getTimeZoneId()).thenReturn(mockedZoneId);
     when(mockedNonMatchingMetadata.getProductVersion()).thenReturn("GemFire 8.2.0 #build 0");
     when(mockedNonMatchingMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2019, 01, 01, 00, 00, 00, mockedZoneId));
@@ -204,9 +204,9 @@ public class FilterStatisticsByDateTimeCommandTest {
     doThrow(new IOException("Mocked IOException for mockedMatchingPath.")).when(filesService).copyFile(mockedMatchingPath, mockedMatchingFolderPath);
     doThrow(new IOException("Mocked IOException for mockedNonMatchingPath.")).when(filesService).copyFile(mockedNonMatchingPath, mockedNonMatchingFolderPath);
 
-    ParsingResult<StatisticFileMetadata> mockedMatchingResult = new ParsingResult<>(mockedMatchingPath, mockedMatchingMetadata);
-    ParsingResult<StatisticFileMetadata> mockedNonMatchingResult = new ParsingResult<>(mockedNonMatchingPath, mockedNonMatchingMetadata);
-    List<ParsingResult<StatisticFileMetadata>> mockedResults = Arrays.asList(mockedMatchingResult, mockedNonMatchingResult);
+    ParsingResult<SamplingMetadata> mockedMatchingResult = new ParsingResult<>(mockedMatchingPath, mockedMatchingMetadata);
+    ParsingResult<SamplingMetadata> mockedNonMatchingResult = new ParsingResult<>(mockedNonMatchingPath, mockedNonMatchingMetadata);
+    List<ParsingResult<SamplingMetadata>> mockedResults = Arrays.asList(mockedMatchingResult, mockedNonMatchingResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 25, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
@@ -250,7 +250,7 @@ public class FilterStatisticsByDateTimeCommandTest {
 
     // 05/01/2018 12:00 - 15/01/2018 16:00
     Path januaryFifthTwelveAMToJanuaryFifteenthFourPMPath = MockUtils.mockPath("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs", false);
-    StatisticFileMetadata januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata = mock(SamplingMetadata.class);
     when(januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata.getTimeZoneId()).thenReturn(zoneId);
     when(januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
     when(januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 01, 05, 12, 00, 00, zoneId));
@@ -258,7 +258,7 @@ public class FilterStatisticsByDateTimeCommandTest {
 
     // 10/01/2018 13:30 - 10/01/2018 14:30
     Path januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath = MockUtils.mockPath("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs", false);
-    StatisticFileMetadata januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata = mock(SamplingMetadata.class);
     when(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata.getTimeZoneId()).thenReturn(zoneId);
     when(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata.getProductVersion()).thenReturn("GemFire 7.0.2 #build 0");
     when(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 01, 10, 13, 30, 00, zoneId));
@@ -266,17 +266,17 @@ public class FilterStatisticsByDateTimeCommandTest {
 
     // 10/01/2018 14:30 - 13/01/2018 17:30
     Path januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath = MockUtils.mockPath("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs", false);
-    StatisticFileMetadata januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata = mock(SamplingMetadata.class);
     when(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata.getTimeZoneId()).thenReturn(zoneId);
     when(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata.getProductVersion()).thenReturn("GemFire 7.0.2 #build 0");
     when(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 01, 10, 14, 30, 00, zoneId));
     when(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 01, 13, 17, 30, 00, zoneId)));
 
-    ParsingResult<StatisticFileMetadata> januaryFifthTwelveAMToJanuaryFifteenthFourPMResult = new ParsingResult<>(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata);
-    ParsingResult<StatisticFileMetadata> januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMResult = new ParsingResult<>(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata);
-    ParsingResult<StatisticFileMetadata> januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMResult = new ParsingResult<>(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata);
+    ParsingResult<SamplingMetadata> januaryFifthTwelveAMToJanuaryFifteenthFourPMResult = new ParsingResult<>(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, januaryFifthTwelveAMToJanuaryFifteenthFourPMMetadata);
+    ParsingResult<SamplingMetadata> januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMResult = new ParsingResult<>(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMMetadata);
+    ParsingResult<SamplingMetadata> januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMResult = new ParsingResult<>(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPathMetadata);
 
-    List<ParsingResult<StatisticFileMetadata>> mockedResults = Arrays.asList(januaryFifthTwelveAMToJanuaryFifteenthFourPMResult, januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMResult, januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMResult);
+    List<ParsingResult<SamplingMetadata>> mockedResults = Arrays.asList(januaryFifthTwelveAMToJanuaryFifteenthFourPMResult, januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMResult, januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     // Filter by deterministic point in time: 14/01/2018 12:05 AM
@@ -361,7 +361,7 @@ public class FilterStatisticsByDateTimeCommandTest {
     // 05/01/2018 14:00 - 07/01/2018 01:00 [Dublin]
     // 05/01/2018 10:00 - 06/01/2018 21:00 [Buenos_Aires]
     Path dublinServerPath = MockUtils.mockPath("dublinServer.gfs", false);
-    StatisticFileMetadata dublinServerMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata dublinServerMetadata = mock(SamplingMetadata.class);
     when(dublinServerMetadata.getTimeZoneId()).thenReturn(dublinZoneId);
     when(dublinServerMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
     when(dublinServerMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 01, 05, 14, 00, 00, dublinZoneId));
@@ -370,15 +370,15 @@ public class FilterStatisticsByDateTimeCommandTest {
     // 05/01/2018 06:00 - 06/01/2018 23:00 [Chicago]
     // 05/01/2018 08:00 - 07/01/2018 01:00 [Buenos_Aires]
     Path chicagoLocatorPath = MockUtils.mockPath("chicagoLocator.gfs", false);
-    StatisticFileMetadata chicagoLocatorMetadata = mock(StatisticFileMetadata.class);
+    SamplingMetadata chicagoLocatorMetadata = mock(SamplingMetadata.class);
     when(chicagoLocatorMetadata.getTimeZoneId()).thenReturn(chicagoZoneId);
     when(chicagoLocatorMetadata.getProductVersion()).thenReturn("GemFire 9.4.0 #build 0");
     when(chicagoLocatorMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 01, 05, 06, 00, 00, chicagoZoneId));
     when(chicagoLocatorMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 01, 06, 23, 00, 00, chicagoZoneId)));
 
-    ParsingResult<StatisticFileMetadata> dublinServerResult = new ParsingResult<>(dublinServerPath, dublinServerMetadata);
-    ParsingResult<StatisticFileMetadata> chicagoLocatorResult = new ParsingResult<>(chicagoLocatorPath, chicagoLocatorMetadata);
-    List<ParsingResult<StatisticFileMetadata>> mockedResults = Arrays.asList(dublinServerResult, chicagoLocatorResult);
+    ParsingResult<SamplingMetadata> dublinServerResult = new ParsingResult<>(dublinServerPath, dublinServerMetadata);
+    ParsingResult<SamplingMetadata> chicagoLocatorResult = new ParsingResult<>(chicagoLocatorPath, chicagoLocatorMetadata);
+    List<ParsingResult<SamplingMetadata>> mockedResults = Arrays.asList(dublinServerResult, chicagoLocatorResult);
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     // Filter by deterministic point in time: 06/01/2018 12:05 AM [America/Buenos_Aires]

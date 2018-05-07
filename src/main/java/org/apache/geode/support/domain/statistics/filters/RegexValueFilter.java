@@ -12,23 +12,17 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.domain.statistics;
+package org.apache.geode.support.domain.statistics.filters;
 
 import java.io.File;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.apache.geode.internal.statistics.ValueFilter;
-
 /**
  *
  */
-public class SimpleValueFilter implements ValueFilter {
-  private final String typeId;
-  private final String instanceId;
-  private final String statisticId;
+public class RegexValueFilter extends AbstractValueFilter {
   private final Pattern typeIdPattern;
   private final Pattern instanceIdPattern;
   private final Pattern statisticIdPattern;
@@ -40,15 +34,13 @@ public class SimpleValueFilter implements ValueFilter {
    * @param instanceId
    * @param statisticId
    */
-  public SimpleValueFilter(String typeId, String instanceId, String statisticId, String archiveNamePattern) {
-    this.typeId = typeId;
-    this.instanceId = instanceId;
-    this.statisticId = statisticId;
+  public RegexValueFilter(String typeId, String instanceId, String statisticId, String archiveNamePattern) {
+    super(typeId, instanceId, statisticId, archiveNamePattern);
 
     if (StringUtils.isBlank(typeId)) {
       this.typeIdPattern = null;
     } else {
-      this.typeIdPattern = Pattern.compile(".*" + typeId, Pattern.CASE_INSENSITIVE);
+      this.typeIdPattern = Pattern.compile(typeId, Pattern.CASE_INSENSITIVE);
     }
 
     if (StringUtils.isBlank(instanceId)) {
@@ -70,65 +62,44 @@ public class SimpleValueFilter implements ValueFilter {
     }
   }
 
-  public String getTypeId() {
-    return typeId;
-  }
-
-  public String getInstanceId() {
-    return instanceId;
-  }
-
-  public String getStatisticId() {
-    return statisticId;
+  /**
+   *
+   * @param pattern
+   * @param actual
+   * @return
+   */
+  private boolean matches(Pattern pattern, String actual) {
+    if (pattern == null) {
+      return true;
+    } else {
+      return pattern.matcher(actual).matches();
+    }
   }
 
   @Override
   public boolean archiveMatches(File archive) {
     if (this.archiveNamePattern == null) {
-      return ValueFilter.super.archiveMatches(archive);
+      return super.archiveMatches(archive);
     } else {
-      Matcher m = this.archiveNamePattern.matcher(archive.getName());
-      return m.matches();
+      return this.archiveNamePattern.matcher(archive.getName()).matches();
     }
   }
 
   @Override
   public boolean statMatches(String statName) {
-    if (this.statisticIdPattern == null) {
-      return true;
-    } else {
-      Matcher m = this.statisticIdPattern.matcher(statName);
-      return m.matches();
-    }
+    return matches(statisticIdPattern, statName);
   }
 
   @Override
   public boolean typeMatches(String typeName) {
-    if (this.typeIdPattern == null) {
-      return true;
-    } else {
-      Matcher m = this.typeIdPattern.matcher(typeName);
-      return m.matches();
-    }
+    return matches(typeIdPattern, typeName);
   }
 
   @Override
   public boolean instanceMatches(String textId, long numericId) {
-    if (this.instanceIdPattern == null) {
-      return true;
-    } else {
-      Matcher m = this.instanceIdPattern.matcher(textId);
-      if (m.matches()) {
-        return true;
-      }
+    boolean matches = matches(instanceIdPattern, textId);
+    matches = matches || matches(instanceIdPattern, String.valueOf(numericId));
 
-      m = this.instanceIdPattern.matcher(String.valueOf(numericId));
-      return m.matches();
-    }
-  }
-
-  @Override
-  public String toString() {
-    return "SimpleValueFilter[typeId=" + this.typeId + ", instanceId=" + this.instanceId + " statisticId=" + this.statisticId + "]";
+    return matches;
   }
 }

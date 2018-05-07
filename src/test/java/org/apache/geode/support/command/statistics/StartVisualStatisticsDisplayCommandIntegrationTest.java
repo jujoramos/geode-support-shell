@@ -111,7 +111,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
           invoked = true;
           String command = "start vsd"
               + " --vsdHome " + vsdHome.getVsdHome()
-              + " --sourcePath " + SampleDataUtils.rootFolder.getAbsolutePath()
+              + " --path " + SampleDataUtils.rootFolder.getAbsolutePath()
               + " --decompressionFolder " + temporaryFolder.getRoot()
               + " --timeZone America/Buenos_Aires";
 
@@ -188,7 +188,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
   @Test
   public void startVisualStatisticsDisplayToolShouldThrowExceptionWhenSourcePathDoesNotExist() {
     vsdHome.exists();
-    String command = "start vsd --vsdHome " + vsdHome.getVsdHome() + " --sourcePath /temp/mock";
+    String command = "start vsd --vsdHome " + vsdHome.getVsdHome() + " --path /temp/mock";
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
@@ -201,7 +201,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
   public void startVisualStatisticsDisplayToolShouldLaunchVsdProcessEvenWhenNoFilesAreFound() throws IOException {
     vsdHome.exists();
     File emptyFolder = temporaryFolder.newFolder("emptyFolder");
-    String command = "start vsd --vsdHome " + vsdHome.getVsdHome() + " --sourcePath " + emptyFolder.getAbsolutePath();
+    String command = "start vsd --vsdHome " + vsdHome.getVsdHome() + " --path " + emptyFolder.getAbsolutePath();
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
@@ -246,7 +246,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
     File decompressionFolder = temporaryFolder.newFolder("decompressed");
     String command = "start vsd"
         + " --vsdHome " + vsdHome.getVsdHome()
-        + " --sourcePath " + SampleDataUtils.uncorruptedFolder.getAbsolutePath()
+        + " --path " + SampleDataUtils.uncorruptedFolder.getAbsolutePath()
         + " --decompressionFolder " + decompressionFolder.getAbsolutePath();
 
     Object commandResult = shell.evaluate(() -> command);
@@ -276,7 +276,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
 
     String command = "start vsd"
         + " --vsdHome " + vsdHome.getVsdHome()
-        + " --sourcePath " + basePath.toString()
+        + " --path " + basePath.toString()
         + " --decompressionFolder " + decompressionFolder.getAbsolutePath();
 
     Object commandResult = shell.evaluate(() -> command);

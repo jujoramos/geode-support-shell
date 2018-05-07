@@ -18,18 +18,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.apache.geode.internal.statistics.ValueFilter;
 import org.apache.geode.support.domain.ParsingResult;
-import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
+import org.apache.geode.support.domain.statistics.Sampling;
+import org.apache.geode.support.domain.statistics.SamplingMetadata;
 
 public interface StatisticsService {
-
-  /**
-   * Parses the metadata for the source statistics files, or all statistics files contained within the source path if it's a folder.
-   *
-   * @param path A statistics file, or a directory containing statistics files to scan.
-   * @return List of ParsingResult instances, containing the parsed metadata and/or the error occurred while trying to read the file.
-   */
-  List<ParsingResult<StatisticFileMetadata>> parseMetadata(Path path);
 
   /**
    * Decompress the source statistics file and write the contents as a regular statistics file to the output path.
@@ -39,4 +33,21 @@ public interface StatisticsService {
    * @throws IOException If an exception occurs while decompressing or witting the results.
    */
   void decompress(Path sourcePath, Path targetPath) throws IOException;
+
+  /**
+   * Parses the metadata for the statistics file, or all statistics files contained within the source path if it's a folder.
+   *
+   * @param path A statistics file, or a directory containing statistics files to scan.
+   * @return List of ParsingResult instances, containing the parsed metadata and/or the error occurred while trying to read the file.
+   */
+  List<ParsingResult<SamplingMetadata>> parseMetadata(Path path);
+
+  /**
+   * Fully parses the sampling from the source statistics file, or all statistics files contained within the source path if it's a folder.
+   *
+   * @param path A statistics file, or a directory containing statistics files to scan.
+   * @param filter List of filters that must be applied when parsing the statistics.
+   * @return List of ParsingResult instances, containing the parsed Sampling with only the requested statistics, and/or the error occurred while trying to read the file.
+   */
+  List<ParsingResult<Sampling>> parseSampling(Path path, List<ValueFilter> filter);
 }

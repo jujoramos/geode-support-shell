@@ -242,8 +242,8 @@ public class IntervalTest {
     assertThat(todayInterval.overlaps(Interval.of(filterZoneId, noon, finishOfMonth.toInstant()))).isTrue();
     assertThat(todayInterval.overlaps(Interval.of(filterZoneId, noon.minus(1, ChronoUnit.DAYS), noon))).isTrue();
     assertThat(todayInterval.overlaps(Interval.of(filterZoneId, noon, noon.plus(1, ChronoUnit.DAYS)))).isTrue();
-    assertThat(todayInterval.overlaps(Interval.of(filterZoneId, startOfMonth.toInstant(), startOfToday.minusSeconds(1).toInstant()))).isFalse();
-    assertThat(todayInterval.overlaps(Interval.of(filterZoneId, finishOfToday.plusSeconds(1).toInstant(), finishOfMonth.toInstant()))).isFalse();
+    assertThat(todayInterval.overlaps(Interval.of(filterZoneId, startOfMonth.minusDays(1).toInstant(), startOfToday.minusSeconds(1).toInstant()))).isFalse();
+    assertThat(todayInterval.overlaps(Interval.of(filterZoneId, finishOfToday.plusSeconds(1).toInstant(), finishOfMonth.plusDays(1).toInstant()))).isFalse();
 
     // Entire Month as The Interval
     assertThat(thisMonthInterval.overlaps(noonInterval.withZoneSameInterval(filterZoneId))).isTrue();

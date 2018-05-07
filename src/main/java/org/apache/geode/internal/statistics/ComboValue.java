@@ -26,25 +26,25 @@ import org.apache.geode.support.domain.marker.GeodeReplacement;
 /**
  * A ComboValue is a value that is the logical combination of a set of other stat values.
  * <p>
- * For now ComboValue has a simple implementation that does not suppport updates.
+ * For now ComboValue has a simple implementation that does not support updates.
  */
 @GeodeReplacement(methods = { "Constructor", "getRawAbsoluteTimeStamps"})
-class ComboValue extends StatArchiveReader.AbstractValue {
+class ComboValue extends AbstractValue {
   private final StatArchiveReader.ResourceType type;
-  private final StatArchiveReader.StatValue[] values;
+  private final StatValue[] values;
 
   /**
    * Creates a ComboValue by adding all the specified values together.
    */
   ComboValue(List valueList) {
-    this((StatArchiveReader.StatValue[]) valueList.toArray(new StatArchiveReader.StatValue[valueList.size()]));
+    this((StatValue[]) valueList.toArray(new StatValue[valueList.size()]));
   }
 
   /**
    * Creates a ComboValue by adding all the specified values together.
    */
   @GeodeReplacement(changes = "Replaced LocalizedStrings.")
-  ComboValue(StatArchiveReader.StatValue[] values) {
+  ComboValue(StatValue[] values) {
     this.values = values;
     this.filter = this.values[0].getFilter();
     String typeName = this.values[0].getType().getName();
@@ -108,13 +108,13 @@ class ComboValue extends StatArchiveReader.AbstractValue {
     this.type = original.getType();
     this.descriptor = original.getDescriptor();
     this.filter = original.getFilter();
-    this.values = new StatArchiveReader.StatValue[original.values.length];
+    this.values = new StatValue[original.values.length];
     for (int i = 0; i < this.values.length; i++) {
       this.values[i] = original.values[i].createTrimmed(startTime, endTime);
     }
   }
 
-  public StatArchiveReader.StatValue createTrimmed(long startTime, long endTime) {
+  public StatValue createTrimmed(long startTime, long endTime) {
     if (startTime == this.startTime && endTime == this.endTime) {
       return this;
     } else {

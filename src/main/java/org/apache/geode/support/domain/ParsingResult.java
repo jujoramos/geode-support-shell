@@ -26,6 +26,10 @@ public class ParsingResult<V> {
     return success;
   }
 
+  public boolean isFailure() {
+    return !success;
+  }
+
   public Path getFile() {
     return file;
   }

@@ -19,6 +19,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -49,6 +51,13 @@ public class FormatUtilsTest {
     when(mockedFile1.toAbsolutePath().toString()).thenReturn("/Users/root/data/files/myFile.dat");
     when(mockedFile2.toAbsolutePath().toString()).thenReturn("myFile.dat");
     assertThat(FormatUtils.relativizePath(mockedFile1, mockedFile2)).isEqualTo("myFile.dat");
+  }
+
+  @Test
+  public void getNumberFormatterTest() {
+    NumberFormat formatter = FormatUtils.getNumberFormatter();
+    assertThat(formatter).isNotNull();
+    assertThat(formatter).isInstanceOf(DecimalFormat.class);
   }
 
   @Test

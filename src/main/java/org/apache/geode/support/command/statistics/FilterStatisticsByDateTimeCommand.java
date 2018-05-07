@@ -41,7 +41,7 @@ import org.springframework.shell.table.TableModelBuilder;
 
 import org.apache.geode.support.domain.Interval;
 import org.apache.geode.support.domain.ParsingResult;
-import org.apache.geode.support.domain.statistics.StatisticFileMetadata;
+import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
 import org.apache.geode.support.utils.FormatUtils;
@@ -83,7 +83,7 @@ public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand
 
     // Parse statistics metadata.
     List<Object> commandResult = new ArrayList<>();
-    List<ParsingResult<StatisticFileMetadata>> parsingResults = statisticsService.parseMetadata(sourceFolder.toPath());
+    List<ParsingResult<SamplingMetadata>> parsingResults = statisticsService.parseMetadata(sourceFolder.toPath());
     TableModelBuilder<String> resultModelBuilder = new TableModelBuilder().addRow().addValue("File Name").addValue("Matches");
     TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder().addRow().addValue("File Name").addValue("Error Description");
 
@@ -104,7 +104,7 @@ public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand
 
             // Proceed if parsing succeeded.
             if (parsingResult.isSuccess()) {
-              StatisticFileMetadata metadataFile = parsingResult.getData();
+              SamplingMetadata metadataFile = parsingResult.getData();
               ZoneId filterZoneId = zoneId != null ? zoneId : metadataFile.getTimeZoneId();
               Instant startInstant = Instant.ofEpochMilli(metadataFile.getStartTimeStamp());
               Instant finishInstant = Instant.ofEpochMilli(metadataFile.getFinishTimeStamp());

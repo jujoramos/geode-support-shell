@@ -12,21 +12,12 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.command.statistics;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.apache.geode.support.service.FilesService;
-import org.apache.geode.support.service.StatisticsService;
-
-// TODO: Spring doesn't know how to convert from String to Path. Add a custom converter and use Path instead of the old Sampling class.
-public class AbstractStatisticsCommand<V> {
-  protected FilesService filesService;
-  protected StatisticsService statisticsService;
-
-  @Autowired
-  public AbstractStatisticsCommand(FilesService filesService, StatisticsService statisticsService) {
-    this.filesService = filesService;
-    this.statisticsService = statisticsService;
-  }
-}
+/**
+ * Classes purely extracted from the official Geode source code repository.
+ * Small modifications have been made so far, primarily in the visibility of the classes and methods.
+ * Changes and possible improvements have been identified through the following annotations:
+ *   - {@link org.apache.geode.support.domain.marker.GeodeExtension}
+ *   - {@link org.apache.geode.support.domain.marker.GeodeReplacement}
+ *   - {@link org.apache.geode.support.domain.marker.GeodeImprovement}
+ */
+package org.apache.geode.internal;

@@ -58,6 +58,43 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
   protected String defaultVsdHome;
   protected List<ProcessWrapper> launchedProcesses;
 
+  /**
+   *
+   */
+  static class DaemonStreamGobbler extends Thread {
+    final InputStream inputStream;
+    final Consumer<String> consumer;
+
+    public DaemonStreamGobbler(String threadName, InputStream inputStream, Consumer<String> consumer) {
+      super(threadName);
+      this.setDaemon(true);
+      this.consumer = consumer;
+      this.inputStream = inputStream;
+    }
+
+    @Override
+    public void run() {
+      new BufferedReader(new InputStreamReader(inputStream)).lines().forEach(consumer);
+    }
+  }
+
+  /**
+   *
+   */
+  static class ProcessWrapper {
+    final boolean success;
+    final Process process;
+    final List<String> commandLine;
+    final Map<String, String> environment;
+
+    public ProcessWrapper(boolean started, Process process, Map<String, String> environment, List<String> commandLine) {
+      this.success = started;
+      this.process = process;
+      this.environment = environment;
+      this.commandLine = commandLine;
+    }
+  }
+
   @Value("${app.vsd.home}")
   public void setDefaultVsdHome(String defaultVsdHome) {
     this.defaultVsdHome = StringUtils.isBlank(defaultVsdHome) ? System.getenv(VSD_HOME_KEY) : defaultVsdHome;
@@ -214,7 +251,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
 
   @ShellMethod(key = "start vsd", value = "Start Visual Statistics Display Tool (VSD).")
   public List<?> startVisualStatisticsDisplayTool(
-      @ShellOption(help = "Path to directory to scan for statistics files.", value = "--sourcePath", defaultValue = ShellOption.NULL) File source,
+      @ShellOption(help = "Path to directory to scan for statistics files.", value = "--path", defaultValue = ShellOption.NULL) File source,
       @ShellOption(help = "Path to the Visual Statistics Display Tool Installation Directory.", value = "--vsdHome", defaultValue = ShellOption.NULL) File vsdHome,
       @ShellOption(help = "Path to the folder where decompressed files should be located. If none is specified, compressed files are left alone and won't be loaded into VSD.", value = "--decompressionFolder", defaultValue = ShellOption.NULL) File decompressionFolder,
       @ShellOption(help = "Time Zone to set as system environment variable. This will be used by the Visual Statistics Display Tool (VSD) when showing data. If not set, none is used.", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId timeZone) {
@@ -290,36 +327,5 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
     commandResult.add(vsdProcessWrapper.success ? "Visual Statistics Display Tool (VSD) successfully started." : "There was an error while starting the VSD process, please check logs for details.");
 
     return commandResult;
-  }
-
-  static class DaemonStreamGobbler extends Thread {
-    final InputStream inputStream;
-    final Consumer<String> consumer;
-
-    public DaemonStreamGobbler(String threadName, InputStream inputStream, Consumer<String> consumer) {
-      super(threadName);
-      this.setDaemon(true);
-      this.consumer = consumer;
-      this.inputStream = inputStream;
-    }
-
-    @Override
-    public void run() {
-      new BufferedReader(new InputStreamReader(inputStream)).lines().forEach(consumer);
-    }
-  }
-
-  static class ProcessWrapper {
-    final boolean success;
-    final Process process;
-    final List<String> commandLine;
-    final Map<String, String> environment;
-
-    public ProcessWrapper(boolean started, Process process, Map<String, String> environment, List<String> commandLine) {
-      this.success = started;
-      this.process = process;
-      this.environment = environment;
-      this.commandLine = commandLine;
-    }
   }
 }

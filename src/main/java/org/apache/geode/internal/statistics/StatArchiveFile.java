@@ -33,10 +33,10 @@ import java.util.zip.GZIPInputStream;
 
 import org.springframework.util.Assert;
 
+import org.apache.geode.internal.logging.DateFormatter;
 import org.apache.geode.support.domain.marker.GeodeExtension;
 import org.apache.geode.support.domain.marker.GeodeImprovement;
 import org.apache.geode.support.domain.marker.GeodeReplacement;
-import org.apache.geode.internal.logging.DateFormatter;
 
 @GeodeReplacement(
     methods = { "readCompactValue", "readHeaderToken", "readResourceInstanceCreateToken", "readResourceInstanceDeleteToken", "readResourceTypeToken", "readSampleToken", "readToken", "update" },
@@ -725,18 +725,4 @@ public class StatArchiveFile {
   public StatArchiveReader.ResourceInst[] getResourceInstancesTable() {
     return this.resourceInstTable;
   }
-
-//  @GeodeExtension
-//  public void readHeader() throws IOException {
-//    byte token;
-//
-//    if (this.updateOK) {
-//      this.dataIn.mark(BUFFER_SIZE);
-//    }
-//
-//    do {
-//      token = this.dataIn.readByte();
-//    } while (token != StatArchiveFormat.HEADER_TOKEN);
-//    readHeaderToken();
-//  }
 }

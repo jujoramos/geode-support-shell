@@ -352,7 +352,6 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
     assertThat(errorsTable.getValue(2, 1)).isEqualTo("Not in GZIP format");
 
     // Assert File Copy.
-    // Assert File Copy.
     assertThat(Files.list(matchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
     assertThat(Files.list(nonMatchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(0);
     assertThat(Files.list(SampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
