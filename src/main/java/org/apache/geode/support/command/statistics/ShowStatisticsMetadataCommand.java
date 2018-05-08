@@ -28,6 +28,7 @@ import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
@@ -60,14 +61,13 @@ public class ShowStatisticsMetadataCommand extends AbstractStatisticsCommand {
     List<Object> commandResult = new ArrayList<>();
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     List<ParsingResult<SamplingMetadata>> parsingResults = statisticsService.parseMetadata(sourcePath);
-    TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Error Description");
     TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Product Version").addValue("Operating System").addValue("Time Zone").addValue("Start Time" + zoneIdDesc).addValue("Finish Time" + zoneIdDesc);
 
     if (parsingResults.isEmpty()) {
       commandResult.add("No statistics files found.");
     } else {
       parsingResults.sort(Comparator.comparing(ParsingResult::getFile));
-      parsingResults.stream().forEach(
+      parsingResults.stream().filter(ParsingResult::isSuccess).forEach(
           parsingResult -> {
             String filePath = FormatUtils.relativizePath(sourcePath, parsingResult.getFile());
 
@@ -88,25 +88,14 @@ public class ShowStatisticsMetadataCommand extends AbstractStatisticsCommand {
                   .addValue(metadataFile.getTimeZoneId().toString())
                   .addValue(startTime.format(FormatUtils.getDateTimeFormatter()))
                   .addValue(finishTime.format(FormatUtils.getDateTimeFormatter()));
-            } else {
-              Exception exception = parsingResult.getException();
-              String errorMessage = exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage();
-              errorsModelBuilder.addRow()
-                  .addValue(filePath)
-                  .addValue(errorMessage);
             }
           }
       );
 
       TableBuilder resultsTableBuilder = new TableBuilder(resultsModelBuilder.build());
-      if (resultsTableBuilder.getModel().getRowCount() > 1) {
-        commandResult.add(resultsTableBuilder.addFullBorder(borderStyle).build());
-      }
-
-      TableBuilder errorsTableBuilder = new TableBuilder(errorsModelBuilder.build());
-      if (errorsTableBuilder.getModel().getRowCount() > 1) {
-        commandResult.add(errorsTableBuilder.addFullBorder(borderStyle).build());
-      }
+      if (resultsTableBuilder.getModel().getRowCount() > 1) commandResult.add(resultsTableBuilder.addFullBorder(borderStyle).build());
+      Table errorsTable = buildErrosTable(sourcePath, parsingResults);
+      if (errorsTable != null) commandResult.add(errorsTable);
     }
 
     return commandResult;

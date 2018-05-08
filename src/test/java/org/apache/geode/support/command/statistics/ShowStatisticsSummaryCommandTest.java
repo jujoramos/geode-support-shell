@@ -53,8 +53,8 @@ import org.apache.geode.support.domain.statistics.filters.RegexValueFilter;
 import org.apache.geode.support.domain.statistics.filters.SimpleValueFilter;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
-import org.apache.geode.support.test.mockito.MockUtils;
 import org.apache.geode.support.test.assertj.TableAssert;
+import org.apache.geode.support.test.mockito.MockUtils;
 
 @RunWith(JUnitParamsRunner.class)
 public class ShowStatisticsSummaryCommandTest {
@@ -330,17 +330,17 @@ public class ShowStatisticsSummaryCommandTest {
   @Test
   public void showStatisticsSummaryShouldThrowExceptionWhenCategoryIdAndStatisticIdAreBothEmpty() {
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, null, null))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, false, null, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Either '--category' or '--statistic' parameter should be specified.");
 
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, "", ""))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, false, "", ""))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Either '--category' or '--statistic' parameter should be specified.");
 
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, "     ", "    "))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, false, "     ", "    "))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Either '--category' or '--statistic' parameter should be specified.");
   }
@@ -349,7 +349,7 @@ public class ShowStatisticsSummaryCommandTest {
   public void showStatisticsSummaryShouldThrowExceptionWhenFileIsNotReadable() {
     doThrow(new IllegalArgumentException("Mocked IllegalArgumentException.")).when(filesService).assertFileReadability(any());
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, "categoryId", "statisticId"))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, false, "categoryId", "statisticId"))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Mocked IllegalArgumentException.");
   }
@@ -358,7 +358,7 @@ public class ShowStatisticsSummaryCommandTest {
   public void showStatisticsSummaryShouldPropagateExceptionsThrownByTheServiceLayer() {
     doThrow(new RuntimeException()).when(statisticsService).parseSampling(any(), any());
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, "categoryId", "statisticId"))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, false, "categoryId", "statisticId"))
         .isInstanceOf(RuntimeException.class);
   }
 
@@ -369,7 +369,7 @@ public class ShowStatisticsSummaryCommandTest {
     ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
     when(statisticsService.parseSampling(any(), any())).thenReturn(Collections.emptyList());
 
-    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, strictMatchingFlag, false, "categoryId", "statisticId");
+    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, strictMatchingFlag, "categoryId", "statisticId");
     verify(statisticsService, times(1)).parseSampling(any(), argumentCaptor.capture());
     List<ValueFilter> filtersUsed = argumentCaptor.getValue();
     assertThat(filtersUsed).isNotNull();
@@ -429,7 +429,7 @@ public class ShowStatisticsSummaryCommandTest {
     List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception")));
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
 
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, "categoryId", "statisticId");
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, true, "categoryId", "statisticId");
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
@@ -453,7 +453,7 @@ public class ShowStatisticsSummaryCommandTest {
     ParsingResult parsingResult = new ParsingResult<>(mockedPath, sampling);
     List<ParsingResult<Sampling>> mockedResults = Arrays.asList(parsingResult);
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, "categoryId", "statisticId");
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, true, "categoryId", "statisticId");
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
@@ -477,7 +477,7 @@ public class ShowStatisticsSummaryCommandTest {
     Sampling sampling = new Sampling(mock(SamplingMetadata.class), categoryMap);
     when(statisticsService.parseSampling(any(), any())).thenReturn(Arrays.asList(new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception")), new ParsingResult<>(mockedParseableFile, sampling)));
 
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, true, false, "categoryId", "statisticId");
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, true, "categoryId", "statisticId");
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;

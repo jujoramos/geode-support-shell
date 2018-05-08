@@ -97,7 +97,7 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
     assertThat(methodTarget).isNotNull();
     assertThat(methodTarget.getAvailability().isAvailable()).isTrue();
     assertThat(methodTarget.getGroup()).isEqualTo("Statistics Commands");
-    assertThat(methodTarget.getHelp()).isEqualTo("Shows Minimum, Maximum, Average and Standard Deviation values for a (set of) defined statistics.");
+    assertThat(methodTarget.getHelp()).isEqualTo("Shows Minimum, Maximum, Average, Last Value and Standard Deviation values for a (set of) defined statistics.");
     assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowStatisticsSummaryCommand.class, "showStatisticsSummary", File.class, ShowStatisticsSummaryCommand.GroupCriteria.class, Statistic.Filter.class, boolean.class, boolean.class, String.class, String.class));
   }
 

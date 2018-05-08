@@ -229,15 +229,15 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
     return result;
   }
 
-  @ShellMethod(key = "show statistics summary", value = "Shows Minimum, Maximum, Average and Standard Deviation values for a (set of) defined statistics.")
+  @ShellMethod(key = "show statistics summary", value = "Shows Minimum, Maximum, Average, Last Value and Standard Deviation values for a (set of) defined statistics.")
   public List<?> showStatisticsSummary(
       @ShellOption(help = "Path to statistics file, or directory to scan for statistics files.", value = "--path") File source,
       @ShellOption(help = "Whether to group results by sampling file or statistic.", value = "--groupCriteria", defaultValue = "Sampling") GroupCriteria groupCriteria,
       @ShellOption(help = "Filter to use (none, per second or per sample) when showing results.", value = "--filter", defaultValue = "None") Statistic.Filter statFilter,
+      @ShellOption(help = "Whether to include statistics for which all sample values are 0.", value = "--showEmptyStatistics", arity = 1, defaultValue = "false") boolean showEmptyStatistics,
       @ShellOption(help = "Whether to use exact matching or regular expressions patterns when parsing the file.", value = "--strictMatching", arity = 1, defaultValue = "false") boolean strictMatching,
-      @ShellOption(help = "Whether to include the statistics for which both maximum and minimum values are 0.", value = "--showEmptyStatistics", arity = 1, defaultValue = "false") boolean showEmptyStatistics,
-      @ShellOption(help = "Category of the statistic to search for (VMStats, IndexStats, etc.). Simple string or regular expression.", value = "--category", defaultValue = ShellOption.NULL) String categoryId,
-      @ShellOption(help = "Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Simple string or regular expression.", value = "--statistic", defaultValue = ShellOption.NULL) String statisticId) {
+      @ShellOption(help = "Category of the statistic to search for (VMStats, IndexStats, etc.). Can be a regular expression ('strictMatching' should be set as 'false').", value = "--category", defaultValue = ShellOption.NULL) String categoryId,
+      @ShellOption(help = "Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression ('strictMatching' should be set as 'false').", value = "--statistic", defaultValue = ShellOption.NULL) String statisticId) {
 
     // Limit the output, showing everything would be overkilling.
     if ((StringUtils.isBlank(categoryId)) && (StringUtils.isBlank(statisticId))) {
@@ -260,22 +260,8 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
     } else {
       Table resultsTable = GroupCriteria.Sampling.equals(groupCriteria) ? buildTableGroupedBySampling(sourcePath, showEmptyStatistics, statFilter, parsingResults) : buildTableGroupedByStatistic(sourcePath, showEmptyStatistics, statFilter, parsingResults);
       if (resultsTable != null) commandResult.add(resultsTable);
-
-      // Iterate Over Failed Results.
-      TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Error Description");
-      parsingResults.stream()
-          .filter(ParsingResult::isFailure)
-          .forEach(parsingResult -> {
-            Exception exception = parsingResult.getException();
-            String filePath = FormatUtils.relativizePath(sourcePath, parsingResult.getFile());
-            String errorMessage = exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage();
-            errorsModelBuilder.addRow()
-                .addValue(filePath)
-                .addValue(errorMessage);
-          });
-
-      TableBuilder errorsTableBuilder = new TableBuilder(errorsModelBuilder.build());
-      if (errorsTableBuilder.getModel().getRowCount() > 1) commandResult.add(errorsTableBuilder.addFullBorder(borderStyle).build());
+      Table errorsTable = buildErrosTable(sourcePath, parsingResults);
+      if (errorsTable != null) commandResult.add(errorsTable);
       if (commandResult.isEmpty()) commandResult.add("No matching results found.");
     }
 
