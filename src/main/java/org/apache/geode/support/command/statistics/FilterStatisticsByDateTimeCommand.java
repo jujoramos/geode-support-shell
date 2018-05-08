@@ -35,7 +35,6 @@ import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
@@ -147,12 +146,12 @@ public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand
 
       TableBuilder resultsTableBuilder = new TableBuilder(resultModelBuilder.build());
       if (resultsTableBuilder.getModel().getRowCount() > 1) {
-        commandResult.add(resultsTableBuilder.addFullBorder(BorderStyle.oldschool).build());
+        commandResult.add(resultsTableBuilder.addFullBorder(borderStyle).build());
       }
 
       TableBuilder errorsTableBuilder = new TableBuilder(errorsModelBuilder.build());
       if (errorsTableBuilder.getModel().getRowCount() > 1) {
-        commandResult.add(errorsTableBuilder.addFullBorder(BorderStyle.oldschool).build());
+        commandResult.add(errorsTableBuilder.addFullBorder(borderStyle).build());
       }
     }
 

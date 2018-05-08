@@ -42,7 +42,6 @@ import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.shell.table.BorderStyle;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
@@ -308,7 +307,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
           });
 
           TableBuilder errorsTableBuilder = new TableBuilder(errorsModelBuilder.build());
-          if (errorsTableBuilder.getModel().getRowCount() > 1) commandResult.add(errorsTableBuilder.addFullBorder(BorderStyle.oldschool).build());
+          if (errorsTableBuilder.getModel().getRowCount() > 1) commandResult.add(errorsTableBuilder.addFullBorder(borderStyle).build());
         } catch (IOException ioException) {
           String errorMessage = String.format("Decompression folder %s couldn't be created. Compressed files will be ignored.", decompressedPath.toString());
           logger.warn(errorMessage);

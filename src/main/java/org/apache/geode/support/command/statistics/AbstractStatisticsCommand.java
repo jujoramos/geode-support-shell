@@ -15,14 +15,16 @@
 package org.apache.geode.support.command.statistics;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.shell.table.BorderStyle;
 
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
 
 // TODO: Spring doesn't know how to convert from String to Path. Add a custom converter and use Path instead of the old Sampling class.
-public class AbstractStatisticsCommand<V> {
+public class AbstractStatisticsCommand  {
   protected FilesService filesService;
   protected StatisticsService statisticsService;
+  protected final BorderStyle borderStyle = BorderStyle.fancy_double;
 
   @Autowired
   public AbstractStatisticsCommand(FilesService filesService, StatisticsService statisticsService) {
