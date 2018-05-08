@@ -96,8 +96,7 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     assertThat(methodTarget.getAvailability().isAvailable()).isTrue();
     assertThat(methodTarget.getGroup()).isEqualTo("Statistics Commands");
     assertThat(methodTarget.getHelp()).isEqualTo("Show general information about statistics files.");
-    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(
-        ShowStatisticsMetadataCommand.class, "showStatisticsMetadata", File.class, ZoneId.class));
+    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowStatisticsMetadataCommand.class, "showStatisticsMetadata", File.class, ZoneId.class));
   }
 
   @Test
@@ -117,7 +116,6 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-
     List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
@@ -167,7 +165,6 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
   public void showStatisticsMetadataShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles(String timeZoneId) {
     ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
-    String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
 
     File basePath = SampleDataUtils.corruptedFolder;

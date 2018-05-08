@@ -41,7 +41,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableModel;
 
 import org.apache.geode.internal.statistics.StatValue;
 import org.apache.geode.internal.statistics.ValueFilter;
@@ -54,7 +53,8 @@ import org.apache.geode.support.domain.statistics.filters.RegexValueFilter;
 import org.apache.geode.support.domain.statistics.filters.SimpleValueFilter;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
-import org.apache.geode.support.test.MockUtils;
+import org.apache.geode.support.test.mockito.MockUtils;
+import org.apache.geode.support.test.assertj.TableAssert;
 
 @RunWith(JUnitParamsRunner.class)
 public class ShowStatisticsSummaryCommandTest {
@@ -202,119 +202,35 @@ public class ShowStatisticsSummaryCommandTest {
 
     List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
     Table resultTable = null;
-    TableModel resultTableModel = null;
 
     // ############ includeEmptyStatistics = false
     resultTable = showStatisticsSummaryCommand.buildTableGroupedBySampling(mockedRootPath, false, Statistic.Filter.None, parsingResults);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel).isNotNull();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(5);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(6);
     verify(serversStatistic, times(1)).setFilter(Statistic.Filter.None);
     verify(delayDurationStatistic, times(1)).setFilter(Statistic.Filter.None);
     verify(replyWaitsInProgressStatistic, times(1)).setFilter(Statistic.Filter.None);
-
-    // Client Data
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("/client.gfs");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(0, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(0, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(0, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(0, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("└──PoolStats.servers");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 2)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 3)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 4)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 5)).isEqualTo("0.00");
-
-    // Server Data
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("/server.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(2, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(2, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(2, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(2, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(3, 0)).isEqualTo("└──DistributionStats.replyWaitsInProgress");
-    assertThat(resultTableModel.getValue(3, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(3, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(3, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(3, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(3, 5)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(4, 0)).isEqualTo("└──StatsSampler.delayDuration");
-    assertThat(resultTableModel.getValue(4, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(4, 2)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(4, 3)).isEqualTo("5.00");
-    assertThat(resultTableModel.getValue(4, 4)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(4, 5)).isEqualTo("0.00");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(5).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("/client.gfs", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──PoolStats.servers", "2.00", "2.00", "2.00", "2.00", "0.00");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("/server.gfs", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo("└──DistributionStats.replyWaitsInProgress", "2.00", "8.00", "0.67", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(4).isEqualTo("└──StatsSampler.delayDuration", "0.00", "10.00", "5.00", "10.00", "0.00");
 
     // ############ includeEmptyStatistics = true
     resultTable = showStatisticsSummaryCommand.buildTableGroupedBySampling(mockedRootPath, true, Statistic.Filter.Sample, parsingResults);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel).isNotNull();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(8);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(6);
     verify(tokensStatistic, times(1)).setFilter(Statistic.Filter.Sample);
     verify(serversStatistic, times(1)).setFilter(Statistic.Filter.Sample);
     verify(jvmPausesStatistic, times(1)).setFilter(Statistic.Filter.Sample);
     verify(delayDurationStatistic, times(1)).setFilter(Statistic.Filter.Sample);
     verify(replyWaitsInProgressStatistic, times(1)).setFilter(Statistic.Filter.Sample);
-
-    // Client Data
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("/client.gfs");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(0, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(0, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(0, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(0, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("└──PoolStats.servers");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 2)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 3)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 4)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 5)).isEqualTo("0.00");
-
-    // Server Data
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("/server.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(2, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(2, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(2, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(2, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(3, 0)).isEqualTo("└──DistributionStats.replyWaitsInProgress");
-    assertThat(resultTableModel.getValue(3, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(3, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(3, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(3, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(3, 5)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(4, 0)).isEqualTo("└──StatsSampler.delayDuration");
-    assertThat(resultTableModel.getValue(4, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(4, 2)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(4, 3)).isEqualTo("5.00");
-    assertThat(resultTableModel.getValue(4, 4)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(4, 5)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(5, 0)).isEqualTo("└──StatsSampler.jvmPauses");
-    assertThat(resultTableModel.getValue(5, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(5, 2)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(5, 3)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(5, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(5, 5)).isEqualTo("0.00");
-
-    // Locator Data
-    assertThat(resultTableModel.getValue(6, 0)).isEqualTo("/locator.gz");
-    assertThat(resultTableModel.getValue(6, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(6, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(6, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(6, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(6, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(7, 0)).isEqualTo("└──DLockStats.tokens");
-    assertThat(resultTableModel.getValue(7, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(7, 2)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(7, 3)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(7, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(7, 5)).isEqualTo("0.00");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(8).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("/client.gfs", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──PoolStats.servers", "2.00", "2.00", "2.00", "2.00", "0.00");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("/server.gfs", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo("└──DistributionStats.replyWaitsInProgress", "2.00", "8.00", "0.67", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(4).isEqualTo("└──StatsSampler.delayDuration", "0.00", "10.00", "5.00", "10.00", "0.00");
+    TableAssert.assertThat(resultTable).row(5).isEqualTo("└──StatsSampler.jvmPauses", "0.00", "0.00", "0.00", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(6).isEqualTo("/locator.gz", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(7).isEqualTo("└──DLockStats.tokens", "0.00", "0.00", "0.00", "0.00", "0.00");
   }
 
   @Test
@@ -373,157 +289,42 @@ public class ShowStatisticsSummaryCommandTest {
 
     List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
     Table resultTable = null;
-    TableModel resultTableModel = null;
 
     // ############ includeEmptyStatistics = false
     resultTable = showStatisticsSummaryCommand.buildTableGroupedByStatistic(mockedRootPath, false, Statistic.Filter.None, parsingResults);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel).isNotNull();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(7);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(6);
     verify(serversStatistic, times(1)).setFilter(Statistic.Filter.None);
     verify(delayDurationStatistic, times(1)).setFilter(Statistic.Filter.None);
     verify(replyWaitsInProgressServerStatistic, times(1)).setFilter(Statistic.Filter.None);
     verify(replyWaitsInProgressLocatorStatistic, times(1)).setFilter(Statistic.Filter.None);
-
-    // DistributionStats.replyWaitsInProgress
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("DistributionStats.replyWaitsInProgress");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(0, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(0, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(0, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(0, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("└──/locator.gz");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(1, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(1, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(1, 5)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("└──/server.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(2, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(2, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(2, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(2, 5)).isEqualTo("0.00");
-
-    // PoolStats.servers
-    assertThat(resultTableModel.getValue(3, 0)).isEqualTo("PoolStats.servers");
-    assertThat(resultTableModel.getValue(3, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(3, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(3, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(3, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(3, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(4, 0)).isEqualTo("└──/client.gfs");
-    assertThat(resultTableModel.getValue(4, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(4, 2)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(4, 3)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(4, 4)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(4, 5)).isEqualTo("0.00");
-
-    // StatsSampler.delayDuration
-    assertThat(resultTableModel.getValue(5, 0)).isEqualTo("StatsSampler.delayDuration");
-    assertThat(resultTableModel.getValue(5, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(5, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(5, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(5, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(5, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(6, 0)).isEqualTo("└──/server.gfs");
-    assertThat(resultTableModel.getValue(6, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(6, 2)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(6, 3)).isEqualTo("5.00");
-    assertThat(resultTableModel.getValue(6, 4)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(6, 5)).isEqualTo("0.00");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(7).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("DistributionStats.replyWaitsInProgress", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──/locator.gz", "2.00", "8.00", "0.67", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("└──/server.gfs", "0.00", "8.00", "0.67", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo("PoolStats.servers", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(4).isEqualTo("└──/client.gfs", "2.00", "2.00", "2.00", "2.00", "0.00");
+    TableAssert.assertThat(resultTable).row(5).isEqualTo("StatsSampler.delayDuration", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(6).isEqualTo("└──/server.gfs", "0.00", "10.00", "5.00", "10.00", "0.00");
 
     // ############ includeEmptyStatistics = true
     resultTable = showStatisticsSummaryCommand.buildTableGroupedByStatistic(mockedRootPath, true, Statistic.Filter.Second, parsingResults);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel).isNotNull();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(11);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(6);
     verify(tokensStatistic, times(1)).setFilter(Statistic.Filter.Second);
     verify(serversStatistic, times(1)).setFilter(Statistic.Filter.Second);
     verify(jvmPausesStatistic, times(1)).setFilter(Statistic.Filter.Second);
     verify(delayDurationStatistic, times(1)).setFilter(Statistic.Filter.Second);
     verify(replyWaitsInProgressServerStatistic, times(1)).setFilter(Statistic.Filter.Second);
     verify(replyWaitsInProgressLocatorStatistic, times(1)).setFilter(Statistic.Filter.Second);
-
-    // DLockStats.tokens
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("DLockStats.tokens");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(0, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(0, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(0, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(0, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("└──/locator.gz");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(1, 2)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(1, 3)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(1, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(1, 5)).isEqualTo("0.00");
-
-    // DistributionStats.replyWaitsInProgress
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("DistributionStats.replyWaitsInProgress");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(2, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(2, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(2, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(2, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(3, 0)).isEqualTo("└──/locator.gz");
-    assertThat(resultTableModel.getValue(3, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(3, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(3, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(3, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(3, 5)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(4, 0)).isEqualTo("└──/server.gfs");
-    assertThat(resultTableModel.getValue(4, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(4, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(4, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(4, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(4, 5)).isEqualTo("0.00");
-
-    // PoolStats.servers
-    assertThat(resultTableModel.getValue(5, 0)).isEqualTo("PoolStats.servers");
-    assertThat(resultTableModel.getValue(5, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(5, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(5, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(5, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(5, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(6, 0)).isEqualTo("└──/client.gfs");
-    assertThat(resultTableModel.getValue(6, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(6, 2)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(6, 3)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(6, 4)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(6, 5)).isEqualTo("0.00");
-
-    // StatsSampler.delayDuration
-    assertThat(resultTableModel.getValue(7, 0)).isEqualTo("StatsSampler.delayDuration");
-    assertThat(resultTableModel.getValue(7, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(7, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(7, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(7, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(7, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(8, 0)).isEqualTo("└──/server.gfs");
-    assertThat(resultTableModel.getValue(8, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(8, 2)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(8, 3)).isEqualTo("5.00");
-    assertThat(resultTableModel.getValue(8, 4)).isEqualTo("10.00");
-    assertThat(resultTableModel.getValue(8, 5)).isEqualTo("0.00");
-
-    // StatsSampler.jvmPauses
-    assertThat(resultTableModel.getValue(9, 0)).isEqualTo("StatsSampler.jvmPauses");
-    assertThat(resultTableModel.getValue(9, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(9, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(9, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(9, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(9, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(10, 0)).isEqualTo("└──/server.gfs");
-    assertThat(resultTableModel.getValue(10, 1)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(10, 2)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(10, 3)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(10, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(10, 5)).isEqualTo("0.00");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(11).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("DLockStats.tokens", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──/locator.gz", "0.00", "0.00", "0.00", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("DistributionStats.replyWaitsInProgress", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo("└──/locator.gz", "2.00", "8.00", "0.67", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(4).isEqualTo("└──/server.gfs", "0.00", "8.00", "0.67", "0.00", "0.00");
+    TableAssert.assertThat(resultTable).row(5).isEqualTo("PoolStats.servers", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(6).isEqualTo("└──/client.gfs", "2.00", "2.00", "2.00", "2.00", "0.00");
+    TableAssert.assertThat(resultTable).row(7).isEqualTo("StatsSampler.delayDuration", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(8).isEqualTo("└──/server.gfs", "0.00", "10.00", "5.00", "10.00", "0.00");
+    TableAssert.assertThat(resultTable).row(9).isEqualTo("StatsSampler.jvmPauses", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(10).isEqualTo("└──/server.gfs", "0.00", "0.00", "0.00", "0.00", "0.00");
   }
 
   @Test
@@ -633,15 +434,10 @@ public class ShowStatisticsSummaryCommandTest {
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
-    Table errorsResultTable = resultList.get(0);
-    assertThat(errorsResultTable).isNotNull();
-    TableModel errorsTableModel = errorsResultTable.getModel();
-    assertThat(errorsTableModel.getRowCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTableModel.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTableModel.getValue(1, 0)).isEqualTo("mockedUnparseableFile.gfs");
-    assertThat(errorsTableModel.getValue(1, 1)).isEqualTo("Mocked Exception");
+    Table errorsTable = resultList.get(0);
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo("mockedUnparseableFile.gfs", "Mocked Exception");
   }
 
   @Test
@@ -664,22 +460,9 @@ public class ShowStatisticsSummaryCommandTest {
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    TableModel resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(2);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(6);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("DistributionStats.replyWaitsInProgress");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(0, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(0, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(0, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(0, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("└──/server.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(1, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(1, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(1, 5)).isEqualTo("0.00");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("DistributionStats.replyWaitsInProgress", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──/server.gfs", "2.00", "8.00", "0.67", "0.00", "0.00");
   }
 
   @Test
@@ -702,32 +485,14 @@ public class ShowStatisticsSummaryCommandTest {
 
     // Results Table First
     Table resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    TableModel resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(2);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(6);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("DistributionStats.replyWaitsInProgress");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Minimum");
-    assertThat(resultTableModel.getValue(0, 2)).isEqualTo("Maximum");
-    assertThat(resultTableModel.getValue(0, 3)).isEqualTo("Average");
-    assertThat(resultTableModel.getValue(0, 4)).isEqualTo("Last Value");
-    assertThat(resultTableModel.getValue(0, 5)).isEqualTo("Standard Deviation");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("└──/server.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("2.00");
-    assertThat(resultTableModel.getValue(1, 2)).isEqualTo("8.00");
-    assertThat(resultTableModel.getValue(1, 3)).isEqualTo("0.67");
-    assertThat(resultTableModel.getValue(1, 4)).isEqualTo("0.00");
-    assertThat(resultTableModel.getValue(1, 5)).isEqualTo("0.00");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("DistributionStats.replyWaitsInProgress", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──/server.gfs", "2.00", "8.00", "0.67", "0.00", "0.00");
 
     // Error Table Last
-    Table errorsResultTable = resultList.get(1);
-    assertThat(errorsResultTable).isNotNull();
-    TableModel errorsTableModel = errorsResultTable.getModel();
-    assertThat(errorsTableModel.getRowCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTableModel.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTableModel.getValue(1, 0)).isEqualTo("mockedUnparseableFile.gfs");
-    assertThat(errorsTableModel.getValue(1, 1)).isEqualTo("Mocked Exception");
+    Table errorsTable = resultList.get(1);
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo("mockedUnparseableFile.gfs", "Mocked Exception");
   }
 }

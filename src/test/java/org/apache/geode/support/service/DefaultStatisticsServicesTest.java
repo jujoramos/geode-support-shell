@@ -57,7 +57,7 @@ import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.domain.statistics.Statistic;
 import org.apache.geode.support.domain.statistics.filters.RegexValueFilter;
 import org.apache.geode.support.domain.statistics.filters.SimpleValueFilter;
-import org.apache.geode.support.test.MockUtils;
+import org.apache.geode.support.test.mockito.MockUtils;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ Files.class, DefaultStatisticsService.class })
@@ -121,8 +121,7 @@ public class DefaultStatisticsServicesTest {
 
   @Test
   public void parseSamplingMetadataShouldThrowExceptionWhenStatFileIsNull() {
-    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(null))
-        .isInstanceOf(NullPointerException.class).hasMessage("StatArchiveFile can not be null.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(null)).isInstanceOf(NullPointerException.class).hasMessage("StatArchiveFile can not be null.");
   }
 
   @Test
@@ -131,13 +130,11 @@ public class DefaultStatisticsServicesTest {
 
     // Null ResourceInstancesTable.
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(null);
-    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile))
-        .isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile)).isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
 
     // Empty ResourceInstancesTable.
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(new StatArchiveReader.ResourceInst[0]);
-    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile))
-        .isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile)).isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
   }
 
   @Test
@@ -148,20 +145,17 @@ public class DefaultStatisticsServicesTest {
 
     // Null StatValue.
     when(mockedResourceInstance.getStatValue(any())).thenReturn(null);
-    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile))
-        .isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, StatValue for cpus should not be null.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile)).isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, StatValue for cpus should not be null.");
 
     // Null TimeStamps.
     StatValue cpusStatValue = mock(StatValue.class);
     when(cpusStatValue.getRawAbsoluteTimeStamps()).thenReturn(null);
     when(mockedResourceInstance.getStatValue(any())).thenReturn(cpusStatValue);
-    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile))
-        .isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, array of TimeStamps for cpus should not be null.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile)).isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, array of TimeStamps for cpus should not be null.");
 
     // Empty TimeStamps.
     when(cpusStatValue.getRawAbsoluteTimeStamps()).thenReturn(new long[0]);
-    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile))
-        .isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, array of TimeStamps for cpus should not be null.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingMetadata(mockedStatArchiveFile)).isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, array of TimeStamps for cpus should not be null.");
   }
 
   @Test
@@ -196,8 +190,7 @@ public class DefaultStatisticsServicesTest {
 
   @Test
   public void parseSamplingStatisticalDataShouldThrowExceptionWhenStatFileIsNull() {
-    assertThatThrownBy(() -> statisticsService.parseSamplingStatisticalData(null))
-        .isInstanceOf(NullPointerException.class).hasMessage("StatArchiveFile can not be null.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingStatisticalData(null)).isInstanceOf(NullPointerException.class).hasMessage("StatArchiveFile can not be null.");
   }
 
   @Test
@@ -206,13 +199,11 @@ public class DefaultStatisticsServicesTest {
 
     // Null ResourceInstancesTable.
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(null);
-    assertThatThrownBy(() -> statisticsService.parseSamplingStatisticalData(mockedStatArchiveFile))
-        .isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingStatisticalData(mockedStatArchiveFile)).isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
 
     // Empty ResourceInstancesTable.
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(new StatArchiveReader.ResourceInst[0]);
-    assertThatThrownBy(() -> statisticsService.parseSamplingStatisticalData(mockedStatArchiveFile))
-        .isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
+    assertThatThrownBy(() -> statisticsService.parseSamplingStatisticalData(mockedStatArchiveFile)).isInstanceOf(IllegalStateException.class).hasMessage("Invalid sampling file, ResourceInstancesTable should not be null nor empty.");
   }
 
   @Test

@@ -46,6 +46,7 @@ public class StatisticsServiceIntegrationTest {
   public void setUp() {
     this.statisticsService = new DefaultStatisticsService();
   }
+
   @Test
   public void decompressShouldThrowExceptionWhenFileIsNotCompressed() throws Exception {
     File mockedFile = temporaryFolder.newFile();
@@ -58,10 +59,7 @@ public class StatisticsServiceIntegrationTest {
     File uncompressedFile = temporaryFolder.newFile("cluster1-locator.gfs");
     String clusterOneLocatorFilePath = SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getFilePath();
 
-    assertThatThrownBy(() -> statisticsService.decompress(Paths.get(clusterOneLocatorFilePath), uncompressedFile.toPath()))
-        .isInstanceOf(IOException.class)
-        .hasMessage("Not in GZIP format");
-
+    assertThatThrownBy(() -> statisticsService.decompress(Paths.get(clusterOneLocatorFilePath), uncompressedFile.toPath())).isInstanceOf(IOException.class).hasMessage("Not in GZIP format");
     assertThat(Files.list(temporaryFolder.getRoot().toPath()).count()).isEqualTo(0);
   }
 
@@ -99,7 +97,6 @@ public class StatisticsServiceIntegrationTest {
   @Test
   public void parseMetadataShouldReturnBothParsingErrorsAndParsingSuccessesWhenParsingSucceedsForSomeFilesAndFailsForOthers() {
     List<ParsingResult<SamplingMetadata>> parsingResults = statisticsService.parseMetadata(SampleDataUtils.rootFolder.toPath());
-
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(9);
 
@@ -199,7 +196,6 @@ public class StatisticsServiceIntegrationTest {
   @Test
   public void parseSamplingShouldReturnBothParsingErrorsAndParsingSuccessesWhenParsingSucceedsForSomeFilesAndFailsForOthers() {
     List<ParsingResult<Sampling>> parsingResults = statisticsService.parseSampling(SampleDataUtils.rootFolder.toPath(), SampleDataUtils.filters);
-
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(9);
 

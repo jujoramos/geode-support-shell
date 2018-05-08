@@ -40,13 +40,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableModel;
 
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
-import org.apache.geode.support.test.MockUtils;
+import org.apache.geode.support.test.mockito.MockUtils;
+import org.apache.geode.support.test.assertj.TableAssert;
 
 @RunWith(JUnitParamsRunner.class)
 public class FilterStatisticsByDateTimeCommandTest {
@@ -127,7 +127,6 @@ public class FilterStatisticsByDateTimeCommandTest {
     when(statisticsService.parseMetadata(any())).thenReturn(Collections.emptyList());
 
     Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
-
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<String> resultList = (List)resultObject;
@@ -144,20 +143,14 @@ public class FilterStatisticsByDateTimeCommandTest {
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
-
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table errorsResultTable = resultList.get(0);
-    assertThat(errorsResultTable).isNotNull();
-    TableModel errorsTableModel = errorsResultTable.getModel();
-    assertThat(errorsTableModel.getRowCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTableModel.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTableModel.getValue(1, 0)).isEqualTo("mockedUnparseableFile.gfs");
-    assertThat(errorsTableModel.getValue(1, 1)).isEqualTo("Mocked Exception");
+    TableAssert.assertThat(errorsResultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsResultTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsResultTable).row(1).isEqualTo("mockedUnparseableFile.gfs", "Mocked Exception");
   }
 
   @Test
@@ -170,18 +163,13 @@ public class FilterStatisticsByDateTimeCommandTest {
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.filterStatisticsByDateTime(2010, 01, 01, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
-
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    TableModel resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(2);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
   }
 
   @Test
@@ -210,37 +198,24 @@ public class FilterStatisticsByDateTimeCommandTest {
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.filterStatisticsByDateTime(2018, 01, 25, 00, 00, 00, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
-
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(2);
 
-    // Correct Results should come first.
+    // Results Table should come first.
     Table resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    TableModel resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(3);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("matching.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("true");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("nonMatching.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("false");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("matching.gfs", "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("nonMatching.gfs", "false");
 
-    // Error Results should come last.
-    TableModel errorsTable = resultList.get(1).getModel();
-    int errorsRowCount = errorsTable.getRowCount();
-    int errorsColumnCount = errorsTable.getColumnCount();
-    assertThat(errorsRowCount).isEqualTo(3);
-    assertThat(errorsColumnCount).isEqualTo(2);
-    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTable.getValue(1, 0)).isEqualTo("matching.gfs");
-    assertThat(errorsTable.getValue(1, 1)).isEqualTo("Mocked IOException for mockedMatchingPath.");
-    assertThat(errorsTable.getValue(2, 0)).isEqualTo("nonMatching.gfs");
-    assertThat(errorsTable.getValue(2, 1)).isEqualTo("Mocked IOException for mockedNonMatchingPath.");
+    // Errors Table should come last.
+    Table errorsTable = resultList.get(1);
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo("matching.gfs", "Mocked IOException for mockedMatchingPath.");
+    TableAssert.assertThat(errorsTable).row(2).isEqualTo("nonMatching.gfs", "Mocked IOException for mockedNonMatchingPath.");
   }
 
   @Test
@@ -286,18 +261,11 @@ public class FilterStatisticsByDateTimeCommandTest {
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    TableModel resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(4);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("true");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("false");
-    assertThat(resultTableModel.getValue(3, 0)).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs");
-    assertThat(resultTableModel.getValue(3, 1)).isEqualTo("false");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(4).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs", "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs", "false");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs", "false");
     verify(filesService, times(1)).copyFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedNonMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedNonMatchingFolderPath);
@@ -310,18 +278,11 @@ public class FilterStatisticsByDateTimeCommandTest {
     resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(4);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("true");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("true");
-    assertThat(resultTableModel.getValue(3, 0)).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs");
-    assertThat(resultTableModel.getValue(3, 1)).isEqualTo("true");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(4).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs", "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs", "true");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs", "true");
     verify(filesService, times(1)).copyFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedMatchingFolderPath);
@@ -334,18 +295,11 @@ public class FilterStatisticsByDateTimeCommandTest {
     resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(4);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("true");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("false");
-    assertThat(resultTableModel.getValue(3, 0)).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs");
-    assertThat(resultTableModel.getValue(3, 1)).isEqualTo("true");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(4).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("januaryFifthTwelveAMToJanuaryFifteenthFourPM.gfs", "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("januaryTenthHalfOnePMToJanuaryTenthHalfTwoPM.gfs", "false");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo("januaryTenthHalfTwoAMToJanuaryThirteenthHalfFive.gfs", "true");
     verify(filesService, times(1)).copyFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedNonMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedMatchingFolderPath);
@@ -388,16 +342,10 @@ public class FilterStatisticsByDateTimeCommandTest {
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    TableModel resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(3);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("dublinServer.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("true");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("chicagoLocator.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("true");
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.gfs", "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.gfs", "true");
     verify(filesService, times(1)).copyFile(dublinServerPath, mockedMatchingFolderPath);
     verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
     reset(filesService);
@@ -409,16 +357,9 @@ public class FilterStatisticsByDateTimeCommandTest {
     resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(3);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("dublinServer.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("false");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("chicagoLocator.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("false");
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.gfs", "false");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.gfs", "false");
     verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
     verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedNonMatchingFolderPath);
     reset(filesService);
@@ -430,16 +371,9 @@ public class FilterStatisticsByDateTimeCommandTest {
     resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(3);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Matches");
-    assertThat(resultTableModel.getValue(1, 0)).isEqualTo("dublinServer.gfs");
-    assertThat(resultTableModel.getValue(1, 1)).isEqualTo("false");
-    assertThat(resultTableModel.getValue(2, 0)).isEqualTo("chicagoLocator.gfs");
-    assertThat(resultTableModel.getValue(2, 1)).isEqualTo("true");
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.gfs", "false");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.gfs", "true");
     verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
     verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
     reset(filesService);

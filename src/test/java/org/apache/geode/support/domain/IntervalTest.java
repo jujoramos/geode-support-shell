@@ -55,21 +55,10 @@ public class IntervalTest {
 
   @Test
   public void ofStartTimeFinishTimeTest() {
-    assertThatThrownBy(() -> Interval.of(null, null))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("StartTime can't be null");
-
-    assertThatThrownBy(() -> Interval.of(startOfToday, null))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("FinishTime can't be null");
-
-    assertThatThrownBy(() -> Interval.of(finishOfToday, startOfToday))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageMatching("StartTime should be a point of time before FinishTime.");
-
-    assertThatThrownBy(() -> Interval.of(startOfToday.withZoneSameInstant(ZoneId.of("America/Chicago")), finishOfToday.withZoneSameInstant(ZoneId.of("Europe/Rome"))))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageMatching("StartTime and FinishTime should belong to the same ZoneId.");
+    assertThatThrownBy(() -> Interval.of(null, null)).isInstanceOf(NullPointerException.class).hasMessageMatching("StartTime can't be null");
+    assertThatThrownBy(() -> Interval.of(startOfToday, null)).isInstanceOf(NullPointerException.class).hasMessageMatching("FinishTime can't be null");
+    assertThatThrownBy(() -> Interval.of(finishOfToday, startOfToday)).isInstanceOf(IllegalArgumentException.class).hasMessageMatching("StartTime should be a point of time before FinishTime.");
+    assertThatThrownBy(() -> Interval.of(startOfToday.withZoneSameInstant(ZoneId.of("America/Chicago")), finishOfToday.withZoneSameInstant(ZoneId.of("Europe/Rome")))).isInstanceOf(IllegalArgumentException.class).hasMessageMatching("StartTime and FinishTime should belong to the same ZoneId.");
 
     Interval interval = Interval.of(startOfToday, finishOfToday);
     assertThat(interval.getStart()).isEqualTo(startOfToday);
@@ -78,21 +67,10 @@ public class IntervalTest {
 
   @Test
   public void ofZoneIdStartInstantFinishInstantTest() {
-    assertThatThrownBy(() -> Interval.of(null, null, null))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("ZoneId can't be null");
-
-    assertThatThrownBy(() -> Interval.of(systemZoneId, null, null))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("StartInstant can't be null");
-
-    assertThatThrownBy(() -> Interval.of(systemZoneId, oneHourBeforeNoon, null))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("FinishInstant can't be null");
-
-    assertThatThrownBy(() -> Interval.of(systemZoneId, oneHourAfterNoon, oneHourBeforeNoon))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageMatching("StartInstant should be a point of time before FinishInstant.");
+    assertThatThrownBy(() -> Interval.of(null, null, null)).isInstanceOf(NullPointerException.class).hasMessageMatching("ZoneId can't be null");
+    assertThatThrownBy(() -> Interval.of(systemZoneId, null, null)).isInstanceOf(NullPointerException.class).hasMessageMatching("StartInstant can't be null");
+    assertThatThrownBy(() -> Interval.of(systemZoneId, oneHourBeforeNoon, null)).isInstanceOf(NullPointerException.class).hasMessageMatching("FinishInstant can't be null");
+    assertThatThrownBy(() -> Interval.of(systemZoneId, oneHourAfterNoon, oneHourBeforeNoon)).isInstanceOf(IllegalArgumentException.class).hasMessageMatching("StartInstant should be a point of time before FinishInstant.");
 
     Interval interval = Interval.of(systemZoneId, oneHourBeforeNoon, oneHourAfterNoon);
     assertThat(interval.getStart()).isEqualTo(ZonedDateTime.ofInstant(oneHourBeforeNoon, systemZoneId));
@@ -102,11 +80,9 @@ public class IntervalTest {
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai", "America/Chicago" })
   public void withZoneSameIntervalTest(String timeZoneId) {
-    assertThatThrownBy(() -> noonInterval.withZoneSameInterval(null))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("ZoneId can't be null");
-
     ZoneId newZoneId = StringUtils.isBlank(timeZoneId) ? systemZoneId : ZoneId.of(timeZoneId);
+
+    assertThatThrownBy(() -> noonInterval.withZoneSameInterval(null)).isInstanceOf(NullPointerException.class).hasMessageMatching("ZoneId can't be null");
 
     Interval newNoonInterval = noonInterval.withZoneSameInterval(newZoneId);
     assertThat(noonInterval.getStart().toInstant()).isEqualTo(newNoonInterval.getStart().toInstant());
@@ -124,10 +100,7 @@ public class IntervalTest {
   @Test
   public void containsShouldThrownExceptionWhenZonedDateTimeParameterIsNull() {
     ZonedDateTime zonedDateTime = null;
-
-    assertThatThrownBy(() -> noonInterval.contains(zonedDateTime))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("DateTime can't be null.");
+    assertThatThrownBy(() -> noonInterval.contains(zonedDateTime)).isInstanceOf(NullPointerException.class).hasMessageMatching("DateTime can't be null.");
   }
 
   @Test
@@ -153,21 +126,14 @@ public class IntervalTest {
     assertThat(todayInterval.contains(finishOfToday.plusSeconds(1).withZoneSameInstant(filterZoneId))).isFalse();
     assertThat(thisMonthInterval.contains(startOfMonth.minusSeconds(1).withZoneSameInstant(filterZoneId))).isFalse();
     assertThat(thisMonthInterval.contains(finishOfMonth.plusSeconds(1).withZoneSameInstant(filterZoneId))).isFalse();
-    assertThat(noonInterval
-        .contains(ZonedDateTime.ofInstant(oneHourBeforeNoon.minusSeconds(1), filterZoneId))).isFalse();
-    assertThat(
-        noonInterval.contains(ZonedDateTime.ofInstant(oneHourAfterNoon.plusSeconds(1), filterZoneId))).isFalse();
-
-
+    assertThat(noonInterval.contains(ZonedDateTime.ofInstant(oneHourBeforeNoon.minusSeconds(1), filterZoneId))).isFalse();
+    assertThat(noonInterval.contains(ZonedDateTime.ofInstant(oneHourAfterNoon.plusSeconds(1), filterZoneId))).isFalse();
   }
 
   @Test
   public void containsShouldThrownExceptionWhenIntervalParameterIsNull() {
     Interval interval = null;
-
-    assertThatThrownBy(() -> todayInterval.contains(interval))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("Interval can't be null.");
+    assertThatThrownBy(() -> todayInterval.contains(interval)).isInstanceOf(NullPointerException.class).hasMessageMatching("Interval can't be null.");
   }
 
   @Test
@@ -210,10 +176,7 @@ public class IntervalTest {
   @Test
   public void overlapsShouldThrownExceptionWhenParameterIsNull() {
     Interval dateTimeInterval = Interval.of(ZoneId.systemDefault(), Instant.now(), Instant.now());
-
-    assertThatThrownBy(() -> dateTimeInterval.overlaps(null))
-        .isInstanceOf(NullPointerException.class)
-        .hasMessageMatching("Interval can't be null.");
+    assertThatThrownBy(() -> dateTimeInterval.overlaps(null)).isInstanceOf(NullPointerException.class).hasMessageMatching("Interval can't be null.");
   }
 
   @Test

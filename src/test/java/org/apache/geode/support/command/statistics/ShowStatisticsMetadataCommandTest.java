@@ -39,13 +39,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableModel;
 
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
-import org.apache.geode.support.test.MockUtils;
+import org.apache.geode.support.test.mockito.MockUtils;
+import org.apache.geode.support.test.assertj.TableAssert;
 import org.apache.geode.support.utils.FormatUtils;
 
 @RunWith(JUnitParamsRunner.class)
@@ -111,19 +111,13 @@ public class ShowStatisticsMetadataCommandTest {
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table errorsResultTable = resultList.get(0);
-    assertThat(errorsResultTable).isNotNull();
-    TableModel errorsTableModel = errorsResultTable.getModel();
-    assertThat(errorsTableModel.getRowCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getColumnCount()).isEqualTo(2);
-    assertThat(errorsTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTableModel.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTableModel.getValue(1, 0)).isEqualTo("mockedUnparseableFile.gfs");
-    assertThat(errorsTableModel.getValue(1, 1)).isEqualTo("Mocked Exception");
+    TableAssert.assertThat(errorsResultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsResultTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsResultTable).row(1).isEqualTo("mockedUnparseableFile.gfs", "Mocked Exception");
   }
 
   @Test
-//  @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
-  @Parameters({ "" })
+  @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
   public void showStatisticsMetadataShouldReturnOnlyMetadataTableIfParsingSucceedsForAllFiles(String timeZoneId) {
     ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
@@ -135,22 +129,13 @@ public class ShowStatisticsMetadataCommandTest {
     when(statisticsService.parseMetadata(any())).thenReturn(mockedResults);
 
     Object resultObject = statisticsCommands.showStatisticsMetadata(mockedFolderFile, zoneId);
-
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table resultTable = resultList.get(0);
-    assertThat(resultTable).isNotNull();
-    TableModel resultTableModel = resultTable.getModel();
-    assertThat(resultTableModel.getRowCount()).isEqualTo(2);
-    assertThat(resultTableModel.getColumnCount()).isEqualTo(6);
-    assertThat(resultTableModel.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultTableModel.getValue(0, 1)).isEqualTo("Product Version");
-    assertThat(resultTableModel.getValue(0, 2)).isEqualTo("Operating System");
-    assertThat(resultTableModel.getValue(0, 3)).isEqualTo("Time Zone");
-    assertThat(resultTableModel.getValue(0, 4)).isEqualTo("Start Time" + zoneIdDesc);
-    assertThat(resultTableModel.getValue(0, 5)).isEqualTo("Finish Time" + zoneIdDesc);
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Product Version", "Operating System", "Time Zone", "Start Time" + zoneIdDesc, "Finish Time" + zoneIdDesc);
   }
 
   @Test
@@ -187,56 +172,32 @@ public class ShowStatisticsMetadataCommandTest {
     List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(2);
 
-    // Correct Results should come first.
-    TableModel resultsTable = resultList.get(0).getModel();
-    int rowCount = resultsTable.getRowCount();
-    int columnCount = resultsTable.getColumnCount();
-    assertThat(rowCount).isEqualTo(3);
-    assertThat(columnCount).isEqualTo(6);
-
-    // Assert Titles
-    assertThat(resultsTable.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(resultsTable.getValue(0, 1)).isEqualTo("Product Version");
-    assertThat(resultsTable.getValue(0, 2)).isEqualTo("Operating System");
-    assertThat(resultsTable.getValue(0, 3)).isEqualTo("Time Zone");
-    assertThat(resultsTable.getValue(0, 4)).isEqualTo("Start Time" + zoneIdDesc);
-    assertThat(resultsTable.getValue(0, 5)).isEqualTo("Finish Time" + zoneIdDesc);
+    // Results Table should come first.
+    Table resultTable = resultList.get(0);
+    int rowCount = resultTable.getModel().getRowCount();
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Product Version", "Operating System", "Time Zone", "Start Time" + zoneIdDesc, "Finish Time" + zoneIdDesc);
 
     // Assert Row Data
     for (int row = 1; row < rowCount; row++) {
       SamplingMetadata expectedRowData = mockedMetadata.get(row - 1);
       ZoneId statTimeZone = expectedRowData.getTimeZoneId();
       ZoneId timeZoneUsed = zoneId != null ? zoneId : expectedRowData.getTimeZoneId();
-
-      assertThat(resultsTable.getValue(row, 0)).isEqualTo(expectedRowData.getFileName());
-      assertThat(resultsTable.getValue(row, 1)).isEqualTo(expectedRowData.getProductVersion());
-      assertThat(resultsTable.getValue(row, 2)).isEqualTo(expectedRowData.getOperatingSystem());
-      assertThat(resultsTable.getValue(row, 3)).isEqualTo(statTimeZone.toString());
-
       Instant startInstant = Instant.ofEpochMilli(expectedRowData.getStartTimeStamp());
       ZonedDateTime startTime = ZonedDateTime.ofInstant(startInstant, timeZoneUsed);
-      assertThat(resultsTable.getValue(row, 4)).isEqualTo(startTime.format(FormatUtils.getDateTimeFormatter()));
-
       Instant finishInstant = Instant.ofEpochMilli(expectedRowData.getFinishTimeStamp());
       ZonedDateTime finishTime = ZonedDateTime.ofInstant(finishInstant, timeZoneUsed);
-      assertThat(resultsTable.getValue(row, 5)).isEqualTo(finishTime.format(FormatUtils.getDateTimeFormatter()));
+      TableAssert.assertThat(resultTable).row(row).isEqualTo(expectedRowData.getFileName(), expectedRowData.getProductVersion(), expectedRowData.getOperatingSystem(), statTimeZone.toString(), startTime.format(FormatUtils.getDateTimeFormatter()), finishTime.format(FormatUtils.getDateTimeFormatter()));
     }
 
-    // Error Results should come last.
-    TableModel errorsTable = resultList.get(1).getModel();
-    int errorsRowCount = errorsTable.getRowCount();
-    int errorsColumnCount = errorsTable.getColumnCount();
-    assertThat(errorsRowCount).isEqualTo(4);
-    assertThat(errorsColumnCount).isEqualTo(2);
-
-    // Assert Titles
-    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-
+    // Errors Table should come last.
+    Table errorsTable = resultList.get(1);
+    int errorsRowCount = errorsTable.getModel().getRowCount();
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(4).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
     for (int row = 1; row < errorsRowCount; row++) {
       Exception expectedException = mockedExceptions.get(row - 1);
-      assertThat(errorsTable.getValue(row, 0)).isEqualTo("/unparseableFile" + row);
-      assertThat(errorsTable.getValue(row, 1)).isEqualTo(expectedException.getMessage());
+      TableAssert.assertThat(errorsTable).row(row).isEqualTo("/unparseableFile" + row, expectedException.getMessage());
     }
   }
 }

@@ -35,6 +35,7 @@ import org.apache.geode.support.utils.FormatUtils;
 
 /**
  * Class used in integration tests to store and assert the hardcoded contents of the statistic files within the samples directory.
+ *
  * TODO: This should be removed once the tool has the ability to generate statistics files on its own, without using already created files for testing.
  */
 public final class SampleDataUtils {
@@ -121,12 +122,7 @@ public final class SampleDataUtils {
 
   }
 
-  /**
-   *
-   * @param expectedMetadata
-   * @param actualMetadata
-   */
-  private static void assertStatisticArchiveMetadata(SamplingMetadata expectedMetadata, SamplingMetadata actualMetadata) {
+  private static void assertSamplingMetadata(SamplingMetadata expectedMetadata, SamplingMetadata actualMetadata) {
     assertThat(actualMetadata.getFileName()).isEqualTo(expectedMetadata.getFileName());
     assertThat(actualMetadata.getVersion()).isEqualTo(expectedMetadata.getVersion());
     assertThat(actualMetadata.isCompressed()).isEqualTo(expectedMetadata.isCompressed());
@@ -137,7 +133,7 @@ public final class SampleDataUtils {
     assertThat(actualMetadata.getOperatingSystem()).isEqualTo(expectedMetadata.getOperatingSystem());
   }
 
-  private static void assertStatisticArchiveMetadata(SamplingMetadata metadata, Path basePath, ZoneId zoneId, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
+  private static void assertSamplingMetadata(SamplingMetadata metadata, Path basePath, ZoneId zoneId, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
     ZoneId formatZoneId = zoneId != null ? zoneId : metadata.getTimeZoneId();
     Instant startInstant = Instant.ofEpochMilli(metadata.getStartTimeStamp());
     Instant finishInstant = Instant.ofEpochMilli(metadata.getFinishTimeStamp());
@@ -155,59 +151,59 @@ public final class SampleDataUtils {
   }
 
   public static void assertClientMetadata(SamplingMetadata actualMetadata) {
-    assertStatisticArchiveMetadata(clientMetadata, actualMetadata);
+    assertSamplingMetadata(clientMetadata, actualMetadata);
   }
 
   public static void assertClusterOneLocatorMetadata(SamplingMetadata actualMetadata) {
-    assertStatisticArchiveMetadata(cluster1locatorMetadata, actualMetadata);
+    assertSamplingMetadata(cluster1locatorMetadata, actualMetadata);
   }
 
   public static void assertClusterOneServerOneMetadata(SamplingMetadata actualMetadata) {
-    assertStatisticArchiveMetadata(cluster1Server1Metadata, actualMetadata);
+    assertSamplingMetadata(cluster1Server1Metadata, actualMetadata);
   }
 
   public static void assertClusterOneServerTwoMetadata(SamplingMetadata actualMetadata) {
-    assertStatisticArchiveMetadata(cluster1Server2Metadata, actualMetadata);
+    assertSamplingMetadata(cluster1Server2Metadata, actualMetadata);
   }
 
   public static void assertClusterTwoLocatorMetadata(SamplingMetadata actualMetadata) {
-    assertStatisticArchiveMetadata(cluster2locatorMetadata, actualMetadata);
+    assertSamplingMetadata(cluster2locatorMetadata, actualMetadata);
   }
 
   public static void assertClusterTwoServerOneMetadata(SamplingMetadata actualMetadata) {
-    assertStatisticArchiveMetadata(cluster2Server1Metadata, actualMetadata);
+    assertSamplingMetadata(cluster2Server1Metadata, actualMetadata);
   }
 
   public static void assertClusterTwoServerTwoMetadata(SamplingMetadata actualMetadata) {
-    assertStatisticArchiveMetadata(cluster2Server2Metadata, actualMetadata);
+    assertSamplingMetadata(cluster2Server2Metadata, actualMetadata);
   }
 
   public static void assertClientMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
-    assertStatisticArchiveMetadata(clientMetadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    assertSamplingMetadata(clientMetadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 
   public static void assertClusterOneLocatorMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
-    assertStatisticArchiveMetadata(cluster1locatorMetadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    assertSamplingMetadata(cluster1locatorMetadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 
   public static void assertClusterOneServerOneMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
-    assertStatisticArchiveMetadata(cluster1Server1Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    assertSamplingMetadata(cluster1Server1Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 
   public static void assertClusterOneServerTwoMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
-    assertStatisticArchiveMetadata(cluster1Server2Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    assertSamplingMetadata(cluster1Server2Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 
   public static void assertClusterTwoLocatorMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
-    assertStatisticArchiveMetadata(cluster2locatorMetadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    assertSamplingMetadata(cluster2locatorMetadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 
   public static void assertClusterTwoServerOneMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
-    assertStatisticArchiveMetadata(cluster2Server1Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    assertSamplingMetadata(cluster2Server1Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 
   public static void assertClusterTwoServerTwoMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
-    assertStatisticArchiveMetadata(cluster2Server2Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    assertSamplingMetadata(cluster2Server2Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 
   private static void assertStatistic(Statistic statistic, String name, String description, boolean isCounter, String units) {
@@ -237,7 +233,7 @@ public final class SampleDataUtils {
   }
 
   public static void assertClientSampling(Sampling clientSampling) {
-    assertStatisticArchiveMetadata(clientMetadata, clientSampling.getMetadata());
+    assertSamplingMetadata(clientMetadata, clientSampling.getMetadata());
     assertThat(clientSampling.getCategories()).isNotNull();
     Map<String, Category> categoryMap = clientSampling.getCategories();
     assertCommonCategories(categoryMap);

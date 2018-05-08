@@ -12,39 +12,38 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.test;
+package org.apache.geode.support.test.assertj;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assume;
-
-import org.apache.geode.support.command.statistics.StartVisualStatisticsDisplayCommand;
+import org.assertj.core.api.AbstractAssert;
 
 /**
- * Helper class to check whether to run or ignore a test that depends on the external VSD tool.
+ * Custom assertion to verify row data.
  */
-public class VsdHome {
-  private String vsdHome;
-
-  public VsdHome() {
-    vsdHome = System.getenv().get(StartVisualStatisticsDisplayCommand.VSD_HOME_KEY);
-  }
+public class RowAssert extends AbstractAssert<RowAssert, String[]> {
 
   /**
    *
-   * @return VsdHome set.
+   * @param actual
    */
-  public String getVsdHome() {
-    return vsdHome;
+  public RowAssert(String[] actual) {
+    super(actual, RowAssert.class);
   }
 
   /**
-   *
-   * @return {@code true} if vsdHome has been set, {@code false} otherwise.
+   * Entry point for all assertions.
    */
-  public void exists() {
-    Assume.assumeTrue("VSD_HOME should be set to run this test.", StringUtils.isNoneEmpty(vsdHome) && Files.exists(Paths.get(vsdHome)));
+  public static RowAssert assertThat(String[] actual) {
+    return new RowAssert(actual);
+  }
+
+  /**
+   * Asserts that all cells within a row match the specified array.
+   */
+  public RowAssert isEqualTo(String... cells) {
+    isNotNull();
+    org.assertj.core.api.Assertions.assertThat(actual.length).isEqualTo(cells.length);
+    for (int i = 0; i < actual.length; i++) org.assertj.core.api.Assertions.assertThat(actual[i]).isEqualTo(cells[i]);
+
+    return this;
   }
 }

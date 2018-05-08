@@ -50,13 +50,12 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableModel;
 
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
-import org.apache.geode.support.test.MockUtils;
-import org.apache.geode.support.test.ResultCaptor;
-import org.apache.geode.support.utils.FormatUtils;
+import org.apache.geode.support.test.mockito.MockUtils;
+import org.apache.geode.support.test.mockito.ResultCaptor;
+import org.apache.geode.support.test.assertj.TableAssert;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(JUnitParamsRunner.class)
@@ -281,18 +280,14 @@ public class StartVisualStatisticsDisplayCommandTest {
     List resultList = (List) resultObject;
     assertThat(resultList.size()).isEqualTo(2);
 
+    // Error Table
     assertThat(resultList.get(0)).isInstanceOf(Table.class);
-    TableModel errorsTable = ((Table) resultList.get(0)).getModel();
-    int errorsRowCount = errorsTable.getRowCount();
-    int errorsColumnCount = errorsTable.getColumnCount();
-    assertThat(errorsRowCount).isEqualTo(2);
-    assertThat(errorsColumnCount).isEqualTo(2);
+    Table errorsTable = (Table) resultList.get(0);
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo("/server.gz", "Problem while decompressing file.");
 
-    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTable.getValue(1, 0)).isEqualTo(FormatUtils.relativizePath(mockedRootDirectoryPath, serverMockedCompressedPath));
-    assertThat(errorsTable.getValue(1, 1)).isEqualTo("Problem while decompressing file.");
-
+    // Result String
     assertThat(resultList.get(1)).isInstanceOf(String.class);
     String resultMessage = (String) resultList.get(1);
     assertThat(resultMessage).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");

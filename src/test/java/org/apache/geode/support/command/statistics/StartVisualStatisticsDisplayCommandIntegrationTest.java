@@ -41,14 +41,14 @@ import org.springframework.shell.Shell;
 import org.springframework.shell.jline.InteractiveShellApplicationRunner;
 import org.springframework.shell.jline.ScriptShellApplicationRunner;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableModel;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
 import org.apache.geode.support.test.SampleDataUtils;
-import org.apache.geode.support.test.VsdHome;
+import org.apache.geode.support.test.assertj.TableAssert;
+import org.apache.geode.support.test.junit.VsdHome;
 
 /**
  * Currently there's no easy way of doing proper integration tests with spring-boot + spring-shell.
@@ -287,15 +287,10 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
 
     // Errors Table Should Come First.
     assertThat(resultList.get(0)).isInstanceOf(Table.class);
-    TableModel errorsTable = ((Table) resultList.get(0)).getModel();
-    int errorsRowCount = errorsTable.getRowCount();
-    int errorsColumnCount = errorsTable.getColumnCount();
-    assertThat(errorsRowCount).isEqualTo(2);
-    assertThat(errorsColumnCount).isEqualTo(2);
-    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTable.getValue(1, 0)).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath));
-    assertThat(errorsTable.getValue(1, 1)).isEqualTo("Not in GZIP format");
+    Table errorsTable = (Table) resultList.get(0);
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
 
     // Vsd Launch Status
     assertThat(resultList.get(1)).isInstanceOf(String.class);
