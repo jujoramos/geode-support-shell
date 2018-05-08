@@ -192,10 +192,10 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
               categoryEntry.getValue().getStatistics().entrySet().stream().forEach(statisticEntry -> {
                 String statName = categoryEntry.getKey().concat(".").concat(statisticEntry.getKey());
                 Statistic statistic = statisticEntry.getValue();
+                statistic.setFilter(filter);
 
                 // Check again to avoid empty statistics if flag if set as 'false'.
                 if (!statistic.isEmpty() || includeEmptyStatistics) {
-                  statistic.setFilter(filter);
                   Map<String, Statistic> statisticMap = fileToStatisticMap.get(filePath);
                   if (statisticMap == null) statisticMap = new HashMap<>();
 
