@@ -30,6 +30,7 @@ import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ class DefaultStatisticsService implements StatisticsService {
   private static final int BUFFER_SIZE = 1024 * 1024;
   private static final Logger logger = LoggerFactory.getLogger(DefaultStatisticsService.class);
   /* This Statistic must be present in all files, that's why we use it as the default */
-  protected final AbstractValueFilter defaultValueFilter = new SimpleValueFilter("VMStats", null, "cpus", null);
+  protected final AbstractValueFilter defaultValueFilter = new SimpleValueFilter("VMStats", "vmStats", "cpus", null);
 
   /**
    *
@@ -71,7 +72,10 @@ class DefaultStatisticsService implements StatisticsService {
    * @return
    */
   protected Predicate<StatArchiveReader.ResourceInst> isSearchedResourceInstance(AbstractValueFilter filterUsed) {
-    return resourceInst -> resourceInst != null && resourceInst.isLoaded() && resourceInst.getType().getName().equals(filterUsed.getTypeId());
+    return resourceInst -> resourceInst != null
+        && resourceInst.isLoaded()
+        && resourceInst.getName().equals(filterUsed.getInstanceId())
+        && resourceInst.getType().getName().equals(filterUsed.getTypeId());
   }
 
   /**
@@ -143,7 +147,8 @@ class DefaultStatisticsService implements StatisticsService {
 
           // StatArchiveFile loads metadata for all ResourceType found, use only those that were actually loaded (at least one filter returned true).
           if (resourceInst.isLoaded()) {
-            Category category = new Category(resourceType.getName(), resourceType.getDescription());
+            String instanceName = StringUtils.isBlank(resourceInst.getName()) ? "" : "[".concat(resourceInst.getName()) + "]";
+            Category category = new Category(resourceType.getName() + instanceName, resourceType.getDescription());
 
             if (ArrayUtils.isNotEmpty(statValues)) {
               Arrays.stream(statValues).filter(Objects::nonNull)
@@ -184,13 +189,14 @@ class DefaultStatisticsService implements StatisticsService {
 
       // Remove the stat added by the default filter.
       if (clonedFilters.size() != filters.size()) {
-        Category vmStatsCategory = categoriesMap.get(defaultValueFilter.getTypeId());
+        String vmStatsCategoryKey = defaultValueFilter.getTypeId() + "[" + defaultValueFilter.getInstanceId() + "]";
+        Category vmStatsCategory = categoriesMap.get(vmStatsCategoryKey);
 
         if (vmStatsCategory != null) {
           vmStatsCategory.removeStatistic(defaultValueFilter.getStatisticId());
 
           // Remove the Category entirely if it was included only for the default filter.
-          if (vmStatsCategory.getStatistics().isEmpty()) categoriesMap.remove(defaultValueFilter.getTypeId());
+          if (vmStatsCategory.getStatistics().isEmpty()) categoriesMap.remove(vmStatsCategoryKey);
         }
       }
 

@@ -232,7 +232,7 @@ public class StatisticsServiceIntegrationTest {
     assertThat(clusterOneLocatorResult.getData()).isNotNull();
     assertThat(clusterOneLocatorResult.getFile().toAbsolutePath().toString()).isEqualTo(clusterOneLocatorFilePath);
     SampleDataUtils.assertClusterOneLocatorMetadata(clusterOneLocatorResult.getData().getMetadata());
-    SampleDataUtils.assertLocatorSampling(clusterOneLocatorResult.getData());
+    SampleDataUtils.assertLocatorSampling(clusterOneLocatorResult.getData(), 1);
 
     // cluster2-locator.gz
     String clusterTwoLocatorFilePath = SampleDataUtils.SampleType.CLUSTER2_LOCATOR.getFilePath();
@@ -241,7 +241,7 @@ public class StatisticsServiceIntegrationTest {
     assertThat(clusterTwoLocatorResult.getData()).isNotNull();
     assertThat(clusterTwoLocatorResult.getFile().toAbsolutePath().toString()).isEqualTo(clusterTwoLocatorFilePath);
     SampleDataUtils.assertClusterTwoLocatorMetadata(clusterTwoLocatorResult.getData().getMetadata());
-    SampleDataUtils.assertLocatorSampling(clusterTwoLocatorResult.getData());
+    SampleDataUtils.assertLocatorSampling(clusterTwoLocatorResult.getData(), 2);
 
     // cluster1-server1.gfs
     String clusterOneServerOneFilePath = SampleDataUtils.SampleType.CLUSTER1_SERVER1.getFilePath();
@@ -250,7 +250,7 @@ public class StatisticsServiceIntegrationTest {
     assertThat(clusterOneServerOneResult.getData()).isNotNull();
     assertThat(clusterOneServerOneResult.getFile().toAbsolutePath().toString()).isEqualTo(clusterOneServerOneFilePath);
     SampleDataUtils.assertClusterOneServerOneMetadata(clusterOneServerOneResult.getData().getMetadata());
-    SampleDataUtils.assertServerSampling(clusterOneServerOneResult.getData());
+    SampleDataUtils.assertServerSampling(clusterOneServerOneResult.getData(), 1, 1);
 
     // cluster1-server2.gfs
     String clusterOneServerTwoFilePath = SampleDataUtils.SampleType.CLUSTER1_SERVER2.getFilePath();
@@ -259,7 +259,7 @@ public class StatisticsServiceIntegrationTest {
     assertThat(clusterOneServerTwoResult.getData()).isNotNull();
     assertThat(clusterOneServerTwoResult.getFile().toAbsolutePath().toString()).isEqualTo(clusterOneServerTwoFilePath);
     SampleDataUtils.assertClusterOneServerTwoMetadata(clusterOneServerTwoResult.getData().getMetadata());
-    SampleDataUtils.assertServerSampling(clusterOneServerTwoResult.getData());
+    SampleDataUtils.assertServerSampling(clusterOneServerTwoResult.getData(), 2, 1);
 
     // cluster2-server1.gfs
     String clusterTwoServerOneFilePath = SampleDataUtils.SampleType.CLUSTER2_SERVER1.getFilePath();
@@ -268,7 +268,7 @@ public class StatisticsServiceIntegrationTest {
     assertThat(clusterTwoServerOneResult.getData()).isNotNull();
     assertThat(clusterTwoServerOneResult.getFile().toAbsolutePath().toString()).isEqualTo(clusterTwoServerOneFilePath);
     SampleDataUtils.assertClusterTwoServerOneMetadata(clusterTwoServerOneResult.getData().getMetadata());
-    SampleDataUtils.assertServerSampling(clusterTwoServerOneResult.getData());
+    SampleDataUtils.assertServerSampling(clusterTwoServerOneResult.getData(), 1, 2);
 
     // cluster2-server2.gfs
     String clusterTwoServerTwoFilePath = SampleDataUtils.SampleType.CLUSTER2_SERVER2.getFilePath();
@@ -277,6 +277,6 @@ public class StatisticsServiceIntegrationTest {
     assertThat(clusterTwoServerTwoResult.getData()).isNotNull();
     assertThat(clusterTwoServerTwoResult.getFile().toAbsolutePath().toString()).isEqualTo(clusterTwoServerTwoFilePath);
     SampleDataUtils.assertClusterTwoServerTwoMetadata(clusterTwoServerTwoResult.getData().getMetadata());
-    SampleDataUtils.assertServerSampling(clusterTwoServerTwoResult.getData());
+    SampleDataUtils.assertServerSampling(clusterTwoServerTwoResult.getData(), 2, 2);
   }
 }

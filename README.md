@@ -444,11 +444,11 @@ $ tree
 
 ### show statistics summary
 
-Displays the summary statistical values for a particular Geode/GemFire statistic, or a set of statistics that matches a specified filter.
+Displays the summary statistical values for a particular Geode/GemFire statistic, or a set of statistics that matches a filter.
 
 The result includes one or two tables, depending on whether the parsing of the different statistics files fails or succeeds.
 
-The _Results_ table includes a list of statistics for which the filter matched, grouped by `Statistic` or `Sampling`, along with the _maximum_, _minimum_, _average_, _standard deviation_ and _last sample_ values for each match. The `groupCriteria` parameter specifies how the results will be shown; `Statistic` is preferred when searching and comparing a particular statistic over a set of files, and `Sampling` is better when searching and comparing several statistics per file.
+The _Results_ table includes a list of statistics for which the filter matched, grouped by `Statistic` or `Sampling`, along with the _maximum_, _minimum_, _average_, _standard deviation_ and _last sample_ values for each match. The `groupBy` parameter specifies how the results will be shown; `Statistic` is preferred when searching and comparing a particular statistic over a set of files, and `Sampling` is better when searching and comparing several statistics per file.
 
 The _Errors_ table includes a list of the statistics files for which the parsing failed, along with 
 the _File Name_ (relative to the original path) and the _Error Description_.
@@ -457,9 +457,9 @@ the _File Name_ (relative to the original path) and the _Error Description_.
 ##### Syntax:
 ```
 # Search strictly for StatSampler.jvmPauses, include those results for which all values are 0 and group results by statistic id.
-$ geode-support-shell>show statistics summary --path ./samples --statistic jvmPauses --category StatSampler --groupCriteria Statistic --showEmptyStatistics true --strictMatching true
+$ geode-support-shell>show statistics summary --path ./samples --statistic jvmPauses --category StatSampler --groupBy Statistic --showEmptyStatistics true
 ╔════════════════════════════════════╦═══════╦═══════╦═══════╦══════════╦══════════════════╗
-║StatSampler.jvmPauses               ║Minimum║Maximum║Average║Last Value║Standard Deviation║
+║StatSampler[statSampler].jvmPauses  ║Minimum║Maximum║Average║Last Value║Standard Deviation║
 ╠════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
 ║└──/uncorrupted/cluster1-locator.gz ║0.00   ║0.00   ║0.00   ║0.00      ║0.00              ║
 ╠════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
@@ -486,43 +486,61 @@ $ geode-support-shell>show statistics summary --path ./samples --statistic jvmPa
 
 # Search for all statistics with name ending in "InProgress", ignore those for which all values are zero and group results by sampling file.
 $ geode-support-shell>show statistics summary --path ./samples --statistic .*InProgress
-╔═══════════════════════════════════════════════════╦═══════╦═══════╦═══════╦══════════╦══════════════════╗
-║/uncorrupted/cluster1-server1.gfs                  ║Minimum║Maximum║Average║Last Value║Standard Deviation║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──DistributionStats.initialImageRequestsInProgress║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──DistributionStats.replyWaitsInProgress          ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║/uncorrupted/cluster1-server2.gfs                  ║Minimum║Maximum║Average║Last Value║Standard Deviation║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──DLockStats.grantWaitsInProgress                 ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──DistributionStats.replyWaitsInProgress          ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║/uncorrupted/cluster2-locator.gz                   ║Minimum║Maximum║Average║Last Value║Standard Deviation║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──LocatorStats.requestsInProgress                 ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║/uncorrupted/cluster2-server1.gfs                  ║Minimum║Maximum║Average║Last Value║Standard Deviation║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──DistributionStats.replyWaitsInProgress          ║0.00   ║2.00   ║0.00   ║0.00      ║0.08              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║/uncorrupted/cluster2-server2.gfs                  ║Minimum║Maximum║Average║Last Value║Standard Deviation║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──DistributionStats.replyWaitsInProgress          ║0.00   ║3.00   ║0.00   ║0.00      ║0.06              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──DistributionStats.syncSocketWritesInProgress    ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║/uncorrupted/sampleClient.gfs                      ║Minimum║Maximum║Average║Last Value║Standard Deviation║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──ClientSendStats.putSendsInProgress              ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──ClientStats.putsInProgress                      ║0.00   ║1.00   ║0.00   ║0.00      ║0.03              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──PoolStats.clientOpSendsInProgress               ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
-╠═══════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
-║└──PoolStats.clientOpsInProgress                   ║0.00   ║1.00   ║0.00   ║0.00      ║0.04              ║
-╚═══════════════════════════════════════════════════╩═══════╩═══════╩═══════╩══════════╩══════════════════╝
+╔═════════════════════════════════════════════════════════════════════════════════════╦═══════╦═══════╦═══════╦══════════╦══════════════════╗
+║/uncorrupted/cluster1-server1.gfs                                                    ║Minimum║Maximum║Average║Last Value║Standard Deviation║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-gatewayEventIdIndexMetaData].getInitialImagesInProgress║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──DistributionStats[distributionStats].initialImageRequestsInProgress               ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──DistributionStats[distributionStats].replyWaitsInProgress                         ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║/uncorrupted/cluster1-server2.gfs                                                    ║Minimum║Maximum║Average║Last Value║Standard Deviation║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──DLockStats[dlockStats].grantWaitsInProgress                                       ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──DistributionStats[distributionStats].replyWaitsInProgress                         ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PartitionedRegionStats[/test].putLocalInProgress                                  ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PartitionedRegionStats[/test].sendReplicationInProgress                           ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║/uncorrupted/cluster2-locator.gz                                                     ║Minimum║Maximum║Average║Last Value║Standard Deviation║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──LocatorStats[192.168.1.7-0.0.0.0/0.0.0.0:12334].requestsInProgress                ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║/uncorrupted/cluster2-server1.gfs                                                    ║Minimum║Maximum║Average║Last Value║Standard Deviation║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──DistributionStats[distributionStats].replyWaitsInProgress                         ║0.00   ║2.00   ║0.00   ║0.00      ║0.08              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PartitionedRegionStats[/test].putLocalInProgress                                  ║0.00   ║2.00   ║0.00   ║0.00      ║0.08              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PartitionedRegionStats[/test].sendReplicationInProgress                           ║0.00   ║2.00   ║0.00   ║0.00      ║0.08              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║/uncorrupted/cluster2-server2.gfs                                                    ║Minimum║Maximum║Average║Last Value║Standard Deviation║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──DistributionStats[distributionStats].replyWaitsInProgress                         ║0.00   ║3.00   ║0.00   ║0.00      ║0.06              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──DistributionStats[distributionStats].syncSocketWritesInProgress                   ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PartitionedRegionStats[/test].putLocalInProgress                                  ║0.00   ║2.00   ║0.00   ║0.00      ║0.05              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PartitionedRegionStats[/test].putRemoteInProgress                                 ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PartitionedRegionStats[/test].sendReplicationInProgress                           ║0.00   ║2.00   ║0.00   ║0.00      ║0.04              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║/uncorrupted/sampleClient.gfs                                                        ║Minimum║Maximum║Average║Last Value║Standard Deviation║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──ClientSendStats[ClientSendStats-default-192.168.1.7:10102].putSendsInProgress     ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──ClientStats[ClientStats-default-192.168.1.7:10101].putsInProgress                 ║0.00   ║1.00   ║0.00   ║0.00      ║0.03              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──ClientStats[ClientStats-default-192.168.1.7:10102].putsInProgress                 ║0.00   ║1.00   ║0.00   ║0.00      ║0.03              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PoolStats[default->[any servers]].clientOpSendsInProgress                         ║0.00   ║1.00   ║0.00   ║0.00      ║0.02              ║
+╠═════════════════════════════════════════════════════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
+║└──PoolStats[default->[any servers]].clientOpsInProgress                             ║0.00   ║1.00   ║0.00   ║0.00      ║0.04              ║
+╚═════════════════════════════════════════════════════════════════════════════════════╩═══════╩═══════╩═══════╩══════════╩══════════════════╝
 
 ╔══════════════════════════════╦═══════════════════════════════╗
 ║File Name                     ║Error Description              ║
@@ -533,36 +551,124 @@ $ geode-support-shell>show statistics summary --path ./samples --statistic .*InP
 ╚══════════════════════════════╩═══════════════════════════════╝
 
 # Search for all statistics related to "queue" and "Gateway", ignore those for which all values are zero and group results by statistic id.
-geode-support-shell>show statistics summary --path ./samples --statistic .*queue.* --category .*Gateway.* --groupCriteria Statistic 
-╔══════════════════════════════════════╦═══════╦════════════╦════════════╦════════════╦══════════════════╗
-║GatewayReceiverStatistics.loadPerQueue║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server1.gfs  ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server2.gfs  ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster2-server1.gfs  ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster2-server2.gfs  ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║GatewaySenderStatistics.eventQueueSize║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server1.gfs  ║0.00   ║3.00        ║0.01        ║0.00        ║0.12              ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server2.gfs  ║0.00   ║2.00        ║0.01        ║0.00        ║0.10              ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║GatewaySenderStatistics.eventQueueTime║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server1.gfs  ║0.00   ║351933542.00║231829429.62║351933542.00║100677918.94      ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server2.gfs  ║0.00   ║352327561.00║233665534.64║352327561.00║100317771.41      ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║GatewaySenderStatistics.eventsQueued  ║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server1.gfs  ║0.00   ║3601.00     ║2041.80     ║3600.00     ║1157.73           ║
-╠══════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
-║└──/uncorrupted/cluster1-server2.gfs  ║0.00   ║3601.00     ║2041.38     ║3600.00     ║1157.60           ║
-╚══════════════════════════════════════╩═══════╩════════════╩════════════╩════════════╩══════════════════╝
+$ geode-support-shell>show statistics summary --path ./samples --statistic .*queue.* --category .*Gateway.* --groupBy Statistic 
+╔════════════════════════════════════════════════════════════════════════╦═══════╦════════════╦════════════╦════════════╦══════════════════╗
+║GatewayReceiverStatistics[192.168.1.7-0.0.0.0/0.0.0.0:5292].loadPerQueue║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server1.gfs                                    ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║GatewayReceiverStatistics[192.168.1.7-0.0.0.0/0.0.0.0:5325].loadPerQueue║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster2-server1.gfs                                    ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║GatewayReceiverStatistics[192.168.1.7-0.0.0.0/0.0.0.0:5386].loadPerQueue║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster2-server2.gfs                                    ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║GatewayReceiverStatistics[192.168.1.7-0.0.0.0/0.0.0.0:5421].loadPerQueue║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server2.gfs                                    ║1.00   ║1.00        ║1.00        ║1.00        ║0.00              ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║GatewaySenderStatistics[gatewaySenderStats-DC1].eventQueueSize          ║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server1.gfs                                    ║0.00   ║3.00        ║0.01        ║0.00        ║0.12              ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server2.gfs                                    ║0.00   ║2.00        ║0.01        ║0.00        ║0.10              ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║GatewaySenderStatistics[gatewaySenderStats-DC1].eventQueueTime          ║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server1.gfs                                    ║0.00   ║351933542.00║231829429.62║351933542.00║100677918.94      ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server2.gfs                                    ║0.00   ║352327561.00║233665534.64║352327561.00║100317771.41      ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║GatewaySenderStatistics[gatewaySenderStats-DC1].eventsQueued            ║Minimum║Maximum     ║Average     ║Last Value  ║Standard Deviation║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server1.gfs                                    ║0.00   ║3601.00     ║2041.80     ║3600.00     ║1157.73           ║
+╠════════════════════════════════════════════════════════════════════════╬═══════╬════════════╬════════════╬════════════╬══════════════════╣
+║└──/uncorrupted/cluster1-server2.gfs                                    ║0.00   ║3601.00     ║2041.38     ║3600.00     ║1157.60           ║
+╚════════════════════════════════════════════════════════════════════════╩═══════╩════════════╩════════════╩════════════╩══════════════════╝
+
+╔══════════════════════════════╦═══════════════════════════════╗
+║File Name                     ║Error Description              ║
+╠══════════════════════════════╬═══════════════════════════════╣
+║/corrupted/unparseableFile.gfs║Unexpected token byte value: 67║
+╠══════════════════════════════╬═══════════════════════════════╣
+║/corrupted/unparseableFile.gz ║Not in GZIP format             ║
+╚══════════════════════════════╩═══════════════════════════════╝
+
+# Search for all performance statistics related to the "test" region only, ignore those for which all values are zero and group results by statistic id.
+$ geode-support-shell>show statistics summary --path ./samples --category CachePerfStats --instance .*test.* --groupBy Sampling
+╔═══════════════════════════════════════════════════════════════════════╦════════════╦═════════════╦═════════════╦═════════════╦══════════════════╗
+║/uncorrupted/cluster1-server1.gfs                                      ║Minimum     ║Maximum      ║Average      ║Last Value   ║Standard Deviation║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].clears                   ║0.00        ║11.00        ║0.00         ║11.00        ║0.17              ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].creates                  ║0.00        ║3601.00      ║2042.28      ║3600.00      ║1157.44           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].entries                  ║0.00        ║3601.00      ║2041.44      ║0.00         ║1157.62           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImageTime      ║0.00        ║11936199.00  ║11844628.65  ║11936199.00  ║1011466.20        ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImagesCompleted║0.00        ║6.00         ║5.95         ║6.00         ║0.51              ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updateTime               ║0.00        ║520300430.00 ║345902693.90 ║520300430.00 ║148080792.49      ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updates                  ║0.00        ║1963.00      ║1113.30      ║1963.00      ║631.40            ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║/uncorrupted/cluster1-server2.gfs                                      ║Minimum     ║Maximum      ║Average      ║Last Value   ║Standard Deviation║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].creates                  ║0.00        ║3601.00      ║2041.38      ║3600.00      ║1157.60           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].entries                  ║0.00        ║3601.00      ║2041.38      ║3600.00      ║1157.60           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImageTime      ║0.00        ║15237682.00  ║15125405.95  ║15237682.00  ║1266489.88        ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImagesCompleted║0.00        ║5.00         ║4.96         ║5.00         ║0.42              ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updateTime               ║0.00        ║444789899.00 ║297925067.90 ║444789899.00 ║125330375.89      ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updates                  ║0.00        ║1637.00      ║928.15       ║1637.00      ║526.22            ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║/uncorrupted/cluster2-server1.gfs                                      ║Minimum     ║Maximum      ║Average      ║Last Value   ║Standard Deviation║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].creates                  ║0.00        ║3600.00      ║2045.87      ║3600.00      ║1154.36           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].entries                  ║0.00        ║3600.00      ║2045.88      ║3600.00      ║1154.36           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImageTime      ║0.00        ║13817717.00  ║13748761.84  ║13817717.00  ║926883.83         ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImagesCompleted║0.00        ║5.00         ║4.97         ║5.00         ║0.34              ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updateTime               ║0.00        ║273142260.00 ║182043962.39 ║273142260.00 ║78846116.91       ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updates                  ║0.00        ║1637.00      ║930.90       ║1637.00      ║524.58            ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║/uncorrupted/cluster2-server2.gfs                                      ║Minimum     ║Maximum      ║Average      ║Last Value   ║Standard Deviation║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].creates                  ║0.00        ║3600.00      ║2051.18      ║3600.00      ║1151.58           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].entries                  ║0.00        ║3600.00      ║2051.18      ║3600.00      ║1151.58           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImageTime      ║0.00        ║12443364.00  ║12376580.15  ║12443364.00  ║875315.74         ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].getInitialImagesCompleted║0.00        ║6.00         ║5.97         ║6.00         ║0.42              ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updateTime               ║0.00        ║305507895.00 ║203256255.08 ║305507895.00 ║88798186.95       ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-partition-test].updates                  ║0.00        ║1963.00      ║1117.83      ║1963.00      ║628.26            ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║/uncorrupted/sampleClient.gfs                                          ║Minimum     ║Maximum      ║Average      ║Last Value   ║Standard Deviation║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-test].creates                            ║1.00        ║3600.00      ║1800.34      ║3600.00      ║1039.31           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-test].metaDataRefreshCount               ║0.00        ║1.00         ║1.00         ║1.00         ║0.06              ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-test].putTime                            ║126051209.00║7450594711.00║4429521895.50║7450594711.00║1933210695.43     ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-test].puts                               ║1.00        ║3600.00      ║1800.34      ║3600.00      ║1039.31           ║
+╠═══════════════════════════════════════════════════════════════════════╬════════════╬═════════════╬═════════════╬═════════════╬══════════════════╣
+║└──CachePerfStats[RegionStats-test].regions                            ║1.00        ║1.00         ║1.00         ║1.00         ║0.00              ║
+╚═══════════════════════════════════════════════════════════════════════╩════════════╩═════════════╩═════════════╩═════════════╩══════════════════╝
 
 ╔══════════════════════════════╦═══════════════════════════════╗
 ║File Name                     ║Error Description              ║
@@ -578,9 +684,9 @@ geode-support-shell>show statistics summary --path ./samples --statistic .*queue
 | Name | Description |
 | :--- | :--- |
 | path | *Mandatory*. Path to statistics file, or directory to scan for statistics files. |
-| groupCriteria | *Optional*. Whether to group results by `Sampling` (default) or `Statistic`. |
-| filter | *Optional*. Filter to use (`None` by default, per `Sample` or per `Second`) when showing results. |
+| groupBy | *Optional*. Whether to group results by `Sampling` (default) or `Statistic`. |
+| filter | *Optional*. Filter to use when showing results (`None` by default, per `Sample` or per `Second`). |
 | showEmptyStatistics | *Optional*. Whether to include statistics for which all sample values are 0. (`false` by default)|
-| strictMatching | *Optional*. Whether to use exact matching (`true`) or regular expressions patterns (`false`, default) when parsing the files. |
-| category | *Mandatory if `statistic` is not set*. Category of the statistic to search for (VMStats, IndexStats, etc.). Can be a regular expression (`strictMatching` should be set as `false`). |
-| statistic | *Mandatory if `category` is not set*. Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression (`strictMatching` should be set as `false`). |
+| category | *Optional*. Category of the statistic to search for (VMStats, IndexStats, etc.). Can be a regular expression. |
+| instance | *Optional*. Instance of the statistic to search for (region name, function name, etc.). Can be a regular expression. |
+| statistic | *Optional*. Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression. |

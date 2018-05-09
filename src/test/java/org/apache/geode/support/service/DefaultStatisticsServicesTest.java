@@ -101,9 +101,10 @@ public class DefaultStatisticsServicesTest {
   @Test
   public void isSearchedResourceInstanceTest() {
     SimpleValueFilter filter = mock(SimpleValueFilter.class);
-    when(filter.getTypeId()).thenReturn("matchingType");
-    StatArchiveReader.ResourceInst matchingResourceInst = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("matchingType", ""), null);
-    StatArchiveReader.ResourceInst nonMatchingResourceInst = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("mockType", ""), null);
+    when(filter.getTypeId()).thenReturn("typeName");
+    when(filter.getInstanceId()).thenReturn("instanceName");
+    StatArchiveReader.ResourceInst matchingResourceInst = MockUtils.mockResourceInstance("instanceName", true, MockUtils.mockResourceType("typeName", ""), null);
+    StatArchiveReader.ResourceInst nonMatchingResourceInst = MockUtils.mockResourceInstance("mockInstance", true, MockUtils.mockResourceType("mockType", ""), null);
 
     // Null Resource Check
     assertThat(statisticsService.isSearchedResourceInstance(filter).test(null)).isFalse();
@@ -140,7 +141,7 @@ public class DefaultStatisticsServicesTest {
   @Test
   public void parseSamplingMetadataShouldThrowExceptionWhenStatValueIsNullOrIncomplete() {
     StatArchiveFile mockedStatArchiveFile = mock(StatArchiveFile.class);
-    StatArchiveReader.ResourceInst mockedResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("VMStats", ""), null);
+    StatArchiveReader.ResourceInst mockedResourceInstance = MockUtils.mockResourceInstance("vmStats",true, MockUtils.mockResourceType("VMStats", ""), null);
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(new StatArchiveReader.ResourceInst[] { mockedResourceInstance });
 
     // Null StatValue.
@@ -170,7 +171,7 @@ public class DefaultStatisticsServicesTest {
 
     StatValue cpusStatValue = mock(StatValue.class);
     when(cpusStatValue.getRawAbsoluteTimeStamps()).thenReturn(new long[] { 10, 2, 1, 5, 11, 6, 3 });
-    StatArchiveReader.ResourceInst mockedResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("VMStats", null), new StatValue[] { cpusStatValue });
+    StatArchiveReader.ResourceInst mockedResourceInstance = MockUtils.mockResourceInstance("vmStats", true, MockUtils.mockResourceType("VMStats", null), new StatValue[] { cpusStatValue });
     when(mockedResourceInstance.getStatValue(any())).thenReturn(cpusStatValue);
 
     StatArchiveFile mockedStatArchiveFile = mock(StatArchiveFile.class);
@@ -214,18 +215,18 @@ public class DefaultStatisticsServicesTest {
     StatValue cpusValue = MockUtils.mockStatValue("cpus", "Number of CPUs available to the member on its machine.", false, "#cpus");
     StatValue fdsOpenValue = MockUtils.mockStatValue("fdsOpen", "Current number of open file descriptors.", true, "#fdsOpen");
     StatArchiveFile mockedStatArchiveFile = mock(StatArchiveFile.class);
-    StatArchiveReader.ResourceInst cachePerfStatsResourceInstance = MockUtils.mockResourceInstance(false, cachePerfStatsResourceType, null);
-    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance(true, vmStatsResourceType, new StatValue[] { cpusValue, null, fdsOpenValue });
-    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance(true, distributionStatsResourceType, new StatValue[] { null, null, null, null });
+    StatArchiveReader.ResourceInst cachePerfStatsResourceInstance = MockUtils.mockResourceInstance("cachePerfStats", false, cachePerfStatsResourceType, null);
+    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance("vmStats", true, vmStatsResourceType, new StatValue[] { cpusValue, null, fdsOpenValue });
+    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance("distributionStats",true, distributionStatsResourceType, new StatValue[] { null, null, null, null });
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(new StatArchiveReader.ResourceInst[] { vmStatsResourceInstance, null, distributionStatsResourceInstance, cachePerfStatsResourceInstance });
 
     Map<String, Category> statisticalData = statisticsService.parseSamplingStatisticalData(mockedStatArchiveFile);
     assertThat(statisticalData.size()).isEqualTo(2);
 
     // VMStats
-    assertThat(statisticalData.containsKey("VMStats")).isTrue();
-    Category vmStatsCategory = statisticalData.get("VMStats");
-    assertThat(vmStatsCategory.getName()).isEqualTo("VMStats");
+    assertThat(statisticalData.containsKey("VMStats[vmStats]")).isTrue();
+    Category vmStatsCategory = statisticalData.get("VMStats[vmStats]");
+    assertThat(vmStatsCategory.getName()).isEqualTo("VMStats[vmStats]");
     assertThat(vmStatsCategory.getDescription()).isEqualTo("Stats available on any java virtual machine.");
     assertThat(vmStatsCategory.hasStatistic("cpus")).isTrue();
     assertThat(vmStatsCategory.hasStatistic("fdsOpen")).isTrue();
@@ -243,9 +244,9 @@ public class DefaultStatisticsServicesTest {
     assertThat(fdsOpenStatistics.getUnits()).isEqualTo("#fdsOpen");
 
     // DistributionStats
-    assertThat(statisticalData.containsKey("DistributionStats")).isTrue();
-    Category distributionStatsCategory = statisticalData.get("DistributionStats");
-    assertThat(distributionStatsCategory.getName()).isEqualTo(distributionStatsResourceType.getName());
+    assertThat(statisticalData.containsKey("DistributionStats[distributionStats]")).isTrue();
+    Category distributionStatsCategory = statisticalData.get("DistributionStats[distributionStats]");
+    assertThat(distributionStatsCategory.getName()).isEqualTo("DistributionStats[distributionStats]");
     assertThat(distributionStatsCategory.getDescription()).isEqualTo(distributionStatsResourceType.getDescription());
     assertThat(distributionStatsCategory.getStatistics().isEmpty()).isTrue();
   }
@@ -259,11 +260,11 @@ public class DefaultStatisticsServicesTest {
     statisticsService.parseIndividualSampling(mockedRegularPath, Collections.emptyList());
     verify(statisticsService, times(1)).initializeStatArchiveFile(mockedRegularPath, Arrays.asList(statisticsService.defaultValueFilter));
 
-    ValueFilter simpleFilter = new SimpleValueFilter("VMStats", null, "cpus", null);
+    ValueFilter simpleFilter = new SimpleValueFilter("VMStats", "vmStats", "cpus", null);
     statisticsService.parseIndividualSampling(mockedRegularPath, Arrays.asList(simpleFilter));
     verify(statisticsService, times(2)).initializeStatArchiveFile(mockedRegularPath, Arrays.asList(simpleFilter));
 
-    ValueFilter regexFilter = new RegexValueFilter("VMStats", null, "cpus", null);
+    ValueFilter regexFilter = new RegexValueFilter("VMStats", "vmStats", "cpus", null);
     statisticsService.parseIndividualSampling(mockedRegularPath, Arrays.asList(regexFilter));
     verify(statisticsService, times(3)).initializeStatArchiveFile(mockedRegularPath, Arrays.asList(regexFilter));
   }
@@ -276,8 +277,8 @@ public class DefaultStatisticsServicesTest {
     StatValue replyWaitsInProgressValue = MockUtils.mockStatValue("replyWaitsInProgress", "Current number of threads waiting for a reply.", true, "operations");
 
     StatArchiveFile mockedStatArchiveFile = mock(StatArchiveFile.class);
-    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("VMStats", ""), new StatValue[] { cpusValue, fdsOpenValue });
-    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("DistributionStats", ""), new StatValue[] { replyWaitsInProgressValue });
+    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance("vmStats", true, MockUtils.mockResourceType("VMStats", ""), new StatValue[] { cpusValue, fdsOpenValue });
+    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance("distributionStats", true, MockUtils.mockResourceType("DistributionStats", ""), new StatValue[] { replyWaitsInProgressValue });
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(new StatArchiveReader.ResourceInst[] { vmStatsResourceInstance, distributionStatsResourceInstance });
 
     doReturn(mockedStatArchiveFile).when(statisticsService).initializeStatArchiveFile(any(), anyList());
@@ -287,11 +288,11 @@ public class DefaultStatisticsServicesTest {
     filters.add(new SimpleValueFilter("DistributionStats", null, "replyWaitsInProgress", null));
 
     Sampling sampling = statisticsService.parseIndividualSampling(mockedRegularPath, filters);
-    assertThat(sampling.hasCategory("VMStats")).isTrue();
-    assertThat(sampling.getCategory("VMStats").hasStatistic("cpus")).isFalse();
-    assertThat(sampling.getCategory("VMStats").hasStatistic("fdsOpen")).isTrue();
-    assertThat(sampling.hasCategory("DistributionStats")).isTrue();
-    assertThat(sampling.getCategory("DistributionStats").hasStatistic("replyWaitsInProgress")).isTrue();
+    assertThat(sampling.hasCategory("VMStats[vmStats]")).isTrue();
+    assertThat(sampling.getCategory("VMStats[vmStats]").hasStatistic("cpus")).isFalse();
+    assertThat(sampling.getCategory("VMStats[vmStats]").hasStatistic("fdsOpen")).isTrue();
+    assertThat(sampling.hasCategory("DistributionStats[distributionStats]")).isTrue();
+    assertThat(sampling.getCategory("DistributionStats[distributionStats]").hasStatistic("replyWaitsInProgress")).isTrue();
   }
 
   @Test
@@ -301,8 +302,8 @@ public class DefaultStatisticsServicesTest {
     StatValue replyWaitsInProgressValue = MockUtils.mockStatValue("replyWaitsInProgress", "Current number of threads waiting for a reply.", true, "operations");
 
     StatArchiveFile mockedStatArchiveFile = mock(StatArchiveFile.class);
-    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("VMStats", ""), new StatValue[] { cpusValue });
-    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("DistributionStats", ""), new StatValue[] { replyWaitsInProgressValue });
+    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance("vmStats", true, MockUtils.mockResourceType("VMStats", ""), new StatValue[] { cpusValue });
+    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance("distributionStats", true, MockUtils.mockResourceType("DistributionStats", ""), new StatValue[] { replyWaitsInProgressValue });
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(new StatArchiveReader.ResourceInst[] { vmStatsResourceInstance, distributionStatsResourceInstance });
 
     doReturn(mockedStatArchiveFile).when(statisticsService).initializeStatArchiveFile(any(), anyList());
@@ -310,9 +311,9 @@ public class DefaultStatisticsServicesTest {
 
     filters.add(new SimpleValueFilter("DistributionStats", null, "replyWaitsInProgress", null));
     Sampling sampling = statisticsService.parseIndividualSampling(mockedRegularPath, filters);
-    assertThat(sampling.hasCategory("VMStats")).isFalse();
-    assertThat(sampling.hasCategory("DistributionStats")).isTrue();
-    assertThat(sampling.getCategory("DistributionStats").hasStatistic("replyWaitsInProgress")).isTrue();
+    assertThat(sampling.hasCategory("VMStats[vmStats]")).isFalse();
+    assertThat(sampling.hasCategory("DistributionStats[distributionStats]")).isTrue();
+    assertThat(sampling.getCategory("DistributionStats[distributionStats]").hasStatistic("replyWaitsInProgress")).isTrue();
   }
 
   @Test
@@ -323,24 +324,24 @@ public class DefaultStatisticsServicesTest {
     StatValue replyWaitsInProgressValue = MockUtils.mockStatValue("replyWaitsInProgress", "Current number of threads waiting for a reply.", true, "operations");
 
     StatArchiveFile mockedStatArchiveFile = mock(StatArchiveFile.class);
-    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("VMStats", ""), new StatValue[] { cpusValue, fdsOpenValue });
-    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance(true, MockUtils.mockResourceType("DistributionStats", ""), new StatValue[] { replyWaitsInProgressValue });
+    StatArchiveReader.ResourceInst vmStatsResourceInstance = MockUtils.mockResourceInstance("vmStats", true, MockUtils.mockResourceType("VMStats", ""), new StatValue[] { cpusValue, fdsOpenValue });
+    StatArchiveReader.ResourceInst distributionStatsResourceInstance = MockUtils.mockResourceInstance("distributionStats", true, MockUtils.mockResourceType("DistributionStats", ""), new StatValue[] { replyWaitsInProgressValue });
     when(mockedStatArchiveFile.getResourceInstancesTable()).thenReturn(new StatArchiveReader.ResourceInst[] { vmStatsResourceInstance, distributionStatsResourceInstance });
 
     doReturn(mockedStatArchiveFile).when(statisticsService).initializeStatArchiveFile(any(), anyList());
     doReturn(mock(SamplingMetadata.class)).when(statisticsService).parseSamplingMetadata(any());
 
-    filters.add(new SimpleValueFilter("VMStats", null, "cpus", null));
-    filters.add(new SimpleValueFilter("VMStats", null, "fdsOpen", null));
+    filters.add(new SimpleValueFilter("VMStats", "vmStats", "cpus", null));
+    filters.add(new SimpleValueFilter("VMStats", "vmStats", "fdsOpen", null));
     filters.add(new SimpleValueFilter("DistributionStats", null, "replyWaitsInProgress", null));
     Sampling sampling = statisticsService.parseIndividualSampling(mockedRegularPath, filters);
 
     assertThat(filters.size()).isEqualTo(3);
-    assertThat(sampling.hasCategory("VMStats")).isTrue();
-    assertThat(sampling.getCategory("VMStats").hasStatistic("cpus")).isTrue();
-    assertThat(sampling.getCategory("VMStats").hasStatistic("fdsOpen")).isTrue();
-    assertThat(sampling.hasCategory("DistributionStats")).isTrue();
-    assertThat(sampling.getCategory("DistributionStats").hasStatistic("replyWaitsInProgress")).isTrue();
+    assertThat(sampling.hasCategory("VMStats[vmStats]")).isTrue();
+    assertThat(sampling.getCategory("VMStats[vmStats]").hasStatistic("cpus")).isTrue();
+    assertThat(sampling.getCategory("VMStats[vmStats]").hasStatistic("fdsOpen")).isTrue();
+    assertThat(sampling.hasCategory("DistributionStats[distributionStats]")).isTrue();
+    assertThat(sampling.getCategory("DistributionStats[distributionStats]").hasStatistic("replyWaitsInProgress")).isTrue();
   }
 
   @Test
@@ -353,11 +354,11 @@ public class DefaultStatisticsServicesTest {
     statisticsService.parseIndividualSampling(mockedRegularPath, filters);
     verify(statisticsService, times(0)).parseSamplingStatisticalData(any());
 
-    List<ValueFilter> simpleFilters = Arrays.asList(new SimpleValueFilter("VMStats", null, "cpus", null));
+    List<ValueFilter> simpleFilters = Arrays.asList(new SimpleValueFilter("VMStats", "vmStats", "cpus", null));
     statisticsService.parseIndividualSampling(mockedRegularPath, simpleFilters);
     verify(statisticsService, times(0)).parseSamplingStatisticalData(any());
 
-    List<ValueFilter> regexFilters = Arrays.asList(new RegexValueFilter("VMStats", null, "cpus", null));
+    List<ValueFilter> regexFilters = Arrays.asList(new RegexValueFilter("VMStats", "vmStats", "cpus", null));
     statisticsService.parseIndividualSampling(mockedRegularPath, regexFilters);
     verify(statisticsService, times(0)).parseSamplingStatisticalData(any());
 

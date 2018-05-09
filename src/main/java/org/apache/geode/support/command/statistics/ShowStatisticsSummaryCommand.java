@@ -37,13 +37,11 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 
-import org.apache.geode.internal.statistics.ValueFilter;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.Category;
 import org.apache.geode.support.domain.statistics.Sampling;
 import org.apache.geode.support.domain.statistics.Statistic;
 import org.apache.geode.support.domain.statistics.filters.RegexValueFilter;
-import org.apache.geode.support.domain.statistics.filters.SimpleValueFilter;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
 import org.apache.geode.support.utils.FormatUtils;
@@ -103,13 +101,13 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
    * |/path/to/fileN                                  |Minimum|Maximum|Average|Last Value|Standard Deviation|
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
-   * |└──StatisticCategoryId.statisticId              |value  |value  |value  |value     |value             |
+   * |└──CategoryId[InstanceId].statisticId           |value  |value  |value  |value     |value             |
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
-   * |└──StatisticCategoryId.statisticId              |value  |value  |value  |value     |value             |
+   * |└──CategoryId[InstanceId].statisticId           |value  |value  |value  |value     |value             |
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
-   * |└──StatisticCategoryId.statisticId              |value  |value  |value  |value     |value             |
+   * |└──CategoryId[InstanceId].statisticId           |value  |value  |value  |value     |value             |
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
-   * |└──StatisticCategoryId.statisticId              |value  |value  |value  |value     |value             |
+   * |└──CategoryId[InstanceId].statisticId           |value  |value  |value  |value     |value             |
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
    */
   protected Table buildTableGroupedBySampling(Path sourcePath, boolean includeEmptyStatistics, Statistic.Filter filter, List<ParsingResult<Sampling>> parsingResults) {
@@ -160,7 +158,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
    * @return A Table with the statistical data, grouped by statistic Id:
    *
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
-   * |StatisticCategoryId.statisticId                 |Minimum|Maximum|Average|Last Value|Standard Deviation|
+   * |CategoryId[InstanceId].statisticId              |Minimum|Maximum|Average|Last Value|Standard Deviation|
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
    * |└──/path/to/file1                               |value  |value  |value  |value     |value             |
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
@@ -232,16 +230,16 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
   @ShellMethod(key = "show statistics summary", value = "Shows Minimum, Maximum, Average, Last Value and Standard Deviation values for a (set of) defined statistics.")
   public List<?> showStatisticsSummary(
       @ShellOption(help = "Path to statistics file, or directory to scan for statistics files.", value = "--path") File source,
-      @ShellOption(help = "Whether to group results by sampling file or statistic.", value = "--groupCriteria", defaultValue = "Sampling") GroupCriteria groupCriteria,
+      @ShellOption(help = "Whether to group results by Sampling or Statistic.", value = "--groupBy", defaultValue = "Sampling") GroupCriteria groupCriteria,
       @ShellOption(help = "Filter to use (none, per second or per sample) when showing results.", value = "--filter", defaultValue = "None") Statistic.Filter statFilter,
       @ShellOption(help = "Whether to include statistics for which all sample values are 0.", value = "--showEmptyStatistics", arity = 1, defaultValue = "false") boolean showEmptyStatistics,
-      @ShellOption(help = "Whether to use exact matching or regular expressions patterns when parsing the file.", value = "--strictMatching", arity = 1, defaultValue = "false") boolean strictMatching,
-      @ShellOption(help = "Category of the statistic to search for (VMStats, IndexStats, etc.). Can be a regular expression ('strictMatching' should be set as 'false').", value = "--category", defaultValue = ShellOption.NULL) String categoryId,
-      @ShellOption(help = "Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression ('strictMatching' should be set as 'false').", value = "--statistic", defaultValue = ShellOption.NULL) String statisticId) {
+      @ShellOption(help = "Category of the statistic to search for (VMStats, IndexStats, etc.). Can be a regular expression.", value = "--category", defaultValue = ShellOption.NULL) String categoryId,
+      @ShellOption(help = "Instance of the statistic to search for (region name, function name, etc.). Can be a regular expression.", value = "--instance", defaultValue = ShellOption.NULL) String instanceId,
+      @ShellOption(help = "Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression.", value = "--statistic", defaultValue = ShellOption.NULL) String statisticId) {
 
     // Limit the output, showing everything would be overkilling.
-    if ((StringUtils.isBlank(categoryId)) && (StringUtils.isBlank(statisticId))) {
-      throw new IllegalArgumentException(String.format("Either '%s' or '%s' parameter should be specified.", "--category", "--statistic"));
+    if ((StringUtils.isBlank(categoryId)) && (StringUtils.isBlank(instanceId)) && (StringUtils.isBlank(statisticId))) {
+      throw new IllegalArgumentException(String.format("Either '%s', '%s' or '%s' parameter should be specified.", "--category", "--instance", "--statistic"));
     }
 
     // Use paths from here.
@@ -252,8 +250,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
 
     // Validations done, start with the command execution.
     List<Object> commandResult = new ArrayList<>();
-    ValueFilter filter = strictMatching ? new SimpleValueFilter(categoryId, null, statisticId, null) : new RegexValueFilter(categoryId, null, statisticId, null);
-    List<ParsingResult<Sampling>> parsingResults = statisticsService.parseSampling(sourcePath, Arrays.asList(filter));
+    List<ParsingResult<Sampling>> parsingResults = statisticsService.parseSampling(sourcePath, Arrays.asList(new RegexValueFilter(categoryId, instanceId, statisticId, null)));
 
     if (parsingResults.isEmpty()) {
       commandResult.add("No statistics files found.");

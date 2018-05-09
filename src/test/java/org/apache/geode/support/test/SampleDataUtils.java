@@ -214,20 +214,20 @@ public final class SampleDataUtils {
   }
 
   private static void assertCommonCategories(Map<String, Category> categoryMap) {
-    assertThat(categoryMap.containsKey("StatSampler")).isTrue();
-    Category statSamplerCategory = categoryMap.get("StatSampler");
+    assertThat(categoryMap.containsKey("StatSampler[statSampler]")).isTrue();
+    Category statSamplerCategory = categoryMap.get("StatSampler[statSampler]");
     assertThat(statSamplerCategory.hasStatistic("delayDuration"));
     assertStatistic(statSamplerCategory.getStatistic("delayDuration"), "delayDuration", "Actual duration of sampling delay taken before taking this sample.", false, "milliseconds");
 
-    assertThat(categoryMap.containsKey("VMStats")).isTrue();
-    Category vmStatsCategory = categoryMap.get("VMStats");
+    assertThat(categoryMap.containsKey("VMStats[vmStats]")).isTrue();
+    Category vmStatsCategory = categoryMap.get("VMStats[vmStats]");
     assertThat(vmStatsCategory.hasStatistic("threads"));
     assertStatistic(vmStatsCategory.getStatistic("threads"), "threads", "Current number of live threads (both daemon and non-daemon) in this VM.", false, "threads");
   }
 
   private static void assertDistributionStatsCategory(Map<String, Category> categoryMap) {
-    assertThat(categoryMap.containsKey("DistributionStats")).isTrue();
-    Category distributionStatsCategory = categoryMap.get("DistributionStats");
+    assertThat(categoryMap.containsKey("DistributionStats[distributionStats]")).isTrue();
+    Category distributionStatsCategory = categoryMap.get("DistributionStats[distributionStats]");
     assertThat(distributionStatsCategory.hasStatistic("replyWaitsInProgress"));
     assertStatistic(distributionStatsCategory.getStatistic("replyWaitsInProgress"), "replyWaitsInProgress", "Current number of threads waiting for a reply.", false, "operations");
   }
@@ -238,38 +238,47 @@ public final class SampleDataUtils {
     Map<String, Category> categoryMap = clientSampling.getCategories();
     assertCommonCategories(categoryMap);
 
-    assertThat(categoryMap.containsKey("PoolStats")).isTrue();
-    Category poolStatsCategory = categoryMap.get("PoolStats");
+    assertThat(categoryMap.containsKey("PoolStats[default->[any servers]]")).isTrue();
+    Category poolStatsCategory = categoryMap.get("PoolStats[default->[any servers]]");
     assertThat(poolStatsCategory.hasStatistic("clientOps"));
     assertStatistic(poolStatsCategory.getStatistic("clientOps"), "clientOps", "Total number of clientOps completed successfully", true, "clientOps");
   }
 
-  public static void assertLocatorSampling(Sampling locatorSampling) {
+  public static void assertLocatorSampling(Sampling locatorSampling, int clusterNumber) {
     assertThat(locatorSampling.getCategories()).isNotNull();
     Map<String, Category> categoryMap = locatorSampling.getCategories();
     assertCommonCategories(categoryMap);
     assertDistributionStatsCategory(categoryMap);
 
-    assertThat(categoryMap.containsKey("LocatorStats")).isTrue();
-    Category poolStatsCategory = categoryMap.get("LocatorStats");
-    assertThat(poolStatsCategory.hasStatistic("serverLoadUpdates"));
-    assertStatistic(poolStatsCategory.getStatistic("serverLoadUpdates"), "serverLoadUpdates", "Total number of times a server load update has been received.", true, "updates");
+    String locatorCategoryKey = "LocatorStats[192.168.1.7-0.0.0.0/0.0.0.0:1" + clusterNumber + "334]";
+    assertThat(categoryMap.containsKey(locatorCategoryKey)).isTrue();
+    Category locatorStatsCategory = categoryMap.get(locatorCategoryKey);
+    assertThat(locatorStatsCategory.hasStatistic("serverLoadUpdates"));
+    assertStatistic(locatorStatsCategory.getStatistic("serverLoadUpdates"), "serverLoadUpdates", "Total number of times a server load update has been received.", true, "updates");
   }
 
-  public static void assertServerSampling(Sampling serverSampling) {
+  public static void assertServerSampling(Sampling serverSampling, int serverNumber, int clusterNumber) {
     assertThat(serverSampling.getCategories()).isNotNull();
     Map<String, Category> categoryMap = serverSampling.getCategories();
     assertCommonCategories(categoryMap);
     assertDistributionStatsCategory(categoryMap);
 
-    assertThat(categoryMap.containsKey("GatewaySenderStatistics")).isTrue();
-    Category poolStatsCategory = categoryMap.get("GatewaySenderStatistics");
-    assertThat(poolStatsCategory.hasStatistic("eventsDistributed"));
-    assertStatistic(poolStatsCategory.getStatistic("eventsDistributed"), "eventsDistributed", "Number of events removed from the event queue and sent.", true, "operations");
+    int portNumber = 0;
+    String gatewaySenderKey = "GatewaySenderStatistics[gatewaySenderStats-DC" + clusterNumber + "]";
+    switch (serverNumber) {
+      case 1: portNumber = clusterNumber == 1 ? 5292 : 5325; break;
+      case 2: portNumber = clusterNumber == 1 ? 5421 : 5386; break;
+    }
+    String gatewayReceiverKey = "GatewayReceiverStatistics[192.168.1.7-0.0.0.0/0.0.0.0:" + portNumber + "]";
 
-    assertThat(categoryMap.containsKey("GatewayReceiverStatistics")).isTrue();
-    Category distributionStatsCategory = categoryMap.get("GatewayReceiverStatistics");
-    assertThat(distributionStatsCategory.hasStatistic("createRequests"));
-    assertStatistic(distributionStatsCategory.getStatistic("createRequests"), "createRequests", "total number of create operations received by this GatewayReceiver", true, "operations");
+    assertThat(categoryMap.containsKey(gatewaySenderKey)).isTrue();
+    Category gatewaySenderStatsCategory = categoryMap.get(gatewaySenderKey);
+    assertThat(gatewaySenderStatsCategory.hasStatistic("eventsDistributed"));
+    assertStatistic(gatewaySenderStatsCategory.getStatistic("eventsDistributed"), "eventsDistributed", "Number of events removed from the event queue and sent.", true, "operations");
+
+    assertThat(categoryMap.containsKey(gatewayReceiverKey)).isTrue();
+    Category gatewayReceiverStatsCategory = categoryMap.get(gatewayReceiverKey);
+    assertThat(gatewayReceiverStatsCategory.hasStatistic("createRequests"));
+    assertStatistic(gatewayReceiverStatsCategory.getStatistic("createRequests"), "createRequests", "total number of create operations received by this GatewayReceiver", true, "operations");
   }
 }

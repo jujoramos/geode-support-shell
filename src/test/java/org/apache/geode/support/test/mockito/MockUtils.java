@@ -146,8 +146,9 @@ public class MockUtils {
    * @param values
    * @return
    */
-  public static StatArchiveReader.ResourceInst mockResourceInstance(boolean isLoaded, StatArchiveReader.ResourceType resourceType, StatValue[] values) {
+  public static StatArchiveReader.ResourceInst mockResourceInstance(String name, boolean isLoaded, StatArchiveReader.ResourceType resourceType, StatValue[] values) {
     StatArchiveReader.ResourceInst resourceInstance = mock(StatArchiveReader.ResourceInst.class);
+    when(resourceInstance.getName()).thenReturn(name);
     when(resourceInstance.isLoaded()).thenReturn(isLoaded);
     when(resourceInstance.getType()).thenReturn(resourceType);
     when(resourceInstance.getStatValues()).thenReturn(values);
