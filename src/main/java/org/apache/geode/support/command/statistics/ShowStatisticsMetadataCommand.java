@@ -94,7 +94,7 @@ public class ShowStatisticsMetadataCommand extends AbstractStatisticsCommand {
 
       TableBuilder resultsTableBuilder = new TableBuilder(resultsModelBuilder.build());
       if (resultsTableBuilder.getModel().getRowCount() > 1) commandResult.add(resultsTableBuilder.addFullBorder(borderStyle).build());
-      Table errorsTable = buildErrosTable(sourcePath, parsingResults);
+      Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
       if (errorsTable != null) commandResult.add(errorsTable);
     }
 

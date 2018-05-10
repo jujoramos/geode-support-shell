@@ -257,7 +257,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
     } else {
       Table resultsTable = GroupCriteria.Sampling.equals(groupCriteria) ? buildTableGroupedBySampling(sourcePath, showEmptyStatistics, statFilter, parsingResults) : buildTableGroupedByStatistic(sourcePath, showEmptyStatistics, statFilter, parsingResults);
       if (resultsTable != null) commandResult.add(resultsTable);
-      Table errorsTable = buildErrosTable(sourcePath, parsingResults);
+      Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
       if (errorsTable != null) commandResult.add(errorsTable);
       if (commandResult.isEmpty()) commandResult.add("No matching results found.");
     }

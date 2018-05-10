@@ -47,7 +47,7 @@ public class AbstractStatisticsCommand<V>  {
    * @param parsingResults The list of parsing results returned by the service layer.
    * @return The errors Table, or null if no errors happened while parsing the files.
    */
-  protected Table buildErrosTable(Path sourcePath, List<ParsingResult<V>> parsingResults) {
+  protected Table buildErrorsTable(Path sourcePath, List<ParsingResult<V>> parsingResults) {
     Table errosTable = null;
     TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Error Description");
 
