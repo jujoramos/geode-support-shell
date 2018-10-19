@@ -24,45 +24,23 @@ public class Sampling {
   private final SamplingMetadata metadata;
   private final Map<String, Category> categories;
 
-  /**
-   *
-   * @param metadata
-   */
   public Sampling(SamplingMetadata metadata, Map<String, Category> categories) {
     this.metadata = metadata;
     this.categories = categories;
   }
 
-  /**
-   *
-   * @return
-   */
   public SamplingMetadata getMetadata() {
     return metadata;
   }
 
-  /**
-   *
-   * @return
-   */
   public Map<String, Category> getCategories() {
     return categories;
   }
 
-  /**
-   *
-   * @param name
-   * @return
-   */
   public boolean hasCategory(String name) {
     return this.categories.containsKey(name);
   }
 
-  /**
-   *
-   * @param name
-   * @return
-   */
   public Category getCategory(String name) {
     return this.categories.get(name);
   }
@@ -107,10 +85,6 @@ public class Sampling {
     return !empty;
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public String toString() {
     return "Sampling{" +

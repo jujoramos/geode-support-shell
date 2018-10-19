@@ -49,10 +49,6 @@ public class Statistic {
     }
   }
 
-  /**
-   *
-   * @param sampling
-   */
   public Statistic(StatValue sampling) {
     Objects.requireNonNull(sampling, "Backing StatValue can not be null.");
     Objects.requireNonNull(sampling.getDescriptor(), "Statistic Descriptor name can not be null.");
@@ -67,100 +63,52 @@ public class Statistic {
     this.description = sampling.getDescriptor().getDescription();
   }
 
-  /**
-   *
-   * @param filter
-   */
   public void setFilter(Filter filter) {
     this.sampling.setFilter(filter.getValue());
   }
 
-  /**
-   *
-   * @return
-   */
   public String getName() {
     return name;
   }
 
-  /**
-   *
-   * @return
-   */
   public String getUnits() {
     return units;
   }
 
-  /**
-   *
-   * @return
-   */
   public boolean isCounter() {
     return counter;
   }
 
-  /**
-   *
-   * @return
-   */
   public String getDescription() {
     return description;
   }
 
-  /**
-   *
-   * @return
-   */
   public double getMinimum() {
     return sampling.getSnapshotsMinimum();
   }
 
-  /**
-   *
-   * @return
-   */
   public double getMaximum() {
     return sampling.getSnapshotsMaximum();
   }
 
-  /**
-   *
-   * @return
-   */
   public double getAverage() {
     return sampling.getSnapshotsAverage();
   }
 
-  /**
-   *
-   * @return
-   */
   public double getStandardDeviation() {
     return sampling.getSnapshotsStandardDeviation();
   }
 
-  /**
-   *
-   * @return
-   */
   public double getLastValue() {
     return sampling.getSnapshotsMostRecent();
   }
 
-  /**
-   *
-   * @return
-   */
   public boolean isEmpty() {
     Set<Double> uniqueValues = Arrays.stream(sampling.getSnapshots()).boxed().collect(Collectors.toSet());
 
-    return ((uniqueValues.size() == 1) && uniqueValues.contains(new Double(0)));
+    return ((uniqueValues.size() == 1) && uniqueValues.contains(0.0));
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public String toString() {
     return "Statistic{" +

@@ -91,7 +91,7 @@ public class ShowStatisticsMetadataCommandTest {
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<String> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<String> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("No statistics files found.");
@@ -108,7 +108,7 @@ public class ShowStatisticsMetadataCommandTest {
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<Table> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table errorsResultTable = resultList.get(0);
     TableAssert.assertThat(errorsResultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
@@ -131,7 +131,7 @@ public class ShowStatisticsMetadataCommandTest {
     Object resultObject = statisticsCommands.showStatisticsMetadata(mockedFolderFile, zoneId);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<Table> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table resultTable = resultList.get(0);
     TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
@@ -169,7 +169,7 @@ public class ShowStatisticsMetadataCommandTest {
 
     Object resultObject = statisticsCommands.showStatisticsMetadata(mockedFolderFile, zoneId);
     assertThat(resultObject).isInstanceOf(List.class);
-    List<Table> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(2);
 
     // Results Table should come first.

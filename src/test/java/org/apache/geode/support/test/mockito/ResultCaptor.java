@@ -30,6 +30,7 @@ public class ResultCaptor<T> implements Answer {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public T answer(InvocationOnMock invocationOnMock) throws Throwable {
     result = (T) invocationOnMock.callRealMethod();
 

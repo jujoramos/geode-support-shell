@@ -42,7 +42,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
 import org.apache.geode.support.domain.statistics.Statistic;
-import org.apache.geode.support.test.SampleDataUtils;
+import org.apache.geode.support.test.StatisticsSampleDataUtils;
 import org.apache.geode.support.test.assertj.TableAssert;
 
 /**
@@ -78,7 +78,7 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
         if (!invoked) {
           invoked = true;
           String command = "show statistics summary"
-              + " --path " + SampleDataUtils.rootFolder.getAbsolutePath()
+              + " --path " + StatisticsSampleDataUtils.rootFolder.getAbsolutePath()
               + " --statistic .*InProgress";
 
           return () -> command;
@@ -102,7 +102,7 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
 
   @Test
   public void showStatisticsSummaryShouldThrowExceptionWhenCategoryIdAndStatisticIdAreBothEmpty() {
-    Object commandResult = shell.evaluate(() -> "show statistics summary --path " + SampleDataUtils.rootFolder.getAbsolutePath());
+    Object commandResult = shell.evaluate(() -> "show statistics summary --path " + StatisticsSampleDataUtils.rootFolder.getAbsolutePath());
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(IllegalArgumentException.class);
     assertThat(((IllegalArgumentException) commandResult).getMessage()).isEqualTo("Either '--category', '--instance' or '--statistic' parameter should be specified.");
@@ -133,16 +133,16 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<String> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("No statistics files found.");
   }
 
   @Test
-  public void showStatisticsSummaryShouldReturnCorrectlyWhenNoMatchingStatisticsAreFound() throws IOException {
+  public void showStatisticsSummaryShouldReturnCorrectlyWhenNoMatchingStatisticsAreFound() {
     String command = "show statistics summary"
-        + " --path " + SampleDataUtils.uncorruptedFolder.toPath()
+        + " --path " + StatisticsSampleDataUtils.uncorruptedFolder.toPath()
         + " --category VMStats"
         + " --instance vmStats"
         + " --statistic nonExistingStatistic";
@@ -150,15 +150,15 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<String> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("No matching results found.");
   }
 
   @Test
-  public void showStatisticsSummaryShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() throws IOException {
-    Path basePath = SampleDataUtils.uncorruptedFolder.toPath();
+  public void showStatisticsSummaryShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() {
+    Path basePath = StatisticsSampleDataUtils.uncorruptedFolder.toPath();
     String command = "show statistics summary"
         + " --path " + basePath.toString()
         + " --category VMStats"
@@ -168,31 +168,31 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
     // Results Table.
     Table resultsTable = resultList.get(0);
     TableAssert.assertThat(resultsTable).rowCountIsEqualsTo(14).columnCountIsEqualsTo(6);
     TableAssert.assertThat(resultsTable).row(0).isEqualTo("VMStats[vmStats].fdLimit", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
-    TableAssert.assertThat(resultsTable).row(1).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
-    TableAssert.assertThat(resultsTable).row(2).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
-    TableAssert.assertThat(resultsTable).row(3).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
-    TableAssert.assertThat(resultsTable).row(4).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
-    TableAssert.assertThat(resultsTable).row(5).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
-    TableAssert.assertThat(resultsTable).row(6).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
+    TableAssert.assertThat(resultsTable).row(1).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
+    TableAssert.assertThat(resultsTable).row(2).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
+    TableAssert.assertThat(resultsTable).row(3).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
+    TableAssert.assertThat(resultsTable).row(4).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
+    TableAssert.assertThat(resultsTable).row(5).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
+    TableAssert.assertThat(resultsTable).row(6).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "10240.00", "10240.00", "10240.00", "10240.00", "0.00");
     TableAssert.assertThat(resultsTable).row(7).isEqualTo("VMStats[vmStats].fdsOpen", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
-    TableAssert.assertThat(resultsTable).row(8).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "88.00", "165.00", "161.88", "162.00", "1.97");
-    TableAssert.assertThat(resultsTable).row(9).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "91.00", "113.00", "112.76", "96.00", "1.08");
-    TableAssert.assertThat(resultsTable).row(10).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "91.00", "114.00", "113.76", "99.00", "1.13");
-    TableAssert.assertThat(resultsTable).row(11).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "61.00", "121.00", "118.13", "118.00", "1.66");
-    TableAssert.assertThat(resultsTable).row(12).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "69.00", "88.00", "85.12", "85.00", "0.77");
-    TableAssert.assertThat(resultsTable).row(13).isEqualTo("└──" + SampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "69.00", "90.00", "86.11", "86.00", "0.78");
+    TableAssert.assertThat(resultsTable).row(8).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "88.00", "165.00", "161.88", "162.00", "1.97");
+    TableAssert.assertThat(resultsTable).row(9).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "91.00", "113.00", "112.76", "96.00", "1.08");
+    TableAssert.assertThat(resultsTable).row(10).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "91.00", "114.00", "113.76", "99.00", "1.13");
+    TableAssert.assertThat(resultsTable).row(11).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "61.00", "121.00", "118.13", "118.00", "1.66");
+    TableAssert.assertThat(resultsTable).row(12).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "69.00", "88.00", "85.12", "85.00", "0.77");
+    TableAssert.assertThat(resultsTable).row(13).isEqualTo("└──" + StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "69.00", "90.00", "86.11", "86.00", "0.78");
   }
 
   @Test
-  public void showStatisticsSummaryShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles() throws IOException {
-    Path basePath = SampleDataUtils.corruptedFolder.toPath();
+  public void showStatisticsSummaryShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles() {
+    Path basePath = StatisticsSampleDataUtils.corruptedFolder.toPath();
     String command = "show statistics summary"
         + " --path " + basePath.toString()
         + " --category VMStats"
@@ -202,20 +202,20 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
     // Errors Table.
     Table errorsTable = resultList.get(0);
     TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
     TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
-    TableAssert.assertThat(errorsTable).row(1).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
-    TableAssert.assertThat(errorsTable).row(2).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
+    TableAssert.assertThat(errorsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
   }
 
   @Test
   public void showStatisticsSummaryShouldReturnErrorsAndResultsTablesInOrder() {
-    Path basePath = SampleDataUtils.rootFolder.toPath();
+    Path basePath = StatisticsSampleDataUtils.rootFolder.toPath();
     String command = "show statistics summary"
         + " --path " + basePath.toString()
         + " --groupBy Sampling"
@@ -224,32 +224,32 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(2);
 
     // Results Table.
     Table resultsTable = resultList.get(0);
     TableAssert.assertThat(resultsTable).rowCountIsEqualsTo(14).columnCountIsEqualsTo(6);
-    TableAssert.assertThat(resultsTable).row(0).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultsTable).row(0).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultsTable).row(1).isEqualTo("└──StatSampler[statSampler].delayDuration", "0.00", "1009.00", "999.91", "1003.00", "21.73");
-    TableAssert.assertThat(resultsTable).row(2).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultsTable).row(3).isEqualTo("└──StatSampler[statSampler].delayDuration", "0.00", "1009.00", "999.90", "999.00", "21.77");
-    TableAssert.assertThat(resultsTable).row(4).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultsTable).row(4).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultsTable).row(5).isEqualTo("└──StatSampler[statSampler].delayDuration","0.00", "1010.00", "999.87", "1003.00", "21.77");
-    TableAssert.assertThat(resultsTable).row(6).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultsTable).row(6).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultsTable).row(7).isEqualTo("└──StatSampler[statSampler].delayDuration", "0.00", "1009.00", "999.92", "1003.00", "21.78");
-    TableAssert.assertThat(resultsTable).row(8).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultsTable).row(8).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultsTable).row(9).isEqualTo("└──StatSampler[statSampler].delayDuration", "0.00", "1009.00", "999.81", "1000.00", "21.80");
-    TableAssert.assertThat(resultsTable).row(10).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultsTable).row(10).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultsTable).row(11).isEqualTo("└──StatSampler[statSampler].delayDuration", "0.00", "5249.00", "1002.25", "1000.00", "97.48");
-    TableAssert.assertThat(resultsTable).row(12).isEqualTo(SampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultsTable).row(12).isEqualTo(StatisticsSampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultsTable).row(13).isEqualTo("└──StatSampler[statSampler].delayDuration", "0.00", "1009.00", "999.77", "1000.00", "23.56");
 
     // Errors Table.
     Table errorsTable = resultList.get(1);
     TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
     TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
-    TableAssert.assertThat(errorsTable).row(1).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
-    TableAssert.assertThat(errorsTable).row(2).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
+    TableAssert.assertThat(errorsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
   }
 }

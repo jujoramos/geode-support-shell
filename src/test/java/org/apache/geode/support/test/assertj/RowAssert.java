@@ -21,11 +21,7 @@ import org.assertj.core.api.AbstractAssert;
  */
 public class RowAssert extends AbstractAssert<RowAssert, String[]> {
 
-  /**
-   *
-   * @param actual
-   */
-  public RowAssert(String[] actual) {
+  RowAssert(String[] actual) {
     super(actual, RowAssert.class);
   }
 

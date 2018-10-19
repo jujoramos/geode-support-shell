@@ -143,6 +143,7 @@ public class StartVisualStatisticsDisplayCommandTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void buildCommandLineShouldWorkCorrectly() {
     Object objectResult = startVisualStatisticsDisplayCommand.buildCommandLine(mockedVsdHome, Collections.emptyList(), Collections.emptyList());
     assertThat(objectResult).isNotNull().isInstanceOf(List.class);
@@ -187,12 +188,13 @@ public class StartVisualStatisticsDisplayCommandTest {
     Object resultObject = startVisualStatisticsDisplayCommand.startVisualStatisticsDisplayTool(mockedRootDirectoryPath.toFile(), mockedVsdHome.toFile(), null, null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<String> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<String> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     assertThat(resultList.get(0)).isEqualTo("There was an error while iterating through the source folder " + mockedRootDirectoryPath.toString() + ".");
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void startVisualStatisticsDisplayToolShouldIgnoreCompressedFilesWhenDecompressionFolderIsNotSet() throws Exception {
     when(Files.isRegularFile(any())).thenReturn(true);
     when(Files.walk(mockedRootDirectoryPath)).thenReturn(Stream.of(mockedRegularPath, mockedCompressedPath));
@@ -204,7 +206,7 @@ public class StartVisualStatisticsDisplayCommandTest {
     Object resultObject = startVisualStatisticsDisplayCommand.startVisualStatisticsDisplayTool(mockedRootDirectoryPath.toFile(), mockedVsdHome.toFile(), null, null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<String> resultList = (List) resultObject;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     assertThat(resultList.get(0)).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");
     verify(filesService, times(0)).createDirectories(any());
@@ -214,6 +216,7 @@ public class StartVisualStatisticsDisplayCommandTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void startVisualStatisticsDisplayToolShouldIgnoreCompressedFilesWhenDecompressionFolderIsSettButNoCompressedFilesAreFound() throws Exception {
     when(Files.isRegularFile(any())).thenReturn(true);
     when(Files.walk(mockedRootDirectoryPath)).thenReturn(Stream.of(mockedRegularPath));
@@ -225,7 +228,7 @@ public class StartVisualStatisticsDisplayCommandTest {
     Object resultObject = startVisualStatisticsDisplayCommand.startVisualStatisticsDisplayTool(mockedRootDirectoryPath.toFile(), mockedVsdHome.toFile(), mockedRootDecompressedPath.toFile(), null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<String> resultList = (List) resultObject;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     assertThat(resultList.get(0)).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");
     verify(filesService, times(0)).createDirectories(any());
@@ -235,6 +238,7 @@ public class StartVisualStatisticsDisplayCommandTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void startVisualStatisticsDisplayToolShouldIgnoreCompressedFilesWhenDecompressionFolderCanNotBeCreated() throws Exception {
     when(Files.isRegularFile(any())).thenReturn(true);
     when(Files.walk(mockedRootDirectoryPath)).thenReturn(Stream.of(mockedRegularPath, mockedCompressedPath));
@@ -247,7 +251,7 @@ public class StartVisualStatisticsDisplayCommandTest {
     Object resultObject = startVisualStatisticsDisplayCommand.startVisualStatisticsDisplayTool(mockedRootDirectoryPath.toFile(), mockedVsdHome.toFile(), mockedRootDecompressedPath.toFile(), null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<String> resultList = (List) resultObject;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) resultObject;
     assertThat(resultList.size()).isEqualTo(2);
 
     String errorMessage = resultList.get(0);
@@ -262,6 +266,7 @@ public class StartVisualStatisticsDisplayCommandTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void startVisualStatisticsDisplayToolShouldReturnErrorsTableIfDecompressionFailsForAtLeastOneFile() throws Exception {
     when(Files.isRegularFile(any())).thenReturn(true);
     Path serverMockedCompressedPath = MockUtils.mockPath("/statistics/server.gz", false);
@@ -297,6 +302,7 @@ public class StartVisualStatisticsDisplayCommandTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   @Parameters({ "", "Australia/Sydney", "Asia/Shanghai" })
   public void startVisualStatisticsDisplayToolShouldSetTimeZoneEnvironmentVariable(String timeZoneId) throws Exception {
     ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
@@ -312,7 +318,7 @@ public class StartVisualStatisticsDisplayCommandTest {
     assertThat(resultList.size()).isEqualTo(1);
     assertThat(resultList.get(0)).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");
 
-    List<String> expectedCommandLine = Arrays.asList(vsdExecutablePath.toString());
+    List<String> expectedCommandLine = Collections.singletonList(vsdExecutablePath.toString());
     Map<String, String> expectedEnvironment = new HashMap<>();
     if (zoneId != null) expectedEnvironment.put("TZ", zoneId.toString());
 
@@ -320,6 +326,8 @@ public class StartVisualStatisticsDisplayCommandTest {
     verify(startVisualStatisticsDisplayCommand, times(1)).launchProcess(expectedCommandLine, expectedEnvironment);
   }
 
+  @Test
+  @SuppressWarnings("unchecked")
   public void startVisualStatisticsDisplayToolShouldReturnWhetherVsdWasLaunchedOrNot() throws Exception {
     when(Files.walk(mockedRootDirectoryPath)).thenReturn(Stream.empty());
     ResultCaptor<List<String>> commandLinetCaptor = new ResultCaptor<>();

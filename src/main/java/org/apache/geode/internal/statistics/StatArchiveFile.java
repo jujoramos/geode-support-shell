@@ -38,10 +38,7 @@ import org.apache.geode.support.domain.marker.GeodeExtension;
 import org.apache.geode.support.domain.marker.GeodeImprovement;
 import org.apache.geode.support.domain.marker.GeodeReplacement;
 
-@GeodeReplacement(
-    methods = { "readCompactValue", "readHeaderToken", "readResourceInstanceCreateToken", "readResourceInstanceDeleteToken", "readResourceTypeToken", "readSampleToken", "readToken", "update" },
-    changes = "Made public."
-)
+@GeodeReplacement(changes = "Made public.")
 public class StatArchiveFile {
   private final StatArchiveReader reader;
   private InputStream is;

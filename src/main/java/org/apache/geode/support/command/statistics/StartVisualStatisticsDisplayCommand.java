@@ -54,8 +54,8 @@ import org.apache.geode.support.utils.FormatUtils;
 public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsCommand {
   public static final String VSD_HOME_KEY = "VSD_HOME";
   private static final Logger logger = LoggerFactory.getLogger(StartVisualStatisticsDisplayCommand.class);
-  protected String defaultVsdHome;
-  protected List<ProcessWrapper> launchedProcesses;
+  String defaultVsdHome;
+  List<ProcessWrapper> launchedProcesses;
 
   /**
    *
@@ -64,7 +64,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
     final InputStream inputStream;
     final Consumer<String> consumer;
 
-    public DaemonStreamGobbler(String threadName, InputStream inputStream, Consumer<String> consumer) {
+    DaemonStreamGobbler(String threadName, InputStream inputStream, Consumer<String> consumer) {
       super(threadName);
       this.setDaemon(true);
       this.consumer = consumer;
@@ -86,7 +86,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
     final List<String> commandLine;
     final Map<String, String> environment;
 
-    public ProcessWrapper(boolean started, Process process, Map<String, String> environment, List<String> commandLine) {
+    ProcessWrapper(boolean started, Process process, Map<String, String> environment, List<String> commandLine) {
       this.success = started;
       this.process = process;
       this.environment = environment;
@@ -110,7 +110,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
    *
    * @return true if the operating system on which the application is running is Windows, false otherwise.
    */
-  protected boolean isWindows() {
+  boolean isWindows() {
     return SystemUtils.IS_OS_WINDOWS;
   }
 
@@ -120,7 +120,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
    * @param vsdHome Vsd Home Path specified as the command argument.
    * @return The VSD executable path.
    */
-  protected Path resolveVsdExecutablePath(String vsdHome) {
+  Path resolveVsdExecutablePath(String vsdHome) {
     Path vsdRootPath;
 
     if (vsdHome != null) {
@@ -146,7 +146,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
    *
    * @return Predicate to evaluate whether a given path is a regular statistics file.
    */
-  static Predicate<Path> isRegularStatisticsFile() {
+  private static Predicate<Path> isRegularStatisticsFile() {
     return compressedPath -> Files.isRegularFile(compressedPath) && compressedPath.toString().endsWith(".gfs");
   }
 
@@ -154,7 +154,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
    *
    * @return Predicate to evaluate whether a given path is a compressed statistics file.
    */
-  static Predicate<Path> isCompressedStatisticsFile() {
+  private static Predicate<Path> isCompressedStatisticsFile() {
     return compressedPath -> Files.isRegularFile(compressedPath) && compressedPath.toString().endsWith(".gz");
   }
 
@@ -167,7 +167,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
    * @return The path for the decompressed file, which is the same as the original one but with ".gfs" extension.
    * @throws IOException Whenever a problem occurs while decompressing or storing the decompressed bytes into the new file.
    */
-  protected Path decompress(Path compressedPath, Path targetFolder) throws IOException {
+  Path decompress(Path compressedPath, Path targetFolder) throws IOException {
     String decompressedName = compressedPath.getFileName().toString().replace(".gz", ".gfs");
     Path decompressedPath = targetFolder.resolve(decompressedName);
     statisticsService.decompress(compressedPath, decompressedPath);
@@ -183,11 +183,11 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
    * @param decompressedStatisticsFiles List of decompressed statistics files that should be loaded by VSD.
    * @return Command line to be executed.
    */
-  protected List<String> buildCommandLine(Path vsdExecutablePath, List<Path> regularStatisticsFiles, List<Path> decompressedStatisticsFiles) {
+  List<String> buildCommandLine(Path vsdExecutablePath, List<Path> regularStatisticsFiles, List<Path> decompressedStatisticsFiles) {
     List<String> commandLine = new ArrayList<>();
     commandLine.add(vsdExecutablePath.toString());
-    commandLine.addAll(regularStatisticsFiles.stream().map(path -> path.toString()).collect(Collectors.toList()));
-    commandLine.addAll(decompressedStatisticsFiles.stream().map(path -> path.toString()).collect(Collectors.toList()));
+    commandLine.addAll(regularStatisticsFiles.stream().map(Path::toString).collect(Collectors.toList()));
+    commandLine.addAll(decompressedStatisticsFiles.stream().map(Path::toString).collect(Collectors.toList()));
 
     if (logger.isDebugEnabled()) {
       logger.debug(String.format("Command Line to Execute: %s", commandLine));
@@ -205,7 +205,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
    *
    * TODO: spring-shell doesn't support Java 9, which has a much better API to deal with processes. See https://github.com/spring-projects/spring-shell/issues/214.
    */
-  protected ProcessWrapper launchProcess(List<String> commandLine, Map<String, String> environment) {
+  ProcessWrapper launchProcess(List<String> commandLine, Map<String, String> environment) {
     // Build VSD Process.
     ProcessBuilder processBuilder = new ProcessBuilder(commandLine).redirectErrorStream(false);
     environment.forEach((key, value) -> processBuilder.environment().put(key, value));
@@ -249,7 +249,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
   }
 
   @ShellMethod(key = "start vsd", value = "Start Visual Statistics Display Tool (VSD).")
-  public List<?> startVisualStatisticsDisplayTool(
+  List<?> startVisualStatisticsDisplayTool(
       @ShellOption(help = "Path to directory to scan for statistics files.", value = "--path", defaultValue = ShellOption.NULL) File source,
       @ShellOption(help = "Path to the Visual Statistics Display Tool Installation Directory.", value = "--vsdHome", defaultValue = ShellOption.NULL) File vsdHome,
       @ShellOption(help = "Path to the folder where decompressed files should be located. If none is specified, compressed files are left alone and won't be loaded into VSD.", value = "--decompressionFolder", defaultValue = ShellOption.NULL) File decompressionFolder,
@@ -294,7 +294,7 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
           filesService.createDirectories(decompressedPath);
 
           // Decompress files and fill new list with the decompressed paths.
-          compressedStatisticsFiles.stream().forEach(compressedPath -> {
+          compressedStatisticsFiles.forEach(compressedPath -> {
             String filePath = FormatUtils.relativizePath(sourcePath, compressedPath);
 
             try {

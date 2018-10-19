@@ -20,10 +20,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the method from the original Geode should be improved.
+ * Indicates that the method from the original class should be improved.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target({ ElementType.METHOD})
+@Target({ ElementType.METHOD, ElementType.FIELD })
 public @interface GeodeImprovement {
 
   String reason() default  "";

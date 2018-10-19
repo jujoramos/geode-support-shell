@@ -23,20 +23,11 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableModel;
-
 import org.apache.geode.internal.statistics.StatArchiveReader;
 import org.apache.geode.internal.statistics.StatValue;
 
 public class MockUtils {
 
-  /**
-   *
-   * @param absolutePath
-   * @param directory
-   * @return
-   */
   public static Path mockPath(String absolutePath, boolean directory) {
     Path mockedPath = mock(Path.class);
     File mockedFile = mock(File.class);
@@ -63,29 +54,12 @@ public class MockUtils {
     return mockedPath;
   }
 
-  /**
-   *
-   * @param year
-   * @param month
-   * @param dayOfMonth
-   * @param hour
-   * @param minutes
-   * @param seconds
-   * @param zoneId
-   * @return
-   */
   public static long mockTimeStamp(int year, int month, int dayOfMonth, int hour, int minutes, int seconds, ZoneId zoneId) {
     ZonedDateTime zonedDateTime = ZonedDateTime.of(year, month, dayOfMonth, hour, minutes, seconds, 0, zoneId);
 
     return zonedDateTime.toInstant().toEpochMilli();
   }
 
-  /**
-   *
-   * @param name
-   * @param description
-   * @return
-   */
   public static StatArchiveReader.ResourceType mockResourceType(String name, String description) {
     StatArchiveReader.ResourceType resourceType = mock(StatArchiveReader.ResourceType.class);
     when(resourceType.getName()).thenReturn(name);
@@ -94,14 +68,6 @@ public class MockUtils {
     return resourceType;
   }
 
-  /**
-   *
-   * @param name
-   * @param description
-   * @param isCounter
-   * @param units
-   * @return
-   */
   public static StatValue mockStatValue(String name, String description, boolean isCounter, String units) {
     StatValue statValue = mock(StatValue.class);
     StatArchiveReader.StatDescriptor statDescriptor = mock(StatArchiveReader.StatDescriptor.class);
@@ -114,19 +80,6 @@ public class MockUtils {
     return statValue;
   }
 
-  /**
-   *
-   * @param name
-   * @param description
-   * @param isCounter
-   * @param units
-   * @param min
-   * @param max
-   * @param average
-   * @param lastValue
-   * @param standardDeviation
-   * @return
-   */
   public static StatValue mockStatValue(String name, String description, boolean isCounter, String units, double min, double max, double average, double lastValue, double standardDeviation) {
     StatValue statValue = mockStatValue(name, description, isCounter, units);
     when(statValue.getSnapshotsMinimum()).thenReturn(min);
@@ -139,13 +92,6 @@ public class MockUtils {
     return statValue;
   }
 
-  /**
-   *
-   * @param isLoaded
-   * @param resourceType
-   * @param values
-   * @return
-   */
   public static StatArchiveReader.ResourceInst mockResourceInstance(String name, boolean isLoaded, StatArchiveReader.ResourceType resourceType, StatValue[] values) {
     StatArchiveReader.ResourceInst resourceInstance = mock(StatArchiveReader.ResourceInst.class);
     when(resourceInstance.getName()).thenReturn(name);
@@ -156,20 +102,16 @@ public class MockUtils {
     return resourceInstance;
   }
 
-  /**
-   *
-   * @param table
-   */
-  public static void printTable(Table table) {
-    TableModel resultTableModel = table.getModel();
-    int rowCount = resultTableModel.getRowCount();
-    int columnCount = resultTableModel.getColumnCount();
-
-    for (int i = 0; i < rowCount; i++) {
-      for (int j = 0; j < columnCount; j++) System.out.print(resultTableModel.getValue(i, j) + " ");
-      System.out.println();
-    }
-
-    System.out.println();
-  }
+//  public static void printTable(Table table) {
+//    TableModel resultTableModel = table.getModel();
+//    int rowCount = resultTableModel.getRowCount();
+//    int columnCount = resultTableModel.getColumnCount();
+//
+//    for (int i = 0; i < rowCount; i++) {
+//      for (int j = 0; j < columnCount; j++) System.out.print(resultTableModel.getValue(i, j) + " ");
+//      System.out.println();
+//    }
+//
+//    System.out.println();
+//  }
 }

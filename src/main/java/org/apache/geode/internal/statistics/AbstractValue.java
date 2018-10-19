@@ -18,7 +18,7 @@ import java.util.Date;
 
 import org.apache.geode.support.domain.marker.GeodeReplacement;
 
-@GeodeReplacement(methods = "setFilter", changes = "Made public.")
+@GeodeReplacement(changes = "Made public.")
 abstract class AbstractValue implements StatValue {
   protected StatArchiveReader.StatDescriptor descriptor;
   protected int filter;

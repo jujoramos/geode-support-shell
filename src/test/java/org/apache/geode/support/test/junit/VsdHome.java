@@ -32,18 +32,10 @@ public class VsdHome {
     vsdHome = System.getenv().get(StartVisualStatisticsDisplayCommand.VSD_HOME_KEY);
   }
 
-  /**
-   *
-   * @return VsdHome set.
-   */
   public String getVsdHome() {
     return vsdHome;
   }
 
-  /**
-   *
-   * @return {@code true} if vsdHome has been set, {@code false} otherwise.
-   */
   public void exists() {
     Assume.assumeTrue("VSD_HOME should be set to run this test.", StringUtils.isNoneEmpty(vsdHome) && Files.exists(Paths.get(vsdHome)));
   }

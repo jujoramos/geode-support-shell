@@ -44,7 +44,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
-import org.apache.geode.support.test.SampleDataUtils;
+import org.apache.geode.support.test.StatisticsSampleDataUtils;
 import org.apache.geode.support.test.assertj.TableAssert;
 
 /**
@@ -63,8 +63,8 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
-  public File matchingFolder;
-  public File nonMatchingFolder;
+  private File matchingFolder;
+  private File nonMatchingFolder;
 
   @Rule
   public final SpringMethodRule springMethodRule = new SpringMethodRule();
@@ -88,7 +88,7 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
         if (!invoked) {
           invoked = true;
           String command = "filter statistics by date-time"
-              + " --sourceFolder " + SampleDataUtils.rootFolder.getAbsolutePath()
+              + " --sourceFolder " + StatisticsSampleDataUtils.rootFolder.getAbsolutePath()
               + " --matchingFolder " + matchingFolder.getAbsolutePath()
               + " --nonMatchingFolder " + nonMatchingFolder.getAbsolutePath()
               + " --year 2018 --month 3 --day 22";
@@ -99,8 +99,8 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
       }
     });
 
-    assertThat(Files.list(SampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
+    assertThat(Files.list(StatisticsSampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
+    assertThat(Files.list(StatisticsSampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
     assertThat(Files.list(matchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
     assertThat(Files.list(nonMatchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(0);
   }
@@ -142,7 +142,7 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<String> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("No statistics files found.");
@@ -150,7 +150,7 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
   @Test
   public void filterStatisticsByDateTimeShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() throws IOException {
-    Path basePath = SampleDataUtils.uncorruptedFolder.toPath();
+    Path basePath = StatisticsSampleDataUtils.uncorruptedFolder.toPath();
     String command = "filter statistics by date-time"
         + " --sourceFolder " + basePath.toString()
         + " --matchingFolder " + matchingFolder.getAbsolutePath()
@@ -159,20 +159,20 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
     // Results Table.
     Table resultTable = resultList.get(0);
     TableAssert.assertThat(resultTable).rowCountIsEqualsTo(8).columnCountIsEqualsTo(2);
     TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
-    TableAssert.assertThat(resultTable).row(1).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(2).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(3).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(4).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(5).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(6).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(7).isEqualTo(SampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(4).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(5).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(6).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(7).isEqualTo(StatisticsSampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "true");
 
     // Assert Copy of Files.
     assertThat(Files.list(basePath).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
@@ -182,7 +182,7 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
   @Test
   public void filterStatisticsByDateTimeShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles() throws IOException {
-    Path basePath = SampleDataUtils.corruptedFolder.toPath();
+    Path basePath = StatisticsSampleDataUtils.corruptedFolder.toPath();
     String command = "filter statistics by date-time"
         + " --sourceFolder " + basePath.toString()
         + " --matchingFolder " + matchingFolder.getAbsolutePath()
@@ -191,15 +191,15 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
     // Errors Table.
     Table resultTable = resultList.get(0);
     TableAssert.assertThat(resultTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
     TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Error Description");
-    TableAssert.assertThat(resultTable).row(1).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
-    TableAssert.assertThat(resultTable).row(2).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
 
     // Assert Copy of Files.
     assertThat(Files.list(basePath).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
@@ -209,7 +209,7 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
   @Test
   public void filterStatisticsByDateTimeShouldUseFileZoneIdForFilteringWhenNoCustomZoneIdIsSpecified() throws IOException {
-    Path basePath = SampleDataUtils.rootFolder.toPath();
+    Path basePath = StatisticsSampleDataUtils.rootFolder.toPath();
     String command = "filter statistics by date-time"
         + " --sourceFolder " + basePath.toString()
         + " --matchingFolder " + matchingFolder.getAbsolutePath()
@@ -218,38 +218,38 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(2);
 
     // Results Table should come first.
     Table resultTable = resultList.get(0);
     TableAssert.assertThat(resultTable).rowCountIsEqualsTo(8).columnCountIsEqualsTo(2);
     TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
-    TableAssert.assertThat(resultTable).row(1).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(2).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(3).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(4).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "false");
-    TableAssert.assertThat(resultTable).row(5).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "false");
-    TableAssert.assertThat(resultTable).row(6).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "false");
-    TableAssert.assertThat(resultTable).row(7).isEqualTo(SampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(4).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "false");
+    TableAssert.assertThat(resultTable).row(5).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "false");
+    TableAssert.assertThat(resultTable).row(6).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "false");
+    TableAssert.assertThat(resultTable).row(7).isEqualTo(StatisticsSampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "true");
 
     // Errors Table should come last.
     Table errorsTable = resultList.get(1);
     TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
     TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
-    TableAssert.assertThat(errorsTable).row(1).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
-    TableAssert.assertThat(errorsTable).row(2).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
+    TableAssert.assertThat(errorsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
 
     // Assert File Copy.
     assertThat(Files.list(matchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(4);
     assertThat(Files.list(nonMatchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(3);
-    assertThat(Files.list(SampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
+    assertThat(Files.list(StatisticsSampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
+    assertThat(Files.list(StatisticsSampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
   }
 
   @Test
   public void filterStatisticsByDateTimeShouldUseCustomZoneIdForFilteringWhenSpecified() throws IOException {
-    Path basePath = SampleDataUtils.rootFolder.toPath();
+    Path basePath = StatisticsSampleDataUtils.rootFolder.toPath();
     String command = "filter statistics by date-time"
         + " --sourceFolder " + basePath.toString()
         + " --matchingFolder " + matchingFolder.getAbsolutePath()
@@ -258,32 +258,32 @@ public class FilterStatisticsByDateTimeCommandIntegrationTest {
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(2);
 
     // Results Table should come first.
     Table resultTable = resultList.get(0);
     TableAssert.assertThat(resultTable).rowCountIsEqualsTo(8).columnCountIsEqualsTo(2);
     TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
-    TableAssert.assertThat(resultTable).row(1).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(2).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(3).isEqualTo(SampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(4).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(5).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(6).isEqualTo(SampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "true");
-    TableAssert.assertThat(resultTable).row(7).isEqualTo(SampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_LOCATOR.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER1.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(3).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER1_SERVER2.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(4).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_LOCATOR.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(5).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER1.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(6).isEqualTo(StatisticsSampleDataUtils.SampleType.CLUSTER2_SERVER2.getRelativeFilePath(basePath), "true");
+    TableAssert.assertThat(resultTable).row(7).isEqualTo(StatisticsSampleDataUtils.SampleType.CLIENT.getRelativeFilePath(basePath), "true");
 
     // Errors Table should come last.
     Table errorsTable = resultList.get(1);
     TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
     TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
-    TableAssert.assertThat(errorsTable).row(1).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
-    TableAssert.assertThat(errorsTable).row(2).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
+    TableAssert.assertThat(errorsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
 
     // Assert File Copy.
     assertThat(Files.list(matchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
     assertThat(Files.list(nonMatchingFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(0);
-    assertThat(Files.list(SampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
+    assertThat(Files.list(StatisticsSampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
+    assertThat(Files.list(StatisticsSampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
   }
 }

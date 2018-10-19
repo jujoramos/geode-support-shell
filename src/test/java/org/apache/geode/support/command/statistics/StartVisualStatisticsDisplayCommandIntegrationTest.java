@@ -46,7 +46,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
-import org.apache.geode.support.test.SampleDataUtils;
+import org.apache.geode.support.test.StatisticsSampleDataUtils;
 import org.apache.geode.support.test.assertj.TableAssert;
 import org.apache.geode.support.test.junit.VsdHome;
 
@@ -83,7 +83,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
    */
   @After
   public void destroyLaunchedProcesses() {
-    startVsdCommand.launchedProcesses.stream().forEach(processWrapper -> {
+    startVsdCommand.launchedProcesses.forEach(processWrapper -> {
       if (processWrapper.process.isAlive()) {
         processWrapper.process.destroyForcibly();
 
@@ -99,7 +99,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
   }
 
   @Test
-  public void shellIntegrationTest() throws IOException, InterruptedException {
+  public void shellIntegrationTest() throws IOException {
     vsdHome.exists();
 
     shell.run(new InputProvider() {
@@ -111,7 +111,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
           invoked = true;
           String command = "start vsd"
               + " --vsdHome " + vsdHome.getVsdHome()
-              + " --path " + SampleDataUtils.rootFolder.getAbsolutePath()
+              + " --path " + StatisticsSampleDataUtils.rootFolder.getAbsolutePath()
               + " --decompressionFolder " + temporaryFolder.getRoot()
               + " --timeZone America/Buenos_Aires";
 
@@ -123,16 +123,18 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
     });
 
     Optional<StartVisualStatisticsDisplayCommand.ProcessWrapper> vsdProcessWrapper = startVsdCommand.launchedProcesses.stream().findFirst();
-    assertThat(vsdProcessWrapper.isPresent());
-    assertThat(vsdProcessWrapper.get().success).isTrue();
-    assertThat(vsdProcessWrapper.get().process.isAlive());
-    assertThat(vsdProcessWrapper.get().environment).isNotNull();
-    assertThat(vsdProcessWrapper.get().commandLine.size()).isEqualTo(9);
-    assertThat(vsdProcessWrapper.get().environment.containsKey("TZ")).isTrue();
-    assertThat(vsdProcessWrapper.get().environment.get("TZ")).isEqualTo("America/Buenos_Aires");
+    assertThat(vsdProcessWrapper.isPresent()).isTrue();
+    StartVisualStatisticsDisplayCommand.ProcessWrapper processWrapper = vsdProcessWrapper.orElse(null);
+    assertThat(processWrapper).isNotNull();
+    assertThat(processWrapper.success).isTrue();
+    assertThat(processWrapper.process.isAlive()).isTrue();
+    assertThat(processWrapper.environment).isNotNull();
+    assertThat(processWrapper.commandLine.size()).isEqualTo(9);
+    assertThat(processWrapper.environment.containsKey("TZ")).isTrue();
+    assertThat(processWrapper.environment.get("TZ")).isEqualTo("America/Buenos_Aires");
     assertThat(Files.list(temporaryFolder.getRoot().toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
+    assertThat(Files.list(StatisticsSampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
+    assertThat(Files.list(StatisticsSampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
   }
 
   @Test
@@ -206,16 +208,18 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<String> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");
     Optional<StartVisualStatisticsDisplayCommand.ProcessWrapper> vsdProcessWrapper = startVsdCommand.launchedProcesses.stream().findFirst();
-    assertThat(vsdProcessWrapper.isPresent());
-    assertThat(vsdProcessWrapper.get().success).isTrue();
-    assertThat(vsdProcessWrapper.get().process.isAlive());
-    assertThat(vsdProcessWrapper.get().commandLine.size()).isEqualTo(1);
-    assertThat(vsdProcessWrapper.get().environment.containsKey("TZ")).isFalse();
+    assertThat(vsdProcessWrapper.isPresent()).isTrue();
+    StartVisualStatisticsDisplayCommand.ProcessWrapper processWrapper = vsdProcessWrapper.orElse(null);
+    assertThat(processWrapper).isNotNull();
+    assertThat(processWrapper.success).isTrue();
+    assertThat(processWrapper.process.isAlive()).isTrue();
+    assertThat(processWrapper.commandLine.size()).isEqualTo(1);
+    assertThat(processWrapper.environment.containsKey("TZ")).isFalse();
   }
 
   @Test
@@ -226,18 +230,20 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<String> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");
     Optional<StartVisualStatisticsDisplayCommand.ProcessWrapper> vsdProcessWrapper = startVsdCommand.launchedProcesses.stream().findFirst();
-    assertThat(vsdProcessWrapper.isPresent());
-    assertThat(vsdProcessWrapper.get().success).isTrue();
-    assertThat(vsdProcessWrapper.get().process.isAlive());
-    assertThat(vsdProcessWrapper.get().environment).isNotNull();
-    assertThat(vsdProcessWrapper.get().commandLine.size()).isEqualTo(1);
-    assertThat(vsdProcessWrapper.get().environment.containsKey("TZ")).isTrue();
-    assertThat(vsdProcessWrapper.get().environment.get("TZ")).isEqualTo(ZoneId.systemDefault().toString());
+    assertThat(vsdProcessWrapper.isPresent()).isTrue();
+    StartVisualStatisticsDisplayCommand.ProcessWrapper processWrapper = vsdProcessWrapper.orElse(null);
+    assertThat(processWrapper).isNotNull();
+    assertThat(processWrapper.success).isTrue();
+    assertThat(processWrapper.process.isAlive()).isTrue();
+    assertThat(processWrapper.environment).isNotNull();
+    assertThat(processWrapper.commandLine.size()).isEqualTo(1);
+    assertThat(processWrapper.environment.containsKey("TZ")).isTrue();
+    assertThat(processWrapper.environment.get("TZ")).isEqualTo(ZoneId.systemDefault().toString());
   }
 
   @Test
@@ -246,32 +252,34 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
     File decompressionFolder = temporaryFolder.newFolder("decompressed");
     String command = "start vsd"
         + " --vsdHome " + vsdHome.getVsdHome()
-        + " --path " + SampleDataUtils.uncorruptedFolder.getAbsolutePath()
+        + " --path " + StatisticsSampleDataUtils.uncorruptedFolder.getAbsolutePath()
         + " --decompressionFolder " + decompressionFolder.getAbsolutePath();
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<String> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");
     Optional<StartVisualStatisticsDisplayCommand.ProcessWrapper> vsdProcessWrapper = startVsdCommand.launchedProcesses.stream().findFirst();
-    assertThat(vsdProcessWrapper.isPresent());
-    assertThat(vsdProcessWrapper.get().success).isTrue();
-    assertThat(vsdProcessWrapper.get().process.isAlive());
-    assertThat(vsdProcessWrapper.get().environment).isNotNull();
-    assertThat(vsdProcessWrapper.get().commandLine.size()).isEqualTo(8);
-    assertThat(vsdProcessWrapper.get().environment.containsKey("TZ")).isFalse();
+    assertThat(vsdProcessWrapper.isPresent()).isTrue();
+    StartVisualStatisticsDisplayCommand.ProcessWrapper processWrapper = vsdProcessWrapper.orElse(null);
+    assertThat(processWrapper).isNotNull();
+    assertThat(processWrapper.success).isTrue();
+    assertThat(processWrapper.process.isAlive()).isTrue();
+    assertThat(processWrapper.environment).isNotNull();
+    assertThat(processWrapper.commandLine.size()).isEqualTo(8);
+    assertThat(processWrapper.environment.containsKey("TZ")).isFalse();
     assertThat(Files.list(decompressionFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
+    assertThat(Files.list(StatisticsSampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
+    assertThat(Files.list(StatisticsSampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
   }
 
   @Test
   public void startVisualStatisticsDisplayToolShouldReturnErrorsTableButLaunchVsdAnywayWhenDecompressionFailsForSomeFiles() throws IOException {
     vsdHome.exists();
-    Path basePath = SampleDataUtils.rootFolder.toPath();
+    Path basePath = StatisticsSampleDataUtils.rootFolder.toPath();
     File decompressionFolder = temporaryFolder.newFolder("decompressed");
 
     String command = "start vsd"
@@ -282,7 +290,7 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Object> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Object> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(2);
 
     // Errors Table Should Come First.
@@ -290,21 +298,23 @@ public class StartVisualStatisticsDisplayCommandIntegrationTest {
     Table errorsTable = (Table) resultList.get(0);
     TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
     TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
-    TableAssert.assertThat(errorsTable).row(1).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
 
     // Vsd Launch Status
     assertThat(resultList.get(1)).isInstanceOf(String.class);
     String resultString = (String) resultList.get(1);
     assertThat(resultString).isEqualTo("Visual Statistics Display Tool (VSD) successfully started.");
     Optional<StartVisualStatisticsDisplayCommand.ProcessWrapper> vsdProcessWrapper = startVsdCommand.launchedProcesses.stream().findFirst();
-    assertThat(vsdProcessWrapper.isPresent());
-    assertThat(vsdProcessWrapper.get().success).isTrue();
-    assertThat(vsdProcessWrapper.get().process.isAlive());
-    assertThat(vsdProcessWrapper.get().environment).isNotNull();
-    assertThat(vsdProcessWrapper.get().commandLine.size()).isEqualTo(9);
-    assertThat(vsdProcessWrapper.get().environment.containsKey("TZ")).isFalse();
+    assertThat(vsdProcessWrapper.isPresent()).isTrue();
+    StartVisualStatisticsDisplayCommand.ProcessWrapper processWrapper = vsdProcessWrapper.orElse(null);
+    assertThat(processWrapper).isNotNull();
+    assertThat(processWrapper.success).isTrue();
+    assertThat(processWrapper.process.isAlive()).isTrue();
+    assertThat(processWrapper.environment).isNotNull();
+    assertThat(processWrapper.commandLine.size()).isEqualTo(9);
+    assertThat(processWrapper.environment.containsKey("TZ")).isFalse();
     assertThat(Files.list(decompressionFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
-    assertThat(Files.list(SampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
+    assertThat(Files.list(StatisticsSampleDataUtils.corruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(2);
+    assertThat(Files.list(StatisticsSampleDataUtils.uncorruptedFolder.toPath()).filter(path -> Files.isRegularFile(path)).count()).isEqualTo(7);
   }
 }

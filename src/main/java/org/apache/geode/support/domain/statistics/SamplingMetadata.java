@@ -29,17 +29,6 @@ public class SamplingMetadata {
   private final String productVersion;
   private final String operatingSystem;
 
-  /**
-   *
-   * @param fileName
-   * @param version
-   * @param compressed
-   * @param timeZoneId
-   * @param startTimeStamp
-   * @param finishTimeStamp
-   * @param productVersion
-   * @param operatingSystem
-   */
   public SamplingMetadata(String fileName, int version, boolean compressed, ZoneId timeZoneId, long startTimeStamp, long finishTimeStamp, String productVersion, String operatingSystem) {
     this.fileName = fileName;
     this.version = version;
@@ -51,74 +40,38 @@ public class SamplingMetadata {
     this.operatingSystem = operatingSystem;
   }
 
-  /**
-   *
-   * @return
-   */
   public String getFileName() {
     return fileName;
   }
 
-  /**
-   *
-   * @return
-   */
   public int getVersion() {
     return version;
   }
 
-  /**
-   *
-   * @return
-   */
   public ZoneId getTimeZoneId() {
     return timeZoneId;
   }
 
-  /**
-   *
-   * @return
-   */
   public boolean isCompressed() {
     return compressed;
   }
 
-  /**
-   *
-   * @return
-   */
   public long getStartTimeStamp() {
     return startTimeStamp;
   }
 
-  /**
-   *
-   * @return
-   */
   public long getFinishTimeStamp() {
     return finishTimeStamp;
   }
 
-  /**
-   *
-   * @return
-   */
   public String getProductVersion() {
     return productVersion;
   }
 
-  /**
-   *
-   * @return
-   */
   public String getOperatingSystem() {
     return operatingSystem;
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public String toString() {
     return "SamplingMetadata[" +

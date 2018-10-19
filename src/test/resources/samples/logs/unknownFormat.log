@@ -1,0 +1,26 @@
+2018-06-22 11:32:15.836  INFO 39889 --- [main] org.apache.geode.support.AppLauncher     : Starting AppLauncher on bwayneMacBookPro with PID 39889 (/Users/bwayne/git/geode-support-shell/build/libs/geode-support-shell-1.0.0.jar started by bwayne in /Users/bwayne/git/geode-support-shell)
+2018-06-22 11:32:15.848 DEBUG 39889 --- [main] org.apache.geode.support.AppLauncher     : Running with Spring Boot v2.0.1.RELEASE, Spring v5.0.5.RELEASE
+2018-06-22 11:32:15.850  INFO 39889 --- [main] org.apache.geode.support.AppLauncher     : No active profile set, falling back to default profiles: default
+2018-06-22 11:32:17.057  INFO 39889 --- [main] org.apache.geode.support.AppLauncher     : Started AppLauncher in 1.758 seconds (JVM running for 2.279)
+2018-06-22 11:37:07.709 DEBUG 39889 --- [main] o.a.g.s.s.DefaultStatisticsService       : Parsing File /Users/bwayne/statistics/stats-52-01.gfs...
+2018-06-22 11:37:08.175 DEBUG 39889 --- [main] o.a.g.s.s.DefaultStatisticsService       : Parsing File  /Users/bwayne/statistics/stats-52-01.gfs... Done!.
+2018-06-22 11:37:08.175 DEBUG 39889 --- [main] o.a.g.s.s.DefaultStatisticsService       : Parsing File /Users/bwayne/statistics/stats.gfs...
+2018-06-22 11:37:08.178 DEBUG 39889 --- [main] o.a.g.s.s.DefaultStatisticsService       : Parsing File  /Users/bwayne/statistics/stats.gfs... Done!.
+2018-06-22 11:37:08.178 DEBUG 39889 --- [main] o.a.g.s.s.DefaultStatisticsService       : Parsing File /Users/bwayne/statistics/stats-53-01.gfs...
+2018-06-22 11:37:08.182 DEBUG 39889 --- [main] o.a.g.s.s.DefaultStatisticsService       : Parsing File  /Users/bwayne/statistics/stats-53-01.gfs... Done!.
+2018-06-22 11:37:31.528 DEBUG 39889 --- [main] .c.s.StartVisualStatisticsDisplayCommand : VSD Executable Path: /Users/bwayne/Applications/GemFire/vsd/bin/vsd
+2018-06-22 11:37:31.530 DEBUG 39889 --- [main] .c.s.StartVisualStatisticsDisplayCommand : Command Line to Execute: [/Users/bwayne/Applications/GemFire/vsd/bin/vsd, /Users/bwayne/statistics/stats-52-01.gfs, /Users/bwayne/statistics/stats.gfs, /Users/bwayne/statistics/stats-53-01.gfs]
+2018-06-22 11:37:31.530 DEBUG 39889 --- [main] .c.s.StartVisualStatisticsDisplayCommand : Launching process using [/Users/bwayne/Applications/GemFire/vsd/bin/vsd, /Users/bwayne/statistics/stats-52-01.gfs, /Users/bwayne/statistics/stats.gfs, /Users/bwayne/statistics/stats-53-01.gfs] with environment={}...
+2018-06-22 11:37:36.563 DEBUG 39889 --- [main] .c.s.StartVisualStatisticsDisplayCommand : Launching process using [/Users/bwayne/Applications/GemFire/vsd/bin/vsd, /Users/bwayne/statistics/stats-52-01.gfs, /Users/bwayne/statistics/stats.gfs, /Users/bwayne/statistics/stats-53-01.gfs] with environment={}... Done!.
+2018-06-22 11:39:18.987 ERROR 39889 --- [Daemon_ErrorStreamReader] .c.s.StartVisualStatisticsDisplayCommand : XIO:  fatal IO error 35 (Resource temporarily unavailable) on X server "/private/tmp/com.apple.launchd.2ibVEGmus2/org.macosforge.xquartz:0"
+2018-06-22 11:39:18.987 ERROR 39889 --- [Daemon_ErrorStreamReader] .c.s.StartVisualStatisticsDisplayCommand :       after 42216 requests (42216 known processed) with 0 events remaining.
+2018-06-22 11:46:02.913  INFO 40191 --- [main] org.apache.geode.support.AppLauncher     : Starting AppLauncher on bwayneMacBookPro with PID 40191 (/Users/bwayne/git/geode-support-shell/build/libs/geode-support-shell-1.0.0.jar started by bwayne in /Users/bwayne/git/geode-support-shell)
+2018-06-22 11:46:02.917 DEBUG 40191 --- [main] org.apache.geode.support.AppLauncher     : Running with Spring Boot v2.0.1.RELEASE, Spring v5.0.5.RELEASE
+2018-06-22 11:46:02.918  INFO 40191 --- [main] org.apache.geode.support.AppLauncher     : No active profile set, falling back to default profiles: default
+2018-06-22 11:46:04.148  INFO 40191 --- [main] org.apache.geode.support.AppLauncher     : Started AppLauncher in 1.771 seconds (JVM running for 2.283)
+2018-06-22 11:46:26.390 DEBUG 40191 --- [main] .c.s.StartVisualStatisticsDisplayCommand : VSD Executable Path: /Users/bwayne/Applications/GemFire/vsd/bin/vsd
+2018-06-22 11:46:26.392 DEBUG 40191 --- [main] .c.s.StartVisualStatisticsDisplayCommand : Command Line to Execute: [/Users/bwayne/Applications/GemFire/vsd/bin/vsd, /Users/bwayne/statistics/stats-52-01.gfs]
+2018-06-22 11:46:26.393 DEBUG 40191 --- [main] .c.s.StartVisualStatisticsDisplayCommand : Launching process using [/Users/bwayne/Applications/GemFire/vsd/bin/vsd, /Users/bwayne/statistics/stats-52-01.gfs] with environment={TZ=America/New_York}...
+2018-06-22 11:46:31.412 DEBUG 40191 --- [main] .c.s.StartVisualStatisticsDisplayCommand : Launching process using [/Users/bwayne/Applications/GemFire/vsd/bin/vsd, /Users/bwayne/statistics/stats-52-01.gfs] with environment={TZ=America/New_York}... Done!.
+2018-06-22 11:48:27.821 ERROR 40191 --- [Daemon_ErrorStreamReader] .c.s.StartVisualStatisticsDisplayCommand : XIO:  fatal IO error 0 (Undefined error: 0) on X server "/private/tmp/com.apple.launchd.2ibVEGmus2/org.macosforge.xquartz:0"
+2018-06-22 11:48:27.822 ERROR 40191 --- [Daemon_ErrorStreamReader] .c.s.StartVisualStatisticsDisplayCommand :       after 7061 requests (7061 known processed) with 0 events remaining.

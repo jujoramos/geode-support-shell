@@ -23,18 +23,12 @@ import org.apache.geode.internal.statistics.ValueFilter;
  *
  */
 public abstract class AbstractValueFilter implements ValueFilter {
-  protected final String typeId;
-  protected final String instanceId;
-  protected final String statisticId;
-  protected final String archiveName;
+  final String typeId;
+  final String instanceId;
+  final String statisticId;
+  final String archiveName;
 
-  /**
-   *
-   * @param typeId
-   * @param instanceId
-   * @param statisticId
-   */
-  public AbstractValueFilter(String typeId, String instanceId, String statisticId, String archiveName) {
+  AbstractValueFilter(String typeId, String instanceId, String statisticId, String archiveName) {
     this.typeId = typeId;
     this.instanceId = instanceId;
     this.statisticId = statisticId;
@@ -53,7 +47,7 @@ public abstract class AbstractValueFilter implements ValueFilter {
     return statisticId;
   }
 
-  public String getArchiveName() {
+  private String getArchiveName() {
     return archiveName;
   }
 

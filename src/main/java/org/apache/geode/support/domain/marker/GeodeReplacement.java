@@ -20,13 +20,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the original class or method from Geode has been changed.
+ * Indicates that the original class or method has been changed.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD })
 public @interface GeodeReplacement {
-
-  String[] methods() default "";
 
   String[] changes() default "";
 }

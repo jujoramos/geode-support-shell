@@ -23,19 +23,12 @@ import org.springframework.shell.table.TableModel;
  */
 public class TableAssert extends AbstractAssert<TableAssert, Table> {
 
-  /**
-   *
-   * @param actual
-   */
-  public TableAssert(Table actual) {
+ private TableAssert(Table actual) {
     super(actual, TableAssert.class);
   }
 
   /**
    * Entry point for all assertions.
-   *
-   * @param actual
-   * @return
    */
   public static TableAssert assertThat(Table actual) {
     return new TableAssert(actual);
@@ -43,9 +36,6 @@ public class TableAssert extends AbstractAssert<TableAssert, Table> {
 
   /**
    * Asserts that the table has the expected amount of rows.
-   *
-   * @param rowCount
-   * @return
    */
   public TableAssert rowCountIsEqualsTo(int rowCount) {
     isNotNull();
@@ -56,9 +46,6 @@ public class TableAssert extends AbstractAssert<TableAssert, Table> {
 
   /**
    * Asserts that the table has the expected amount of columns.
-   *
-   * @param columnCount
-   * @return
    */
   public TableAssert columnCountIsEqualsTo(int columnCount) {
     isNotNull();
@@ -69,9 +56,6 @@ public class TableAssert extends AbstractAssert<TableAssert, Table> {
 
   /**
    * Returns a RowAssert object for the given row.
-   *
-   * @param row
-   * @return
    */
   public RowAssert row(int row) {
     isNotNull();

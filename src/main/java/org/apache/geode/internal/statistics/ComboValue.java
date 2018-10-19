@@ -28,7 +28,6 @@ import org.apache.geode.support.domain.marker.GeodeReplacement;
  * <p>
  * For now ComboValue has a simple implementation that does not support updates.
  */
-@GeodeReplacement(methods = { "Constructor", "getRawAbsoluteTimeStamps"})
 class ComboValue extends AbstractValue {
   private final StatArchiveReader.ResourceType type;
   private final StatValue[] values;

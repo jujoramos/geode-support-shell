@@ -29,11 +29,6 @@ public class Category {
   private final String description;
   private Map<String, Statistic> statistics;
 
-  /**
-   *
-   * @param name
-   * @param description
-   */
   public Category(String name, String description) {
     Objects.requireNonNull(name, "Statistic name can not be null.");
     Objects.requireNonNull(description, "Statistic unit can not be null.");
@@ -43,76 +38,38 @@ public class Category {
     this.statistics = new HashMap<>();
   }
 
-  /**
-   *
-   * @return
-   */
   public String getName() {
     return name;
   }
 
-  /**
-   *
-   * @return
-   */
   public String getDescription() {
     return description;
   }
 
-  /**
-   *
-   * @return
-   */
   public Map<String, Statistic> getStatistics() {
     return statistics;
   }
 
-  /**
-   *
-   * @param name
-   * @return
-   */
   public boolean hasStatistic(String name) {
     return this.statistics.containsKey(name);
   }
 
-  /**
-   *
-   * @param name
-   * @return
-   */
   public Statistic getStatistic(String name) {
    return this.statistics.get(name);
   }
 
-  /**
-   *
-   * @param statisticId
-   */
   public void removeStatistic(String statisticId) {
     this.statistics.remove(statisticId);
   }
 
-  /**
-   *
-   * @param statistic
-   */
   public void addStatistic(Statistic statistic) {
     this.statistics.put(statistic.getName(), statistic);
   }
 
-  /**
-   *
-   * @return
-   */
   public boolean isEmpty() {
     return this.statistics.isEmpty();
   }
 
-  /**
-   *
-   * @return
-   */
   @Override
   public String toString() {
     return "Category{" +

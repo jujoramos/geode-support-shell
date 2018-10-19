@@ -34,6 +34,8 @@ apply plugin: 'java'
 apply plugin: 'wrapper'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 test {
     // Output files should be left on the build directory.
@@ -60,6 +62,9 @@ dependencies {
     compile ("org.apache.commons:commons-lang3:3.7")
     compile ("org.springframework.boot:spring-boot-starter")
     compile ("org.springframework.shell:spring-shell-starter:2.0.0.RELEASE")
+
+    compile ("commons-io:commons-io:2.6")
+    compile ("log4j:apache-log4j-extras:1.2.17")
 
     testCompile ("org.assertj:assertj-core:3.9.0")
     testCompile ("pl.pragmatists:JUnitParams:1.1.1")

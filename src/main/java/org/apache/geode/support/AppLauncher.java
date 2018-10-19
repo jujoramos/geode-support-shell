@@ -41,17 +41,10 @@ import org.springframework.shell.jline.PromptProvider;
 @ComponentScan(basePackages = { "org.apache.geode.support.service", "org.apache.geode.support.command.statistics" })
 public class AppLauncher {
 
-  /**
-   *
-   * @param args
-   */
   public static void main(String args[]) {
     SpringApplication.run(AppLauncher.class, args);
   }
 
-  /**
-   *
-   */
   @Bean
   public PromptProvider promptProvider() {
     return () -> new AttributedString("geode-support-shell>", AttributedStyle.DEFAULT.foreground(AttributedStyle.GREEN));

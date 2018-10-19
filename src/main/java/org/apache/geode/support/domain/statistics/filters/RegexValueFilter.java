@@ -28,12 +28,6 @@ public class RegexValueFilter extends AbstractValueFilter {
   private final Pattern statisticIdPattern;
   private final Pattern archiveNamePattern;
 
-  /**
-   *
-   * @param typeId
-   * @param instanceId
-   * @param statisticId
-   */
   public RegexValueFilter(String typeId, String instanceId, String statisticId, String archiveNamePattern) {
     super(typeId, instanceId, statisticId, archiveNamePattern);
 
@@ -62,12 +56,6 @@ public class RegexValueFilter extends AbstractValueFilter {
     }
   }
 
-  /**
-   *
-   * @param pattern
-   * @param actual
-   * @return
-   */
   private boolean matches(Pattern pattern, String actual) {
     if (pattern == null) {
       return true;

@@ -75,7 +75,7 @@ public class ShowStatisticsSummaryCommandTest {
   public void buildTableGroupedBySamplingShouldIterateOverSuccessfulParsingResultsOnly() {
     ParsingResult result = mock(ParsingResult.class);
     when(result.isSuccess()).thenReturn(false);
-    Table emptyTableResult = showStatisticsSummaryCommand.buildTableGroupedBySampling(mockedRootPath, false, null, Collections.singletonList(result));
+    @SuppressWarnings("unchecked") Table emptyTableResult = showStatisticsSummaryCommand.buildTableGroupedBySampling(mockedRootPath, false, null, Collections.singletonList(result));
     assertThat(emptyTableResult).isNull();
   }
 
@@ -83,7 +83,7 @@ public class ShowStatisticsSummaryCommandTest {
   public void buildTableGroupedByStatisticShouldIterateOverSuccessfulParsingResultsOnly() {
     ParsingResult result = mock(ParsingResult.class);
     when(result.isSuccess()).thenReturn(false);
-    Table emptyTableResult = showStatisticsSummaryCommand.buildTableGroupedByStatistic(mockedRootPath, false, null, Collections.singletonList(result));
+    @SuppressWarnings("unchecked") Table emptyTableResult = showStatisticsSummaryCommand.buildTableGroupedByStatistic(mockedRootPath, false, null, Collections.singletonList(result));
     assertThat(emptyTableResult).isNull();
   }
 
@@ -199,8 +199,8 @@ public class ShowStatisticsSummaryCommandTest {
     ParsingResult serverResult = new ParsingResult<>(mockedServerFile, serverSampling);
     ParsingResult locatorResult = new ParsingResult<>(mockedLocatorFile, locatorSampling);
 
-    List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
-    Table resultTable = null;
+    Table resultTable;
+    @SuppressWarnings("unchecked") List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
 
     // ############ includeEmptyStatistics = false
     resultTable = showStatisticsSummaryCommand.buildTableGroupedBySampling(mockedRootPath, false, Statistic.Filter.None, parsingResults);
@@ -286,8 +286,8 @@ public class ShowStatisticsSummaryCommandTest {
     ParsingResult serverResult = new ParsingResult<>(mockedServerFile, serverSampling);
     ParsingResult locatorResult = new ParsingResult<>(mockedLocatorFile, locatorSampling);
 
-    List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
-    Table resultTable = null;
+    Table resultTable;
+    @SuppressWarnings("unchecked") List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
 
     // ############ includeEmptyStatistics = false
     resultTable = showStatisticsSummaryCommand.buildTableGroupedByStatistic(mockedRootPath, false, Statistic.Filter.None, parsingResults);
@@ -329,7 +329,7 @@ public class ShowStatisticsSummaryCommandTest {
   @Test
   public void showStatisticsSummaryShouldThrowExceptionWhenCategoryIdAndStatisticIdAreBothEmpty() {
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, null, null, null))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.Sample, true, null, null, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Either '--category', '--instance' or '--statistic' parameter should be specified.");
 
@@ -362,6 +362,7 @@ public class ShowStatisticsSummaryCommandTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void showStatisticsSummaryShouldSetTheProperFilterWhenInvokingTheServiceLayer() {
     ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
     when(statisticsService.parseSampling(any(), any())).thenReturn(Collections.emptyList());
@@ -381,7 +382,7 @@ public class ShowStatisticsSummaryCommandTest {
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<String> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<String> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("No statistics files found.");
@@ -391,7 +392,7 @@ public class ShowStatisticsSummaryCommandTest {
   @Parameters({ "Statistic", "Sampling" })
   public void showStatisticsSummaryShouldReturnStringWhenNoMatchingResultsAreFound(String groupingCriteria) {
     ShowStatisticsSummaryCommand.GroupCriteria criteria = ShowStatisticsSummaryCommand.GroupCriteria.valueOf(groupingCriteria);
-    List<ParsingResult<Sampling>> mockedResults = Arrays.asList(new ParsingResult<>(MockUtils.mockPath("/samples/file.gfs", false), mock(Sampling.class)));
+    List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(new ParsingResult<>(MockUtils.mockPath("/samples/file.gfs", false), mock(Sampling.class)));
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
     doReturn(null).when(showStatisticsSummaryCommand).buildTableGroupedByStatistic(any(), anyBoolean(), any(), any());
     doReturn(null).when(showStatisticsSummaryCommand).buildTableGroupedBySampling(any(), anyBoolean(), any(), any());
@@ -399,7 +400,7 @@ public class ShowStatisticsSummaryCommandTest {
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<String> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<String> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("No matching results found.");
@@ -407,7 +408,7 @@ public class ShowStatisticsSummaryCommandTest {
 
   @Test
   public void showStatisticsSummaryShouldGroupResultsByTheConfiguredGroupingCriteria() {
-    List<ParsingResult<Sampling>> mockedResults = Arrays.asList(new ParsingResult<>(MockUtils.mockPath("/samples/file.gfs", false), mock(Sampling.class)));
+    List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(new ParsingResult<>(MockUtils.mockPath("/samples/file.gfs", false), mock(Sampling.class)));
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
 
     showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Sampling, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
@@ -429,7 +430,7 @@ public class ShowStatisticsSummaryCommandTest {
     Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<Table> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table errorsTable = resultList.get(0);
     TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
@@ -448,13 +449,13 @@ public class ShowStatisticsSummaryCommandTest {
     Path mockedPath = MockUtils.mockPath("/samples/server.gfs", false);
     Sampling sampling = new Sampling(mock(SamplingMetadata.class), categoryMap);
     ParsingResult parsingResult = new ParsingResult<>(mockedPath, sampling);
-    List<ParsingResult<Sampling>> mockedResults = Arrays.asList(parsingResult);
+    @SuppressWarnings("unchecked") List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(parsingResult);
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
     Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<Table> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(1);
     Table resultTable = resultList.get(0);
     TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
@@ -477,7 +478,7 @@ public class ShowStatisticsSummaryCommandTest {
     Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
-    List<Table> resultList = (List)resultObject;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
     assertThat(resultList.size()).isEqualTo(2);
 
     // Results Table First

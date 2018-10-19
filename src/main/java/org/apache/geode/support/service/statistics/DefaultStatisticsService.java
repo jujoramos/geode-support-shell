@@ -12,7 +12,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.service;
+package org.apache.geode.support.service.statistics;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,7 +21,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +46,7 @@ import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.domain.statistics.Statistic;
 import org.apache.geode.support.domain.statistics.filters.AbstractValueFilter;
 import org.apache.geode.support.domain.statistics.filters.SimpleValueFilter;
+import org.apache.geode.support.service.StatisticsService;
 
 /**
  *
@@ -56,22 +56,13 @@ class DefaultStatisticsService implements StatisticsService {
   private static final int BUFFER_SIZE = 1024 * 1024;
   private static final Logger logger = LoggerFactory.getLogger(DefaultStatisticsService.class);
   /* This Statistic must be present in all files, that's why we use it as the default */
-  protected final AbstractValueFilter defaultValueFilter = new SimpleValueFilter("VMStats", "vmStats", "cpus", null);
+  final AbstractValueFilter defaultValueFilter = new SimpleValueFilter("VMStats", "vmStats", "cpus", null);
 
-  /**
-   *
-   * @return
-   */
-  protected Predicate<Path> isStatisticsFile() {
+  Predicate<Path> isStatisticsFile() {
     return path -> Files.isRegularFile(path) && defaultValueFilter.archiveMatches(path.toFile());
   }
 
-  /**
-   *
-   * @param filterUsed
-   * @return
-   */
-  protected Predicate<StatArchiveReader.ResourceInst> isSearchedResourceInstance(AbstractValueFilter filterUsed) {
+  Predicate<StatArchiveReader.ResourceInst> isSearchedResourceInstance(AbstractValueFilter filterUsed) {
     return resourceInst -> resourceInst != null
         && resourceInst.isLoaded()
         && resourceInst.getName().equals(filterUsed.getInstanceId())
@@ -86,8 +77,8 @@ class DefaultStatisticsService implements StatisticsService {
    * @return The StatArchiveFile, ready for use.
    * @throws IOException If an exception occurs while trying to create the InputStream on the original file.
    */
-  protected StatArchiveFile initializeStatArchiveFile(Path path, List<ValueFilter> filters) throws IOException {
-    StatArchiveFile statArchiveFile = new StatArchiveFile(path.toFile(), filters.toArray(new ValueFilter[filters.size()]));
+  StatArchiveFile initializeStatArchiveFile(Path path, List<ValueFilter> filters) throws IOException {
+    StatArchiveFile statArchiveFile = new StatArchiveFile(path.toFile(), filters.toArray(new ValueFilter[0]));
     statArchiveFile.update(false);
 
     return statArchiveFile;
@@ -100,7 +91,7 @@ class DefaultStatisticsService implements StatisticsService {
    * @param statFile The {@link StatArchiveFile} to parse the metadata from, must be already initialized.
    * @return The SamplingMetadata parsed from the given StatArchiveFile.
    */
-  protected SamplingMetadata parseSamplingMetadata(StatArchiveFile statFile) {
+  SamplingMetadata parseSamplingMetadata(StatArchiveFile statFile) {
     Objects.requireNonNull(statFile, "StatArchiveFile can not be null.");
 
     ArchiveInfo info = statFile.getArchiveInfo();
@@ -110,7 +101,7 @@ class DefaultStatisticsService implements StatisticsService {
     // Find the ResourceInstance corresponding to the filter used when reading the file.
     StatArchiveReader.ResourceInst cpuResourceInstance = Arrays.stream(resourceInstancesTable)
         .filter(isSearchedResourceInstance(defaultValueFilter))
-        .findAny().get();
+        .findAny().orElseThrow(() -> new IllegalStateException(String.format("Invalid sampling file, StatValue for %s should not be null.", defaultValueFilter.getStatisticId())));
 
     StatValue cpuStatValues = cpuResourceInstance.getStatValue(defaultValueFilter.getStatisticId());
     if (cpuStatValues == null) throw new IllegalStateException(String.format("Invalid sampling file, StatValue for %s should not be null.", defaultValueFilter.getStatisticId()));
@@ -132,7 +123,7 @@ class DefaultStatisticsService implements StatisticsService {
    * @param statFile The {@link StatArchiveFile} to parse the statistical data from, must be already initialized.
    * @return The statistical data parsed from the StatFile, based on the filters used.
    */
-  protected Map<String, Category> parseSamplingStatisticalData(StatArchiveFile statFile) {
+  Map<String, Category> parseSamplingStatisticalData(StatArchiveFile statFile) {
     Objects.requireNonNull(statFile, "StatArchiveFile can not be null.");
 
     Map<String, Category> categoryMap = new HashMap<>();
@@ -173,7 +164,7 @@ class DefaultStatisticsService implements StatisticsService {
    * @return The Statistic Sampling containing the metadata and statistical data, if any.
    * @throws IOException When an exception occurs while parsing the file.
    */
-  protected Sampling parseIndividualSampling(Path path, final List<ValueFilter> filters) throws Exception {
+  Sampling parseIndividualSampling(Path path, final List<ValueFilter> filters) throws Exception {
     Sampling samplingResult;
     StatArchiveFile statArchiveFile = null;
     List<ValueFilter> clonedFilters = new ArrayList<>(filters);
@@ -185,7 +176,7 @@ class DefaultStatisticsService implements StatisticsService {
       if (logger.isDebugEnabled()) logger.debug(String.format("Parsing File %s...", path.toString()));
       statArchiveFile = initializeStatArchiveFile(path, clonedFilters);
       SamplingMetadata fileMetadata = parseSamplingMetadata(statArchiveFile);
-      Map<String, Category> categoriesMap = clonedFilters.size() == 1 ?  Collections.emptyMap() : parseSamplingStatisticalData(statArchiveFile);
+      Map<String, Category> categoriesMap = clonedFilters.size() == 1 ?  new HashMap<>() : parseSamplingStatisticalData(statArchiveFile);
 
       // Remove the stat added by the default filter.
       if (clonedFilters.size() != filters.size()) {

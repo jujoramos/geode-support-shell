@@ -26,12 +26,15 @@ import java.util.Locale;
 
 public class FormatUtils {
   private static final DateTimeFormatter defaultDateTimeFormatter;
-  private static final ThreadLocal<NumberFormat> defaultNumberFormatter = ThreadLocal.withInitial(() -> new DecimalFormat("#0.00"));
+  private static final ThreadLocal<NumberFormat>
+      defaultNumberFormatter =
+      ThreadLocal.withInitial(() -> new DecimalFormat("#0.00"));
 
   static {
     defaultDateTimeFormatter = DateTimeFormatter.ofPattern(DateTimeFormatterBuilder
-        .getLocalizedDateTimePattern(FormatStyle.MEDIUM, FormatStyle.MEDIUM, IsoChronology.INSTANCE, Locale
-            .getDefault()));
+        .getLocalizedDateTimePattern(FormatStyle.MEDIUM, FormatStyle.MEDIUM, IsoChronology.INSTANCE,
+            Locale
+                .getDefault()));
   }
 
   public static NumberFormat getNumberFormatter() {
@@ -46,9 +49,8 @@ public class FormatUtils {
    * Check whether file2 path is contained within file1 path, in which case
    * the repetitive part of the path is removed.
    * If the path from both files are the same, then no trim is done.
-   *
-   * @param file1
-   * @param file2
+   * @param file1 Path to file1.
+   * @param file2 Path to file2.
    * @return Trimmed path from file2, or the original file2 path if both paths are the same.
    */
   public static String relativizePath(Path file1, Path file2) {
@@ -66,13 +68,14 @@ public class FormatUtils {
   }
 
   /**
-   *
-   * @param productVersion
-   * @return
+   * Removes, from the product version parsed from the statistics files, the build information and
+   * date information.
+   * @param productVersion Original Product Version Parsed from the statistics files.
+   * @return The Product Version, without the build information.
    */
   public static String trimProductVersion(String productVersion) {
     // Ignore buildId and sourceDate. See GemFireStatSampler#getProductDescription().
-    if (productVersion.indexOf("#") != -1) {
+    if (productVersion.contains("#")) {
       return productVersion.substring(0, productVersion.indexOf("#")).trim();
     } else {
       return productVersion.trim();
@@ -80,9 +83,9 @@ public class FormatUtils {
   }
 
   /**
-   *
-   * @param zoneId
-   * @return
+   * Adds `[` and `]` to the zoneId.
+   * @param zoneId Original zoneId.
+   * @return [zoneId].
    */
   public static String formatTimeZoneId(ZoneId zoneId) {
     return zoneId != null ? "[" + zoneId.toString() + "]" : "";

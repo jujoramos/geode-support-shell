@@ -44,7 +44,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
-import org.apache.geode.support.test.SampleDataUtils;
+import org.apache.geode.support.test.StatisticsSampleDataUtils;
 import org.apache.geode.support.utils.FormatUtils;
 
 /**
@@ -79,7 +79,7 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
       public Input readInput() {
         if (!invoked) {
           invoked = true;
-          String command = "show statistics metadata --path " + SampleDataUtils.rootFolder.getAbsolutePath();
+          String command = "show statistics metadata --path " + StatisticsSampleDataUtils.rootFolder.getAbsolutePath();
           return () -> command;
         } else {
           return () -> "exit";
@@ -116,7 +116,7 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isNotNull();
     assertThat(commandResult).isInstanceOf(List.class);
-    List<String> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<String> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
     String resultString = resultList.get(0);
     assertThat(resultString).isEqualTo("No statistics files found.");
@@ -129,11 +129,11 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
 
-    File basePath = SampleDataUtils.uncorruptedFolder;
+    File basePath = StatisticsSampleDataUtils.uncorruptedFolder;
     String command = "show statistics metadata --path " + basePath.getAbsolutePath() + zoneIdCommandOption;
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
     // Correct Results.
@@ -152,13 +152,14 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     assertThat(resultsTable.getValue(0, 5)).isEqualTo("Finish Time" + zoneIdDesc);
 
     // Output should be ordered by file name.
-    SampleDataUtils.assertClusterOneLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(1, 0), (String) resultsTable.getValue(1, 1), (String) resultsTable.getValue(1, 2), (String) resultsTable.getValue(1, 3), (String) resultsTable.getValue(1, 4), (String) resultsTable.getValue(1, 5));
-    SampleDataUtils.assertClusterOneServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(2, 0), (String) resultsTable.getValue(2, 1), (String) resultsTable.getValue(2, 2), (String) resultsTable.getValue(2, 3), (String) resultsTable.getValue(2, 4), (String) resultsTable.getValue(2, 5));
-    SampleDataUtils.assertClusterOneServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(3, 0), (String) resultsTable.getValue(3, 1), (String) resultsTable.getValue(3, 2), (String) resultsTable.getValue(3, 3), (String) resultsTable.getValue(3, 4), (String) resultsTable.getValue(3, 5));
-    SampleDataUtils.assertClusterTwoLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(4, 0), (String) resultsTable.getValue(4, 1), (String) resultsTable.getValue(4, 2), (String) resultsTable.getValue(4, 3), (String) resultsTable.getValue(4, 4), (String) resultsTable.getValue(4, 5));
-    SampleDataUtils.assertClusterTwoServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(5, 0), (String) resultsTable.getValue(5, 1), (String) resultsTable.getValue(5, 2), (String) resultsTable.getValue(5, 3), (String) resultsTable.getValue(5, 4), (String) resultsTable.getValue(5, 5));
-    SampleDataUtils.assertClusterTwoServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(6, 0), (String) resultsTable.getValue(6, 1), (String) resultsTable.getValue(6, 2), (String) resultsTable.getValue(6, 3), (String) resultsTable.getValue(6, 4), (String) resultsTable.getValue(6, 5));
-    SampleDataUtils.assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
+    StatisticsSampleDataUtils.assertClusterOneLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(1, 0), (String) resultsTable.getValue(1, 1), (String) resultsTable.getValue(1, 2), (String) resultsTable.getValue(1, 3), (String) resultsTable.getValue(1, 4), (String) resultsTable.getValue(1, 5));
+    StatisticsSampleDataUtils.assertClusterOneServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(2, 0), (String) resultsTable.getValue(2, 1), (String) resultsTable.getValue(2, 2), (String) resultsTable.getValue(2, 3), (String) resultsTable.getValue(2, 4), (String) resultsTable.getValue(2, 5));
+    StatisticsSampleDataUtils.assertClusterOneServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(3, 0), (String) resultsTable.getValue(3, 1), (String) resultsTable.getValue(3, 2), (String) resultsTable.getValue(3, 3), (String) resultsTable.getValue(3, 4), (String) resultsTable.getValue(3, 5));
+    StatisticsSampleDataUtils.assertClusterTwoLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(4, 0), (String) resultsTable.getValue(4, 1), (String) resultsTable.getValue(4, 2), (String) resultsTable.getValue(4, 3), (String) resultsTable.getValue(4, 4), (String) resultsTable.getValue(4, 5));
+    StatisticsSampleDataUtils.assertClusterTwoServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(5, 0), (String) resultsTable.getValue(5, 1), (String) resultsTable.getValue(5, 2), (String) resultsTable.getValue(5, 3), (String) resultsTable.getValue(5, 4), (String) resultsTable.getValue(5, 5));
+    StatisticsSampleDataUtils.assertClusterTwoServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(6, 0), (String) resultsTable.getValue(6, 1), (String) resultsTable.getValue(6, 2), (String) resultsTable.getValue(6, 3), (String) resultsTable.getValue(6, 4), (String) resultsTable.getValue(6, 5));
+    StatisticsSampleDataUtils
+        .assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
   }
 
   @Test
@@ -167,11 +168,11 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
     String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
 
-    File basePath = SampleDataUtils.corruptedFolder;
+    File basePath = StatisticsSampleDataUtils.corruptedFolder;
     String command = "show statistics metadata --path " + basePath.getAbsolutePath() + zoneIdCommandOption;
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
     // Error Results should come last.
@@ -184,9 +185,9 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     // Assert Table Data
     assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
     assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTable.getValue(1, 0)).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath.toPath()));
+    assertThat(errorsTable.getValue(1, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath.toPath()));
     assertThat(errorsTable.getValue(1, 1)).isEqualTo("Unexpected token byte value: 67");
-    assertThat(errorsTable.getValue(2, 0)).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath.toPath()));
+    assertThat(errorsTable.getValue(2, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath.toPath()));
     assertThat(errorsTable.getValue(2, 1)).isEqualTo("Not in GZIP format");
   }
 
@@ -197,11 +198,11 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
 
-    File basePath = SampleDataUtils.rootFolder;
+    File basePath = StatisticsSampleDataUtils.rootFolder;
     String command = "show statistics metadata --path " + basePath.getAbsolutePath() + zoneIdCommandOption;
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    List<Table> resultList = (List) commandResult;
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(2);
 
     // Correct Results should come first.
@@ -220,13 +221,14 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     assertThat(resultsTable.getValue(0, 5)).isEqualTo("Finish Time" + zoneIdDesc);
 
     // Output should be ordered by file name.
-    SampleDataUtils.assertClusterOneLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(1, 0), (String) resultsTable.getValue(1, 1), (String) resultsTable.getValue(1, 2), (String) resultsTable.getValue(1, 3), (String) resultsTable.getValue(1, 4), (String) resultsTable.getValue(1, 5));
-    SampleDataUtils.assertClusterOneServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(2, 0), (String) resultsTable.getValue(2, 1), (String) resultsTable.getValue(2, 2), (String) resultsTable.getValue(2, 3), (String) resultsTable.getValue(2, 4), (String) resultsTable.getValue(2, 5));
-    SampleDataUtils.assertClusterOneServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(3, 0), (String) resultsTable.getValue(3, 1), (String) resultsTable.getValue(3, 2), (String) resultsTable.getValue(3, 3), (String) resultsTable.getValue(3, 4), (String) resultsTable.getValue(3, 5));
-    SampleDataUtils.assertClusterTwoLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(4, 0), (String) resultsTable.getValue(4, 1), (String) resultsTable.getValue(4, 2), (String) resultsTable.getValue(4, 3), (String) resultsTable.getValue(4, 4), (String) resultsTable.getValue(4, 5));
-    SampleDataUtils.assertClusterTwoServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(5, 0), (String) resultsTable.getValue(5, 1), (String) resultsTable.getValue(5, 2), (String) resultsTable.getValue(5, 3), (String) resultsTable.getValue(5, 4), (String) resultsTable.getValue(5, 5));
-    SampleDataUtils.assertClusterTwoServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(6, 0), (String) resultsTable.getValue(6, 1), (String) resultsTable.getValue(6, 2), (String) resultsTable.getValue(6, 3), (String) resultsTable.getValue(6, 4), (String) resultsTable.getValue(6, 5));
-    SampleDataUtils.assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
+    StatisticsSampleDataUtils.assertClusterOneLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(1, 0), (String) resultsTable.getValue(1, 1), (String) resultsTable.getValue(1, 2), (String) resultsTable.getValue(1, 3), (String) resultsTable.getValue(1, 4), (String) resultsTable.getValue(1, 5));
+    StatisticsSampleDataUtils.assertClusterOneServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(2, 0), (String) resultsTable.getValue(2, 1), (String) resultsTable.getValue(2, 2), (String) resultsTable.getValue(2, 3), (String) resultsTable.getValue(2, 4), (String) resultsTable.getValue(2, 5));
+    StatisticsSampleDataUtils.assertClusterOneServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(3, 0), (String) resultsTable.getValue(3, 1), (String) resultsTable.getValue(3, 2), (String) resultsTable.getValue(3, 3), (String) resultsTable.getValue(3, 4), (String) resultsTable.getValue(3, 5));
+    StatisticsSampleDataUtils.assertClusterTwoLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(4, 0), (String) resultsTable.getValue(4, 1), (String) resultsTable.getValue(4, 2), (String) resultsTable.getValue(4, 3), (String) resultsTable.getValue(4, 4), (String) resultsTable.getValue(4, 5));
+    StatisticsSampleDataUtils.assertClusterTwoServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(5, 0), (String) resultsTable.getValue(5, 1), (String) resultsTable.getValue(5, 2), (String) resultsTable.getValue(5, 3), (String) resultsTable.getValue(5, 4), (String) resultsTable.getValue(5, 5));
+    StatisticsSampleDataUtils.assertClusterTwoServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(6, 0), (String) resultsTable.getValue(6, 1), (String) resultsTable.getValue(6, 2), (String) resultsTable.getValue(6, 3), (String) resultsTable.getValue(6, 4), (String) resultsTable.getValue(6, 5));
+    StatisticsSampleDataUtils
+        .assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
 
     // Error Results should come last.
     TableModel errorsTable = resultList.get(1).getModel();
@@ -238,9 +240,9 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     // Assert Table Data
     assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
     assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTable.getValue(1, 0)).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath.toPath()));
+    assertThat(errorsTable.getValue(1, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath.toPath()));
     assertThat(errorsTable.getValue(1, 1)).isEqualTo("Unexpected token byte value: 67");
-    assertThat(errorsTable.getValue(2, 0)).isEqualTo(SampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath.toPath()));
+    assertThat(errorsTable.getValue(2, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath.toPath()));
     assertThat(errorsTable.getValue(2, 1)).isEqualTo("Not in GZIP format");
   }
 }

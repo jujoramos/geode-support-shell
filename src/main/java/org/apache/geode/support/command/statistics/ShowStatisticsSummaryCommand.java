@@ -17,7 +17,7 @@ package org.apache.geode.support.command.statistics;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +110,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
    * |└──CategoryId[InstanceId].statisticId           |value  |value  |value  |value     |value             |
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
    */
-  protected Table buildTableGroupedBySampling(Path sourcePath, boolean includeEmptyStatistics, Statistic.Filter filter, List<ParsingResult<Sampling>> parsingResults) {
+  Table buildTableGroupedBySampling(Path sourcePath, boolean includeEmptyStatistics, Statistic.Filter filter, List<ParsingResult<Sampling>> parsingResults) {
     Table result = null;
     parsingResults.sort(Comparator.comparing(ParsingResult::getFile));
     TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<>();
@@ -127,15 +127,15 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
             resultsModelBuilder.addRow().addValue(filePath).addValue("Minimum").addValue("Maximum").addValue("Average").addValue("Last Value").addValue("Standard Deviation");
 
             // Data Rows
-             categoryMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)).forEach(categoryEntry -> {
+             categoryMap.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)).forEach(categoryEntry ->
                categoryEntry.getValue().getStatistics().entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey)).forEach(statisticEntry -> {
                  String statName = categoryEntry.getKey().concat(".").concat(statisticEntry.getKey());
                  Statistic statistic = statisticEntry.getValue();
                  statistic.setFilter(filter);
                  addResultRow(resultsModelBuilder, includeEmptyStatistics, statName, statistic);
-                });
-              });
-            }
+                })
+             );
+          }
         });
 
     TableModel resultModel = resultsModelBuilder.build();
@@ -169,7 +169,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
    * |└──/path/to/fileN                               |value  |value  |value  |value     |value             |
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
    */
-  protected Table buildTableGroupedByStatistic(Path sourcePath, boolean includeEmptyStatistics, Statistic.Filter filter, List<ParsingResult<Sampling>> parsingResults) {
+  Table buildTableGroupedByStatistic(Path sourcePath, boolean includeEmptyStatistics, Statistic.Filter filter, List<ParsingResult<Sampling>> parsingResults) {
     Table result = null;
     Set<String> statistics = new TreeSet<>();
     Map<String, Map<String, Statistic>> fileToStatisticMap = new TreeMap<>();
@@ -186,10 +186,9 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
           // Continue only if there's data to show.
           if ((sampling.hasAnyStatistic()) && (sampling.hasAnyNonEmptyStatistic() || includeEmptyStatistics)) {
             // Data Rows
-            categoryMap.entrySet().stream().forEach(categoryEntry -> {
-              categoryEntry.getValue().getStatistics().entrySet().stream().forEach(statisticEntry -> {
-                String statName = categoryEntry.getKey().concat(".").concat(statisticEntry.getKey());
-                Statistic statistic = statisticEntry.getValue();
+            categoryMap.forEach((key, value)  ->
+              value.getStatistics().forEach((statisticKey, statistic) -> {
+                String statName = key.concat(".").concat(statisticKey);
                 statistic.setFilter(filter);
 
                 // Check again to avoid empty statistics if flag if set as 'false'.
@@ -201,8 +200,8 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
                   statisticMap.put(statName, statistic);
                   fileToStatisticMap.put(filePath, statisticMap);
                 }
-              });
-            });
+              })
+            );
           }
         });
 
@@ -211,9 +210,8 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
       // Add intermediate header for the Stat Name
       resultsModelBuilder.addRow().addValue(statName).addValue("Minimum").addValue("Maximum").addValue("Average").addValue("Last Value").addValue("Standard Deviation");
 
-      fileToStatisticMap.entrySet().forEach(mapEntry -> {
-        String filePath = mapEntry.getKey();
-        Statistic statistic = mapEntry.getValue().get(statName);
+      fileToStatisticMap.forEach((filePath, value) -> {
+        Statistic statistic = value.get(statName);
         addResultRow(resultsModelBuilder, includeEmptyStatistics, filePath, statistic);
       });
     });
@@ -228,7 +226,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
   }
 
   @ShellMethod(key = "show statistics summary", value = "Shows Minimum, Maximum, Average, Last Value and Standard Deviation values for a (set of) defined statistics.")
-  public List<?> showStatisticsSummary(
+  List<?> showStatisticsSummary(
       @ShellOption(help = "Path to statistics file, or directory to scan for statistics files.", value = "--path") File source,
       @ShellOption(help = "Whether to group results by Sampling or Statistic.", value = "--groupBy", defaultValue = "Sampling") GroupCriteria groupCriteria,
       @ShellOption(help = "Filter to use (none, per second or per sample) when showing results.", value = "--filter", defaultValue = "None") Statistic.Filter statFilter,
@@ -250,7 +248,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
 
     // Validations done, start with the command execution.
     List<Object> commandResult = new ArrayList<>();
-    List<ParsingResult<Sampling>> parsingResults = statisticsService.parseSampling(sourcePath, Arrays.asList(new RegexValueFilter(categoryId, instanceId, statisticId, null)));
+    List<ParsingResult<Sampling>> parsingResults = statisticsService.parseSampling(sourcePath, Collections.singletonList(new RegexValueFilter(categoryId, instanceId, statisticId, null)));
 
     if (parsingResults.isEmpty()) {
       commandResult.add("No statistics files found.");

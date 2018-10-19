@@ -38,7 +38,7 @@ import org.apache.geode.support.utils.FormatUtils;
  *
  * TODO: This should be removed once the tool has the ability to generate statistics files on its own, without using already created files for testing.
  */
-public final class SampleDataUtils {
+public final class StatisticsSampleDataUtils {
   public static final List<ValueFilter> filters;
   private static final SamplingMetadata clientMetadata;
   private static final SamplingMetadata cluster1locatorMetadata;
@@ -47,7 +47,7 @@ public final class SampleDataUtils {
   private static final SamplingMetadata cluster2locatorMetadata;
   private static final SamplingMetadata cluster2Server1Metadata;
   private static final SamplingMetadata cluster2Server2Metadata;
-  public static final File rootFolder = new File(SampleDataUtils.class.getResource("/samples").getFile());
+  public static final File rootFolder = new File(StatisticsSampleDataUtils.class.getResource("/samples/statistics").getFile());
   public static final File corruptedFolder = rootFolder.toPath().resolve("corrupted").toFile();
   public static final File uncorruptedFolder = rootFolder.toPath().resolve("uncorrupted").toFile();
 
@@ -216,19 +216,19 @@ public final class SampleDataUtils {
   private static void assertCommonCategories(Map<String, Category> categoryMap) {
     assertThat(categoryMap.containsKey("StatSampler[statSampler]")).isTrue();
     Category statSamplerCategory = categoryMap.get("StatSampler[statSampler]");
-    assertThat(statSamplerCategory.hasStatistic("delayDuration"));
+    assertThat(statSamplerCategory.hasStatistic("delayDuration")).isTrue();
     assertStatistic(statSamplerCategory.getStatistic("delayDuration"), "delayDuration", "Actual duration of sampling delay taken before taking this sample.", false, "milliseconds");
 
     assertThat(categoryMap.containsKey("VMStats[vmStats]")).isTrue();
     Category vmStatsCategory = categoryMap.get("VMStats[vmStats]");
-    assertThat(vmStatsCategory.hasStatistic("threads"));
+    assertThat(vmStatsCategory.hasStatistic("threads")).isTrue();
     assertStatistic(vmStatsCategory.getStatistic("threads"), "threads", "Current number of live threads (both daemon and non-daemon) in this VM.", false, "threads");
   }
 
   private static void assertDistributionStatsCategory(Map<String, Category> categoryMap) {
     assertThat(categoryMap.containsKey("DistributionStats[distributionStats]")).isTrue();
     Category distributionStatsCategory = categoryMap.get("DistributionStats[distributionStats]");
-    assertThat(distributionStatsCategory.hasStatistic("replyWaitsInProgress"));
+    assertThat(distributionStatsCategory.hasStatistic("replyWaitsInProgress")).isTrue();
     assertStatistic(distributionStatsCategory.getStatistic("replyWaitsInProgress"), "replyWaitsInProgress", "Current number of threads waiting for a reply.", false, "operations");
   }
 
@@ -240,7 +240,7 @@ public final class SampleDataUtils {
 
     assertThat(categoryMap.containsKey("PoolStats[default->[any servers]]")).isTrue();
     Category poolStatsCategory = categoryMap.get("PoolStats[default->[any servers]]");
-    assertThat(poolStatsCategory.hasStatistic("clientOps"));
+    assertThat(poolStatsCategory.hasStatistic("clientOps")).isTrue();
     assertStatistic(poolStatsCategory.getStatistic("clientOps"), "clientOps", "Total number of clientOps completed successfully", true, "clientOps");
   }
 
@@ -253,7 +253,7 @@ public final class SampleDataUtils {
     String locatorCategoryKey = "LocatorStats[192.168.1.7-0.0.0.0/0.0.0.0:1" + clusterNumber + "334]";
     assertThat(categoryMap.containsKey(locatorCategoryKey)).isTrue();
     Category locatorStatsCategory = categoryMap.get(locatorCategoryKey);
-    assertThat(locatorStatsCategory.hasStatistic("serverLoadUpdates"));
+    assertThat(locatorStatsCategory.hasStatistic("serverLoadUpdates")).isTrue();
     assertStatistic(locatorStatsCategory.getStatistic("serverLoadUpdates"), "serverLoadUpdates", "Total number of times a server load update has been received.", true, "updates");
   }
 
@@ -273,12 +273,12 @@ public final class SampleDataUtils {
 
     assertThat(categoryMap.containsKey(gatewaySenderKey)).isTrue();
     Category gatewaySenderStatsCategory = categoryMap.get(gatewaySenderKey);
-    assertThat(gatewaySenderStatsCategory.hasStatistic("eventsDistributed"));
+    assertThat(gatewaySenderStatsCategory.hasStatistic("eventsDistributed")).isTrue();
     assertStatistic(gatewaySenderStatsCategory.getStatistic("eventsDistributed"), "eventsDistributed", "Number of events removed from the event queue and sent.", true, "operations");
 
     assertThat(categoryMap.containsKey(gatewayReceiverKey)).isTrue();
     Category gatewayReceiverStatsCategory = categoryMap.get(gatewayReceiverKey);
-    assertThat(gatewayReceiverStatsCategory.hasStatistic("createRequests"));
+    assertThat(gatewayReceiverStatsCategory.hasStatistic("createRequests")).isTrue();
     assertStatistic(gatewayReceiverStatsCategory.getStatistic("createRequests"), "createRequests", "total number of create operations received by this GatewayReceiver", true, "operations");
   }
 }

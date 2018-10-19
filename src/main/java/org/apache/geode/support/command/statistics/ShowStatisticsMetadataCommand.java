@@ -48,7 +48,7 @@ public class ShowStatisticsMetadataCommand extends AbstractStatisticsCommand {
   }
 
   @ShellMethod(key = "show statistics metadata", value = "Show general information about statistics files.")
-  public List<?> showStatisticsMetadata(
+  List<?> showStatisticsMetadata(
       @ShellOption(help = "Path to statistics file, or directory to scan for statistics files.", value = "--path") File source,
       @ShellOption(help = "Time Zone Id to use when showing results. If not set, the default from the statistics file will be used.", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId) {
 

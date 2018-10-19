@@ -1,0 +1,564 @@
+
+[info 2018/04/17 15:19:48.658 IST server1 <main> tid=0x1] Startup Configuration:
+   ### GemFire Properties defined with system property ###
+  locators=localhost[10101]
+  security-manager=********
+  start-dev-rest-api=false
+  use-cluster-configuration=true
+  ### GemFire Properties defined with api ###
+  name=server1
+  ### GemFire Properties defined with launcher ###
+  log-file=/Users/bwayne/server1/server1.log
+  ### GemFire Properties using default values ###
+  ack-severe-alert-threshold=0
+  ack-wait-threshold=15
+  archive-disk-space-limit=0
+  archive-file-size-limit=0
+  async-distribution-timeout=0
+  async-max-queue-size=8
+  async-queue-timeout=60000
+  bind-address=
+  cache-xml-file=cache.xml
+  cluster-configuration-dir=
+  cluster-ssl-ciphers=any
+  cluster-ssl-enabled=false
+  cluster-ssl-keystore=
+  cluster-ssl-keystore-password=
+  cluster-ssl-keystore-type=
+  cluster-ssl-protocols=any
+  cluster-ssl-require-authentication=true
+  cluster-ssl-truststore=
+  cluster-ssl-truststore-password=
+  conflate-events=server
+  conserve-sockets=true
+  delta-propagation=true
+  deploy-working-dir=/Users/bwayne/server1
+  disable-auto-reconnect=false
+  disable-tcp=false
+  distributed-system-id=-1
+  distributed-transactions=false
+  durable-client-id=
+  durable-client-timeout=300
+  enable-cluster-configuration=true
+  enable-network-partition-detection=true
+  enable-time-statistics=false
+  enforce-unique-host=false
+  gateway-ssl-ciphers=any
+  gateway-ssl-enabled=false
+  gateway-ssl-keystore=
+  gateway-ssl-keystore-password=
+  gateway-ssl-keystore-type=
+  gateway-ssl-protocols=any
+  gateway-ssl-require-authentication=true
+  gateway-ssl-truststore=
+  gateway-ssl-truststore-password=
+  groups=
+  http-service-bind-address=
+  http-service-port=7070
+  http-service-ssl-ciphers=any
+  http-service-ssl-enabled=false
+  http-service-ssl-keystore=
+  http-service-ssl-keystore-password=
+  http-service-ssl-keystore-type=
+  http-service-ssl-protocols=any
+  http-service-ssl-require-authentication=false
+  http-service-ssl-truststore=
+  http-service-ssl-truststore-password=
+  jmx-manager=false
+  jmx-manager-access-file=
+  jmx-manager-bind-address=
+  jmx-manager-hostname-for-clients=
+  jmx-manager-http-port=7070
+  jmx-manager-password-file=
+  jmx-manager-port=1099
+  jmx-manager-ssl-ciphers=any
+  jmx-manager-ssl-enabled=false
+  jmx-manager-ssl-keystore=
+  jmx-manager-ssl-keystore-password=
+  jmx-manager-ssl-keystore-type=
+  jmx-manager-ssl-protocols=any
+  jmx-manager-ssl-require-authentication=true
+  jmx-manager-ssl-truststore=
+  jmx-manager-ssl-truststore-password=
+  jmx-manager-start=false
+  jmx-manager-update-rate=2000
+  load-cluster-configuration-from-dir=false
+  locator-wait-time=0
+  lock-memory=false
+  log-disk-space-limit=0
+  log-file-size-limit=0
+  log-level=config
+  max-num-reconnect-tries=3
+  max-wait-time-reconnect=60000
+  mcast-address=239.192.81.1
+  mcast-flow-control=1048576, 0.25, 5000
+  mcast-port=0
+  mcast-recv-buffer-size=1048576
+  mcast-send-buffer-size=65535
+  mcast-ttl=32
+  member-timeout=5000
+  membership-port-range=1024-65535
+  memcached-bind-address=
+  memcached-port=0
+  memcached-protocol=ASCII
+  off-heap-memory-size=
+  redis-bind-address=
+  redis-password=
+  redis-port=0
+  redundancy-zone=
+  remote-locators=
+  remove-unresponsive-client=false
+  roles=
+  security-client-accessor=
+  security-client-accessor-pp=
+  security-client-auth-init=
+  security-client-authenticator=
+  security-client-dhalgo=
+  security-log-file=
+  security-log-level=config
+  security-peer-auth-init=
+  security-peer-authenticator=
+  security-peer-verifymember-timeout=1000
+  security-post-processor=
+  security-udp-dhalgo=
+  serializable-object-filter=!*
+  server-bind-address=
+  server-ssl-ciphers=any
+  server-ssl-enabled=false
+  server-ssl-keystore=
+  server-ssl-keystore-password=
+  server-ssl-keystore-type=
+  server-ssl-protocols=any
+  server-ssl-require-authentication=true
+  server-ssl-truststore=
+  server-ssl-truststore-password=
+  socket-buffer-size=32768
+  socket-lease-time=60000
+  ssl-ciphers=any
+  ssl-cluster-alias=
+  ssl-default-alias=
+  ssl-enabled-components=
+  ssl-gateway-alias=
+  ssl-jmx-alias=
+  ssl-keystore=
+  ssl-keystore-password=
+  ssl-keystore-type=
+  ssl-locator-alias=
+  ssl-protocols=any
+  ssl-require-authentication=true
+  ssl-server-alias=
+  ssl-truststore=
+  ssl-truststore-password=
+  ssl-truststore-type=
+  ssl-web-alias=
+  ssl-web-require-authentication=false
+  start-locator=
+  statistic-archive-file=
+  statistic-sample-rate=1000
+  statistic-sampling-enabled=true
+  tcp-port=0
+  udp-fragment-size=60000
+  udp-recv-buffer-size=1048576
+  udp-send-buffer-size=65535
+  user-command-packages=
+  validate-serializable-objects=false
+
+
+[info 2018/04/17 15:19:48.692 IST server1 <main> tid=0x1]
+  ---------------------------------------------------------------------------
+
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with this
+    work for additional information regarding copyright ownership.
+
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with the
+    License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+    License for the specific language governing permissions and limitations
+    under the License.
+
+  ---------------------------------------------------------------------------
+  Build-Date: 2018-03-19 16:50:34 +0000
+  Build-Id: root 13
+  Build-Java-Version: 1.8.0_161
+  Build-Platform: Linux 4.4.0-89-generic amd64
+  GemFire-Source-Date: 2018-03-19 16:06:42 +0000
+  GemFire-Source-Repository: support/9.4
+  GemFire-Source-Revision: a79a89636981719f3153c9a38db87aa49a7f2026
+  Product-Name: Pivotal GemFire
+  Product-Version: 9.4.0
+  Source-Date: 2018-03-16 20:43:10 +0000
+  Source-Repository: support/9.4
+  Source-Revision: f122abcb40ac9050680ed28b1e66ad73a60cba46
+  Native version: native code unavailable
+  Running on: /192.168.1.7, 8 cpu(s), amd64 Linux 3.10.0-862.11.6.el7.x86_64 
+  Communications version: 80
+  Process ID: 32310
+  User: bwayne
+  Current dir: /Users/bwayne/server1
+  Home dir: /Users/bwayne
+  Command Line Parameters:
+    -Dgemfire.locators=localhost[10101]
+    -Dgemfire.start-dev-rest-api=false
+    -Dgemfire.use-cluster-configuration=true
+    -Dgemfire.security-manager=io.pivotal.support.MySecurityManager
+    -Dgemfire.security-username=superUser
+    -Dgemfire.security-password=********
+    -XX:OnOutOfMemoryError=kill -KILL %p
+    -Dgemfire.launcher.registerSignalHandlers=true
+    -Djava.awt.headless=true
+    -Dsun.rmi.dgc.server.gcInterval=9223372036854775806
+  Class Path:
+    /Users/bwayne/Applications/GemFire/9.4.0/pivotal-gemfire-9.4.0/lib/geode-core-9.4.0.jar
+    /Users/bwayne/security-manager/target/security-manager-1.0.0.jar
+    /Users/bwayne/Applications/GemFire/9.4.0/pivotal-gemfire-9.4.0/lib/geode-dependencies.jar
+  Library Path:
+    /Users/bwayne/Library/Java/Extensions
+    /Library/Java/Extensions
+    /Network/Library/Java/Extensions
+    /System/Library/Java/Extensions
+    /usr/lib/java
+    .
+  System Properties:
+      awt.toolkit = sun.lwawt.macosx.LWCToolkit
+      file.encoding = UTF-8
+      file.encoding.pkg = sun.io
+      file.separator = /
+      ftp.nonProxyHosts = local|*.local|169.254/16|*.169.254/16
+      gemfire.launcher.registerSignalHandlers = true
+      gemfire.locators = localhost[10101]
+      gemfire.security-manager = io.pivotal.support.MySecurityManager
+      gemfire.security-password = ********
+      gemfire.security-username = superUser
+      gemfire.start-dev-rest-api = false
+      gemfire.use-cluster-configuration = true
+      gopherProxySet = false
+      http.nonProxyHosts = local|*.local|169.254/16|*.169.254/16
+      java.awt.graphicsenv = sun.awt.CGraphicsEnvironment
+      java.awt.headless = true
+      java.awt.printerjob = sun.lwawt.macosx.CPrinterJob
+      java.class.version = 52.0
+      java.endorsed.dirs = /Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/endorsed
+      java.ext.dirs = /Users/bwayne/Library/Java/Extensions:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/ext:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java
+      java.home = /Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre
+      java.io.tmpdir = /var/folders/h5/lpqkmjfn7mv6fkgp9gdhf8dh0000gq/T/
+      java.runtime.name = Java(TM) SE Runtime Environment
+      java.runtime.version = 1.8.0_152-b16
+      java.specification.name = Java Platform API Specification
+      java.specification.vendor = Oracle Corporation
+      java.specification.version = 1.8
+      java.vendor = Oracle Corporation
+      java.vendor.url = http://java.oracle.com/
+      java.vendor.url.bug = http://bugreport.sun.com/bugreport/
+      java.version = 1.8.0_152
+      java.vm.info = mixed mode
+      java.vm.name = Java HotSpot(TM) 64-Bit Server VM
+      java.vm.specification.name = Java Virtual Machine Specification
+      java.vm.specification.vendor = Oracle Corporation
+      java.vm.specification.version = 1.8
+      java.vm.vendor = Oracle Corporation
+      java.vm.version = 25.152-b16
+      jna.platform.library.path = /usr/lib:/usr/lib
+      jnidispatch.path = /var/folders/h5/lpqkmjfn7mv6fkgp9gdhf8dh0000gq/T/jna--1151997864/jna7005621900414300440.tmp
+      line.separator =
+
+      os.version = 10.13.4
+      path.separator = :
+      socksNonProxyHosts = local|*.local|169.254/16|*.169.254/16
+      sun.arch.data.model = 64
+      sun.boot.class.path = /Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/sunrsasign.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/classes
+      sun.boot.library.path = /Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/lib
+      sun.cpu.endian = little
+      sun.cpu.isalist =
+      sun.io.unicode.encoding = UnicodeBig
+      sun.java.command = org.apache.geode.distributed.ServerLauncher start server1 --server-port=40404
+      sun.java.launcher = SUN_STANDARD
+      sun.jnu.encoding = UTF-8
+      sun.management.compiler = HotSpot 64-Bit Tiered Compilers
+      sun.nio.ch.bugLevel =
+      sun.os.patch.level = unknown
+      sun.rmi.dgc.server.gcInterval = 9223372036854775806
+      user.country = US
+      user.language = en
+      user.timezone = Europe/Dublin
+  Log4J 2 Configuration:
+      jar:file:/Users/bwayne/Applications/GemFire/9.4.0/pivotal-gemfire-9.4.0/lib/geode-core-9.4.0.jar!/log4j2.xml
+  ---------------------------------------------------------------------------
+
+
+[info 2018/04/17 15:19:48.696 IST server1 <main> tid=0x1] Startup Configuration:
+   ### GemFire Properties defined with system property ###
+  locators=localhost[10101]
+  security-manager=********
+  start-dev-rest-api=false
+  use-cluster-configuration=true
+  ### GemFire Properties defined with api ###
+  name=server1
+  ### GemFire Properties defined with launcher ###
+  log-file=/Users/bwayne/server1/server1.log
+  ### GemFire Properties using default values ###
+  ack-severe-alert-threshold=0
+  ack-wait-threshold=15
+  archive-disk-space-limit=0
+  archive-file-size-limit=0
+  async-distribution-timeout=0
+  async-max-queue-size=8
+  async-queue-timeout=60000
+  bind-address=
+  cache-xml-file=cache.xml
+  cluster-configuration-dir=
+  cluster-ssl-ciphers=any
+  cluster-ssl-enabled=false
+  cluster-ssl-keystore=
+  cluster-ssl-keystore-password=
+  cluster-ssl-keystore-type=
+  cluster-ssl-protocols=any
+  cluster-ssl-require-authentication=true
+  cluster-ssl-truststore=
+  cluster-ssl-truststore-password=
+  conflate-events=server
+  conserve-sockets=true
+  delta-propagation=true
+  deploy-working-dir=/Users/bwayne/server1
+  disable-auto-reconnect=false
+  disable-tcp=false
+  distributed-system-id=-1
+  distributed-transactions=false
+  durable-client-id=
+  durable-client-timeout=300
+  enable-cluster-configuration=true
+  enable-network-partition-detection=true
+  enable-time-statistics=false
+  enforce-unique-host=false
+  gateway-ssl-ciphers=any
+  gateway-ssl-enabled=false
+  gateway-ssl-keystore=
+  gateway-ssl-keystore-password=
+  gateway-ssl-keystore-type=
+  gateway-ssl-protocols=any
+  gateway-ssl-require-authentication=true
+  gateway-ssl-truststore=
+  gateway-ssl-truststore-password=
+  groups=
+  http-service-bind-address=
+  http-service-port=7070
+  http-service-ssl-ciphers=any
+  http-service-ssl-enabled=false
+  http-service-ssl-keystore=
+  http-service-ssl-keystore-password=
+  http-service-ssl-keystore-type=
+  http-service-ssl-protocols=any
+  http-service-ssl-require-authentication=false
+  http-service-ssl-truststore=
+  http-service-ssl-truststore-password=
+  jmx-manager=false
+  jmx-manager-access-file=
+  jmx-manager-bind-address=
+  jmx-manager-hostname-for-clients=
+  jmx-manager-http-port=7070
+  jmx-manager-password-file=
+  jmx-manager-port=1099
+  jmx-manager-ssl-ciphers=any
+  jmx-manager-ssl-enabled=false
+  jmx-manager-ssl-keystore=
+  jmx-manager-ssl-keystore-password=
+  jmx-manager-ssl-keystore-type=
+  jmx-manager-ssl-protocols=any
+  jmx-manager-ssl-require-authentication=true
+  jmx-manager-ssl-truststore=
+  jmx-manager-ssl-truststore-password=
+  jmx-manager-start=false
+  jmx-manager-update-rate=2000
+  load-cluster-configuration-from-dir=false
+  locator-wait-time=0
+  lock-memory=false
+  log-disk-space-limit=0
+  log-file-size-limit=0
+  log-level=config
+  max-num-reconnect-tries=3
+  max-wait-time-reconnect=60000
+  mcast-address=239.192.81.1
+  mcast-flow-control=1048576, 0.25, 5000
+  mcast-port=0
+  mcast-recv-buffer-size=1048576
+  mcast-send-buffer-size=65535
+  mcast-ttl=32
+  member-timeout=5000
+  membership-port-range=1024-65535
+  memcached-bind-address=
+  memcached-port=0
+  memcached-protocol=ASCII
+  off-heap-memory-size=
+  redis-bind-address=
+  redis-password=
+  redis-port=0
+  redundancy-zone=
+  remote-locators=
+  remove-unresponsive-client=false
+  roles=
+  security-client-accessor=
+  security-client-accessor-pp=
+  security-client-auth-init=
+  security-client-authenticator=
+  security-client-dhalgo=
+  security-log-file=
+  security-log-level=config
+  security-peer-auth-init=
+  security-peer-authenticator=
+  security-peer-verifymember-timeout=1000
+  security-post-processor=
+  security-udp-dhalgo=
+  serializable-object-filter=!*
+  server-bind-address=
+  server-ssl-ciphers=any
+  server-ssl-enabled=false
+  server-ssl-keystore=
+  server-ssl-keystore-password=
+  server-ssl-keystore-type=
+  server-ssl-protocols=any
+  server-ssl-require-authentication=true
+  server-ssl-truststore=
+  server-ssl-truststore-password=
+  socket-buffer-size=32768
+  socket-lease-time=60000
+  ssl-ciphers=any
+  ssl-cluster-alias=
+  ssl-default-alias=
+  ssl-enabled-components=
+  ssl-gateway-alias=
+  ssl-jmx-alias=
+  ssl-keystore=
+  ssl-keystore-password=
+  ssl-keystore-type=
+  ssl-locator-alias=
+  ssl-protocols=any
+  ssl-require-authentication=true
+  ssl-server-alias=
+  ssl-truststore=
+  ssl-truststore-password=
+  ssl-truststore-type=
+  ssl-web-alias=
+  ssl-web-require-authentication=false
+  start-locator=
+  statistic-archive-file=
+  statistic-sample-rate=1000
+  statistic-sampling-enabled=true
+  tcp-port=0
+  udp-fragment-size=60000
+  udp-recv-buffer-size=1048576
+  udp-send-buffer-size=65535
+  user-command-packages=
+  validate-serializable-objects=false
+
+
+[info 2018/04/17 15:19:48.700 IST server1 <main> tid=0x1] initializing InternalDataSerializer with 3 services
+
+[info 2018/04/17 15:19:48.799 IST server1 <main> tid=0x1] Starting membership services
+
+[info 2018/04/17 15:19:48.865 IST server1 <main> tid=0x1] JGroups channel created (took 66ms)
+
+[info 2018/04/17 15:19:48.885 IST server1 <main> tid=0x1] GemFire P2P Listener started on /192.168.1.7:34134
+
+[info 2018/04/17 15:19:48.887 IST server1 <Geode Failure Detection Server thread 0> tid=0x1f] Started failure detection server thread on /192.168.1.7:19208.
+
+[info 2018/04/17 15:19:48.903 IST server1 <main> tid=0x1] Attempting to join the distributed system through coordinator 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 using address 192.168.1.7(server1:32310):1025
+
+[info 2018/04/17 15:19:49.238 IST server1 <unicast receiver,bwayneMacBookPro-62747> tid=0x1b] received new view: View[192.168.1.7(locator1:32296:locator)<ec><v0>:1024|1] members: [192.168.1.7(locator1:32296:locator)<ec><v0>:1024, 192.168.1.7(server1:32310)<v1>:1025{lead}]
+  old view is: null
+
+[info 2018/04/17 15:19:49.244 IST server1 <main> tid=0x1] Finished joining (took 357ms).
+
+[info 2018/04/17 15:19:49.244 IST server1 <main> tid=0x1] Starting DistributionManager 192.168.1.7(server1:32310)<v1>:1025.  (took 520 ms)
+
+[info 2018/04/17 15:19:49.246 IST server1 <main> tid=0x1] Initial (distribution manager) view =  View[192.168.1.7(locator1:32296:locator)<ec><v0>:1024|1] members: [192.168.1.7(locator1:32296:locator)<ec><v0>:1024, 192.168.1.7(server1:32310)<v1>:1025{lead}]
+
+[info 2018/04/17 15:19:49.246 IST server1 <main> tid=0x1] Admitting member <192.168.1.7(locator1:32296:locator)<ec><v0>:1024>. Now there are 1 non-admin member(s).
+
+[info 2018/04/17 15:19:49.247 IST server1 <main> tid=0x1] Admitting member <192.168.1.7(server1:32310)<v1>:1025>. Now there are 2 non-admin member(s).
+
+[info 2018/04/17 15:19:49.279 IST server1 <P2P message reader for 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 shared unordered uid=1 port=58617> tid=0x26] Member 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 is equivalent or in the same redundancy zone.
+
+[info 2018/04/17 15:19:49.333 IST server1 <main> tid=0x1] Received cluster configuration from the locator
+
+[info 2018/04/17 15:19:49.366 IST server1 <main> tid=0x1]
+  ***************************************************************
+  Configuration for  'cluster'
+
+  Jar files to deployed
+  <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+  <cache xmlns="http://geode.apache.org/schema/cache" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" copy-on-read="false" is-server="false" lock-lease="120" lock-timeout="60" search-timeout="300" version="1.0" xsi:schemaLocation="http://geode.apache.org/schema/cache http://geode.apache.org/schema/cache/cache-1.0.xsd"/>
+
+
+[info 2018/04/17 15:19:49.367 IST server1 <main> tid=0x1] The "security-manager" configuration attribute can not be modified.
+
+[info 2018/04/17 15:19:49.463 IST server1 <main> tid=0x1] Requesting cluster configuration
+
+[info 2018/04/17 15:19:49.561 IST server1 <main> tid=0x1] Initializing region _monitoringRegion_192.168.1.7<v1>1025
+
+[info 2018/04/17 15:19:49.565 IST server1 <main> tid=0x1] Initialization of region _monitoringRegion_192.168.1.7<v1>1025 completed
+
+[info 2018/04/17 15:19:50.078 IST server1 <main> tid=0x1] Initialized cache service org.apache.geode.connectors.jdbc.internal.JdbcConnectorServiceImpl
+
+[info 2018/04/17 15:19:50.091 IST server1 <main> tid=0x1] Initialized cache service org.apache.geode.cache.lucene.internal.LuceneServiceImpl
+
+[info 2018/04/17 15:19:50.092 IST server1 <main> tid=0x1] Initialized cache service com.gemstone.gemfire.OldClientSupportProvider
+
+[info 2018/04/17 15:19:50.188 IST server1 <main> tid=0x1] Initializing region PdxTypes
+
+[info 2018/04/17 15:19:50.189 IST server1 <main> tid=0x1] Initialization of region PdxTypes completed
+
+[info 2018/04/17 15:19:50.255 IST server1 <main> tid=0x1] Cache server connection listener bound to address 192.168.1.7-0.0.0.0/0.0.0.0:40404 with backlog 1,000.
+
+[info 2018/04/17 15:19:50.264 IST server1 <main> tid=0x1] ClientHealthMonitorThread maximum allowed time between pings: 60,000
+
+[warning 2018/04/17 15:19:50.265 IST server1 <main> tid=0x1] Handshaker max Pool size: 4
+
+[info 2018/04/17 15:19:50.273 IST server1 <main> tid=0x1] CacheServer Configuration:   port=40404 max-connections=800 max-threads=0 notify-by-subscription=true socket-buffer-size=32768 maximum-time-between-pings=60000 maximum-message-count=230000 message-time-to-live=180 eviction-policy=none capacity=1 overflow directory=. groups=[] loadProbe=ConnectionCountProbe loadPollInterval=5000 tcpNoDelay=true
+
+[info 2018/04/17 15:19:58.304 IST server1 <Function Execution Processor1> tid=0x4a] Initializing region test
+
+[info 2018/04/17 15:19:58.306 IST server1 <Function Execution Processor1> tid=0x4a] Initialization of region test completed
+
+[info 2018/04/17 15:19:58.340 IST server1 <Function Execution Processor1> tid=0x4a] XmlEntity:searchString: //cache:region[@name='test']
+
+[info 2018/04/17 15:19:59.679 IST server1 <Function Execution Processor1> tid=0x4a] Initializing region region
+
+[info 2018/04/17 15:19:59.680 IST server1 <Function Execution Processor1> tid=0x4a] Initialization of region region completed
+
+[info 2018/04/17 15:19:59.686 IST server1 <Function Execution Processor1> tid=0x4a] XmlEntity:searchString: //cache:region[@name='region']
+
+[warning 2018/04/17 15:19:59.686 IST server1 <Handshaker /10.89.234.48:1528 Thread 38> tid=0x3218b] Bridge server: failed accepting client connection {0}
+java.io.EOFException
+at com.gemstone.gemfire.internal.cache.tier.sockets.AcceptorImpl.handleNewClientConnection(AcceptorImpl.java:1471)
+at com.gemstone.gemfire.internal.cache.tier.sockets.AcceptorImpl$5.run(AcceptorImpl.java:1368)
+at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+at java.lang.Thread.run(Thread.java:748)
+
+[info 2018/04/17 15:20:43.448 IST server1 <Function Execution Processor1> tid=0x4a] Received GFSH shutdown. Shutting down member 192.168.1.7(server1:32310)<v1>:1025
+
+[info 2018/04/17 15:20:44.464 IST server1 <pool-3-thread-1> tid=0x4e] GemFireCache[id = 1914615775; isClosing = true; isShutDownAll = false; created = Tue Apr 17 15:19:49 IST 2018; server = true; copyOnRead = false; lockLease = 120; lockTimeout = 60]: Now closing.
+
+[info 2018/04/17 15:20:44.478 IST server1 <pool-3-thread-1> tid=0x4e] Cache server on port 40,404 is shutting down.
+
+[info 2018/04/17 15:20:44.488 IST server1 <pool-3-thread-1> tid=0x4e] Shutting down DistributionManager 192.168.1.7(server1:32310)<v1>:1025.
+
+[info 2018/04/17 15:20:45.596 IST server1 <pool-3-thread-1> tid=0x4e] Now closing distribution for 192.168.1.7(server1:32310)<v1>:1025
+
+[info 2018/04/17 15:20:45.596 IST server1 <pool-3-thread-1> tid=0x4e] Stopping membership services
+
+[info 2018/04/17 15:20:45.598 IST server1 <Geode Failure Detection Server thread 0> tid=0x1f] GMSHealthMonitor server thread exiting
+
+[info 2018/04/17 15:20:45.598 IST server1 <pool-3-thread-1> tid=0x4e] GMSHealthMonitor server socket is closed in stopServices().
+
+[info 2018/04/17 15:20:45.598 IST server1 <pool-3-thread-1> tid=0x4e] GMSHealthMonitor serverSocketExecutor is terminated
+
+[info 2018/04/17 15:20:45.609 IST server1 <pool-3-thread-1> tid=0x4e] DistributionManager stopped in 1,121ms.
+
+[info 2018/04/17 15:20:45.610 IST server1 <pool-3-thread-1> tid=0x4e] Marking DistributionManager 192.168.1.7(server1:32310)<v1>:1025 as closed.

@@ -12,7 +12,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.service;
+package org.apache.geode.support.service.statistics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,7 +31,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +64,6 @@ public class DefaultStatisticsServicesTest {
   private Path mockedRegularPath;
   private Path mockedCompressedPath;
   private Path mockedDirectoryPath;
-  private Stream<Path> mockedDirectoryStream;
   private DefaultStatisticsService statisticsService;
 
   @Before
@@ -76,7 +74,7 @@ public class DefaultStatisticsServicesTest {
     mockedRegularPath = MockUtils.mockPath("/mockedDirectory/mockedFile.gfs", false);
     mockedCompressedPath = MockUtils.mockPath("/mockedDirectory/mockedFile.gz", false);
 
-    mockedDirectoryStream = Stream.of(mockedRegularPath, mockedCompressedPath);
+    Stream<Path> mockedDirectoryStream = Stream.of(mockedRegularPath, mockedCompressedPath);
     PowerMockito.mockStatic(Files.class);
 
     when(Files.isRegularFile(any())).thenReturn(true);
@@ -258,15 +256,15 @@ public class DefaultStatisticsServicesTest {
     doReturn(mock(Map.class)).when(statisticsService).parseSamplingStatisticalData(any());
 
     statisticsService.parseIndividualSampling(mockedRegularPath, Collections.emptyList());
-    verify(statisticsService, times(1)).initializeStatArchiveFile(mockedRegularPath, Arrays.asList(statisticsService.defaultValueFilter));
+    verify(statisticsService, times(1)).initializeStatArchiveFile(mockedRegularPath, Collections.singletonList(statisticsService.defaultValueFilter));
 
     ValueFilter simpleFilter = new SimpleValueFilter("VMStats", "vmStats", "cpus", null);
-    statisticsService.parseIndividualSampling(mockedRegularPath, Arrays.asList(simpleFilter));
-    verify(statisticsService, times(2)).initializeStatArchiveFile(mockedRegularPath, Arrays.asList(simpleFilter));
+    statisticsService.parseIndividualSampling(mockedRegularPath, Collections.singletonList(simpleFilter));
+    verify(statisticsService, times(2)).initializeStatArchiveFile(mockedRegularPath, Collections.singletonList(simpleFilter));
 
     ValueFilter regexFilter = new RegexValueFilter("VMStats", "vmStats", "cpus", null);
-    statisticsService.parseIndividualSampling(mockedRegularPath, Arrays.asList(regexFilter));
-    verify(statisticsService, times(3)).initializeStatArchiveFile(mockedRegularPath, Arrays.asList(regexFilter));
+    statisticsService.parseIndividualSampling(mockedRegularPath, Collections.singletonList(regexFilter));
+    verify(statisticsService, times(3)).initializeStatArchiveFile(mockedRegularPath, Collections.singletonList(regexFilter));
   }
 
   @Test
@@ -354,11 +352,11 @@ public class DefaultStatisticsServicesTest {
     statisticsService.parseIndividualSampling(mockedRegularPath, filters);
     verify(statisticsService, times(0)).parseSamplingStatisticalData(any());
 
-    List<ValueFilter> simpleFilters = Arrays.asList(new SimpleValueFilter("VMStats", "vmStats", "cpus", null));
+    List<ValueFilter> simpleFilters = Collections.singletonList(new SimpleValueFilter("VMStats", "vmStats", "cpus", null));
     statisticsService.parseIndividualSampling(mockedRegularPath, simpleFilters);
     verify(statisticsService, times(0)).parseSamplingStatisticalData(any());
 
-    List<ValueFilter> regexFilters = Arrays.asList(new RegexValueFilter("VMStats", "vmStats", "cpus", null));
+    List<ValueFilter> regexFilters = Collections.singletonList(new RegexValueFilter("VMStats", "vmStats", "cpus", null));
     statisticsService.parseIndividualSampling(mockedRegularPath, regexFilters);
     verify(statisticsService, times(0)).parseSamplingStatisticalData(any());
 
@@ -466,11 +464,13 @@ public class DefaultStatisticsServicesTest {
     assertThat(parsingResults.size()).isEqualTo(2);
     verify(statisticsService, times(2)).parseIndividualSampling(any(), any());
 
-    ParsingResult<SamplingMetadata> succeededResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gz")).findAny().get();
+    ParsingResult<SamplingMetadata> succeededResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gz")).findAny().orElse(null);
+    assertThat(succeededResult).isNotNull();
     assertThat(succeededResult.isSuccess()).isTrue();
     assertThat(succeededResult.getData()).isNotNull();
 
-    ParsingResult<SamplingMetadata> failedResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gfs")).findAny().get();
+    ParsingResult<SamplingMetadata> failedResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gfs")).findAny().orElse(null);
+    assertThat(failedResult).isNotNull();
     assertThat(failedResult.isSuccess()).isFalse();
     assertThat(failedResult.getException()).isNotNull();
     assertThat(failedResult.getException()).isInstanceOf(IOException.class).hasMessage("Mocked Exception While Parsing File.");
@@ -546,11 +546,13 @@ public class DefaultStatisticsServicesTest {
     assertThat(parsingResults.size()).isEqualTo(2);
     verify(statisticsService, times(2)).parseIndividualSampling(any(), any());
 
-    ParsingResult<Sampling> succeededResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gz")).findAny().get();
+    ParsingResult<Sampling> succeededResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gz")).findAny().orElse(null);
+    assertThat(succeededResult).isNotNull();
     assertThat(succeededResult.isSuccess()).isTrue();
     assertThat(succeededResult.getData()).isNotNull();
 
-    ParsingResult<Sampling> failedResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gfs")).findAny().get();
+    ParsingResult<Sampling> failedResult = parsingResults.stream().filter(result -> result.getFile().toFile().getName().endsWith(".gfs")).findAny().orElse(null);
+    assertThat(failedResult).isNotNull();
     assertThat(failedResult.isSuccess()).isFalse();
     assertThat(failedResult.getException()).isNotNull();
     assertThat(failedResult.getException()).isInstanceOf(IOException.class).hasMessage("Mocked Exception While Parsing File.");

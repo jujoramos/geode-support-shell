@@ -31,10 +31,7 @@ import org.apache.geode.support.domain.marker.GeodeReplacement;
 /**
  * StatArchiveReader provides APIs to read statistic snapshots from an archive file.
  */
-@GeodeReplacement(
-    methods= { "bitsToDouble", "main" },
-    changes = "Internal classes were made top level."
-)
+@GeodeReplacement(changes = "Internal classes were made top level.")
 public class StatArchiveReader implements StatArchiveFormat {
 
   protected static final NumberFormat nf = NumberFormat.getNumberInstance();
@@ -966,7 +963,7 @@ public class StatArchiveReader implements StatArchiveFormat {
     }
   }
 
-  @GeodeReplacement(methods = "getValuesEx", changes = "Made protected.")
+  @GeodeReplacement(changes = "Made protected.")
   protected static class BitSeries {
     int count; // number of items in this series
     long currentStartBits;
@@ -1256,7 +1253,6 @@ public class StatArchiveReader implements StatArchiveFormat {
   /**
    * Defines a single instance of a resource type.
    */
-  @GeodeReplacement(methods = "Constructor")
   public static class ResourceInst {
     private final boolean loaded;
     private final StatArchiveFile archive;

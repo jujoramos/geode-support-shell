@@ -55,7 +55,7 @@ public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand
   }
 
   @ShellMethod(key = "filter statistics by date-time", value = "Scan the statistics files contained within the source folder and copy them to different folders, depending on whether they match the specified date time or not.")
-  public List<?> filterStatisticsByDateTime(
+  List<?> filterStatisticsByDateTime(
       @ShellOption(help = "Year to look for within the statistics samples.", value = "--year") @Min(2010) Integer year,
       @ShellOption(help = "Month [1 - 12] to look for within the statistics samples.", value = "--month") @Min(1) @Max(12) Integer month,
       @ShellOption(help = "Day of Month [1 - 31] to look for within the statistics samples.", value = "--day") @Min(1) @Max(31) Integer day,
@@ -83,8 +83,10 @@ public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand
     // Parse statistics metadata.
     List<Object> commandResult = new ArrayList<>();
     List<ParsingResult<SamplingMetadata>> parsingResults = statisticsService.parseMetadata(sourceFolder.toPath());
-    TableModelBuilder<String> resultModelBuilder = new TableModelBuilder().addRow().addValue("File Name").addValue("Matches");
-    TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder().addRow().addValue("File Name").addValue("Error Description");
+    TableModelBuilder<String> resultModelBuilder = new TableModelBuilder<>();
+    resultModelBuilder.addRow().addValue("File Name").addValue("Matches");
+    TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<>();
+    errorsModelBuilder.addRow().addValue("File Name").addValue("Error Description");
 
     // Process Results.
     if (parsingResults.isEmpty()) {
@@ -96,9 +98,9 @@ public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand
       Optional<Integer> secondsWrapper = Optional.ofNullable(second);
       parsingResults.sort(Comparator.comparing(ParsingResult::getFile));
 
-      parsingResults.stream().forEach(
+      parsingResults.forEach(
           parsingResult -> {
-            Boolean matches;
+            boolean matches;
             String filePath = FormatUtils.relativizePath(sourceFolder.toPath(), parsingResult.getFile());
 
             // Proceed if parsing succeeded.
@@ -124,7 +126,7 @@ public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand
               // Add row to results table no matter what.
               resultModelBuilder.addRow()
                   .addValue(filePath)
-                  .addValue(matches.toString());
+                  .addValue(String.valueOf(matches));
 
               // Try to move the file, add the row to the errors table if needed.
               try {

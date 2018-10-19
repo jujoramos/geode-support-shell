@@ -23,22 +23,10 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class SimpleValueFilter extends AbstractValueFilter {
 
-  /**
-   *
-   * @param typeId
-   * @param instanceId
-   * @param statisticId
-   */
   public SimpleValueFilter(String typeId, String instanceId, String statisticId, String archiveName) {
     super(typeId, instanceId, statisticId, archiveName);
   }
 
-  /**
-   *
-   * @param pattern
-   * @param actual
-   * @return
-   */
   private boolean matches(String pattern, String actual) {
     if (StringUtils.isBlank(pattern)) {
       return true;

@@ -38,7 +38,7 @@ public class Interval {
     this.finishTime = finishTime;
   }
 
-  public Interval withZoneSameInterval(ZoneId zoneId) {
+  Interval withZoneSameInterval(ZoneId zoneId) {
     Objects.requireNonNull(zoneId, "ZoneId can't be null");
     if (zoneId.equals(this.zoneId)) return this;
 
@@ -108,7 +108,6 @@ public class Interval {
       other = new Interval(zoneId, interval.startTime.withZoneSameInstant(zoneId), interval.finishTime.withZoneSameInstant(zoneId));
     }
 
-    return contains(other) ||
-        (startTime.compareTo(other.finishTime) <= 0 && other.startTime.compareTo(finishTime) <= 0);
+    return contains(other) || (startTime.compareTo(other.finishTime) <= 0 && other.startTime.compareTo(finishTime) <= 0);
   }
 }

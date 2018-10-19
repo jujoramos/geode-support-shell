@@ -23,7 +23,7 @@ import org.apache.geode.support.domain.marker.GeodeReplacement;
 /**
  * Provides the value series related to a single statistics.
  */
-@GeodeReplacement(methods = "getEndIdx", changes = "Made public.")
+@GeodeReplacement(changes = "Made public.")
 class SimpleValue extends AbstractValue {
   private final StatArchiveReader.ResourceInst resource;
 
