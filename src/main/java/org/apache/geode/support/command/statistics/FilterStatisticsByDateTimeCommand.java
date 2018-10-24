@@ -38,6 +38,7 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
+import org.apache.geode.support.command.AbstractStatisticsCommand;
 import org.apache.geode.support.domain.Interval;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.SamplingMetadata;
@@ -48,10 +49,12 @@ import org.apache.geode.support.utils.FormatUtils;
 @ShellComponent
 @ShellCommandGroup("Statistics Commands")
 public class FilterStatisticsByDateTimeCommand extends AbstractStatisticsCommand {
+  private StatisticsService statisticsService;
 
   @Autowired
   public FilterStatisticsByDateTimeCommand(FilesService filesService, StatisticsService statisticsService) {
-    super(filesService, statisticsService);
+    super(filesService);
+    this.statisticsService = statisticsService;
   }
 
   @ShellMethod(key = "filter statistics by date-time", value = "Scan the statistics files contained within the source folder and copy them to different folders, depending on whether they match the specified date time or not.")

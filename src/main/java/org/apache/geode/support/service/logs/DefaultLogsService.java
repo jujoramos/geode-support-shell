@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.slf4j.Logger;
@@ -34,16 +35,17 @@ class DefaultLogsService implements LogsService {
     this.logParser = logParser;
   }
 
-  LogMetadata parseSelectively(Path path, boolean intervalOnly) throws IOException {
+  LogMetadata parseSelectively(Path path, boolean intervalOnly) throws Exception {
     LogMetadata logFileMetadata;
 
     try {
       if (logger.isDebugEnabled()) logger.debug(String.format("Parsing File %s...", path.toString()));
+      long starTime = System.nanoTime();
       logFileMetadata = (intervalOnly) ? logParser.parseLogFileInterval(path) : logParser.parseLogFileMetadata(path);
-      if (logger.isDebugEnabled()) logger.debug(String.format("Parsing File  %s... Done!.", path.toString()));
-    } catch (IOException exception) {
-      String errorMessage = String.format("There was a problem while parsing file %s.", path.toString());
-      logger.error(errorMessage, exception);
+      long finishTime =  System.nanoTime();
+      if (logger.isDebugEnabled()) logger.debug(String.format("Parsing File  %s... Done!. Time elapsed: %d seconds.", path.toString(), TimeUnit.SECONDS.convert(finishTime - starTime, TimeUnit.NANOSECONDS)));
+    } catch (Exception exception) {
+      logger.error(String.format("Parsing File %s... Error: %s", path.toString(), exception.getMessage()));
       throw exception;
     }
 

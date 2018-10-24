@@ -12,7 +12,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.command.statistics;
+package org.apache.geode.support.command;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -25,19 +25,16 @@ import org.springframework.shell.table.TableModelBuilder;
 
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.service.FilesService;
-import org.apache.geode.support.service.StatisticsService;
 import org.apache.geode.support.utils.FormatUtils;
 
 // TODO: Spring doesn't know how to convert from String to Path. Add a custom converter and use Path instead of the old Sampling class.
 public class AbstractStatisticsCommand<V>  {
   protected FilesService filesService;
-  protected StatisticsService statisticsService;
-  final BorderStyle borderStyle = BorderStyle.fancy_double;
+  protected final BorderStyle borderStyle = BorderStyle.fancy_double;
 
   @Autowired
-  public AbstractStatisticsCommand(FilesService filesService, StatisticsService statisticsService) {
+  public AbstractStatisticsCommand(FilesService filesService) {
     this.filesService = filesService;
-    this.statisticsService = statisticsService;
   }
 
   /**
@@ -47,8 +44,8 @@ public class AbstractStatisticsCommand<V>  {
    * @param parsingResults The list of parsing results returned by the service layer.
    * @return The errors Table, or null if no errors happened while parsing the files.
    */
-  Table buildErrorsTable(Path sourcePath, List<ParsingResult<V>> parsingResults) {
-    Table errosTable = null;
+  protected Table buildErrorsTable(Path sourcePath, List<ParsingResult<V>> parsingResults) {
+    Table errorsTable = null;
     TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Error Description");
 
     parsingResults.stream()
@@ -63,8 +60,8 @@ public class AbstractStatisticsCommand<V>  {
         });
 
     TableBuilder errorsTableBuilder = new TableBuilder(errorsModelBuilder.build());
-    if (errorsTableBuilder.getModel().getRowCount() > 1) errosTable = errorsTableBuilder.addFullBorder(borderStyle).build();
+    if (errorsTableBuilder.getModel().getRowCount() > 1) errorsTable = errorsTableBuilder.addFullBorder(borderStyle).build();
 
-    return errosTable;
+    return errorsTable;
   }
 }

@@ -46,7 +46,7 @@ public class LogsServiceIntegrationTest {
   public void parseIntervalShouldReturnBothParsingErrorsAndParsingSuccessesWhenParsingSucceedsForSomeFilesAndFailsForOthers() {
     List<ParsingResult<LogMetadata>> parsingResults = logsService.parseInterval(LogsSampleDataUtils.rootFolder.toPath());
     assertThat(parsingResults).isNotNull();
-    assertThat(parsingResults.size()).isEqualTo(3);
+    assertThat(parsingResults.size()).isEqualTo(4);
 
     // unknownFormat.log
     String unparseableFilePath = LogsSampleDataUtils.unknownLogPath.toString();
@@ -77,6 +77,16 @@ public class LogsServiceIntegrationTest {
     assertThat(member9XResult.getFile().toAbsolutePath().toString()).isEqualTo(member9XFilePath);
     LogMetadata member9XMetadata = member9XResult.getData();
     LogsSampleDataUtils.assertMember9XMetadata(member9XMetadata, true);
+
+    // noHeader.log
+    String noHeaderFilePath = LogsSampleDataUtils.noHeaderLogPath.toString();
+    ParsingResult<LogMetadata> noHeaderResult = parsingResults.stream().filter(result -> result.getFile().toAbsolutePath().toString().equals(noHeaderFilePath)).findAny().orElse(null);
+    assertThat(noHeaderResult).isNotNull();
+    assertThat(noHeaderResult.isSuccess()).isTrue();
+    assertThat(noHeaderResult.getData()).isNotNull();
+    assertThat(noHeaderResult.getFile().toAbsolutePath().toString()).isEqualTo(noHeaderFilePath);
+    LogMetadata noHeaderMetadata = noHeaderResult.getData();
+    LogsSampleDataUtils.assertNoHeaderMetadata(noHeaderMetadata);
   }
 
   @Test
@@ -94,7 +104,7 @@ public class LogsServiceIntegrationTest {
   public void parseMetadataShouldReturnBothParsingErrorsAndParsingSuccessesWhenParsingSucceedsForSomeFilesAndFailsForOthers() {
     List<ParsingResult<LogMetadata>> parsingResults = logsService.parseMetadata(LogsSampleDataUtils.rootFolder.toPath());
     assertThat(parsingResults).isNotNull();
-    assertThat(parsingResults.size()).isEqualTo(3);
+    assertThat(parsingResults.size()).isEqualTo(4);
 
     // unknownFormat.log
     String unparseableFilePath = LogsSampleDataUtils.unknownLogPath.toString();
@@ -125,5 +135,15 @@ public class LogsServiceIntegrationTest {
     assertThat(member9XResult.getFile().toAbsolutePath().toString()).isEqualTo(member9XFilePath);
     LogMetadata member9XMetadata = member9XResult.getData();
     LogsSampleDataUtils.assertMember9XMetadata(member9XMetadata, false);
+
+    // noHeader.log
+    String noHeaderFilePath = LogsSampleDataUtils.noHeaderLogPath.toString();
+    ParsingResult<LogMetadata> noHeaderResult = parsingResults.stream().filter(result -> result.getFile().toAbsolutePath().toString().equals(noHeaderFilePath)).findAny().orElse(null);
+    assertThat(noHeaderResult).isNotNull();
+    assertThat(noHeaderResult.isSuccess()).isTrue();
+    assertThat(noHeaderResult.getData()).isNotNull();
+    assertThat(noHeaderResult.getFile().toAbsolutePath().toString()).isEqualTo(noHeaderFilePath);
+    LogMetadata noHeaderMetadata = noHeaderResult.getData();
+    LogsSampleDataUtils.assertNoHeaderMetadata(noHeaderMetadata);
   }
 }

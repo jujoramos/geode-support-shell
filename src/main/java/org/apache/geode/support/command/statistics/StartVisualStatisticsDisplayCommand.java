@@ -45,6 +45,7 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
+import org.apache.geode.support.command.AbstractStatisticsCommand;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
 import org.apache.geode.support.utils.FormatUtils;
@@ -54,6 +55,7 @@ import org.apache.geode.support.utils.FormatUtils;
 public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsCommand {
   public static final String VSD_HOME_KEY = "VSD_HOME";
   private static final Logger logger = LoggerFactory.getLogger(StartVisualStatisticsDisplayCommand.class);
+  private StatisticsService statisticsService;
   String defaultVsdHome;
   List<ProcessWrapper> launchedProcesses;
 
@@ -101,7 +103,8 @@ public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsComma
 
   @Autowired
   public StartVisualStatisticsDisplayCommand(FilesService filesService, StatisticsService statisticsService) {
-    super(filesService, statisticsService);
+    super(filesService);
+    this.statisticsService = statisticsService;
     this.launchedProcesses = new CopyOnWriteArrayList<>();
   }
 

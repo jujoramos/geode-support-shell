@@ -1,5 +1,5 @@
 
-[info 2018/04/17 15:19:48.658 IST server1 <main> tid=0x1] Startup Configuration:
+[info 2018/04/17 05:19:48.658 ART server1 <main> tid=0x1] Startup Configuration:
    ### GemFire Properties defined with system property ###
   locators=localhost[10101]
   security-manager=********
@@ -164,7 +164,7 @@
   validate-serializable-objects=false
 
 
-[info 2018/04/17 15:19:48.692 IST server1 <main> tid=0x1]
+[info 2018/04/17 05:19:48.692 ART server1 <main> tid=0x1]
   ---------------------------------------------------------------------------
 
     Licensed to the Apache Software Foundation (ASF) under one or more
@@ -286,13 +286,13 @@
       sun.rmi.dgc.server.gcInterval = 9223372036854775806
       user.country = US
       user.language = en
-      user.timezone = Europe/Dublin
+      user.timezone = America/Buenos_Aires
   Log4J 2 Configuration:
       jar:file:/Users/bwayne/Applications/GemFire/9.4.0/pivotal-gemfire-9.4.0/lib/geode-core-9.4.0.jar!/log4j2.xml
   ---------------------------------------------------------------------------
 
 
-[info 2018/04/17 15:19:48.696 IST server1 <main> tid=0x1] Startup Configuration:
+[info 2018/04/17 05:19:48.696 ART server1 <main> tid=0x1] Startup Configuration:
    ### GemFire Properties defined with system property ###
   locators=localhost[10101]
   security-manager=********
@@ -457,36 +457,36 @@
   validate-serializable-objects=false
 
 
-[info 2018/04/17 15:19:48.700 IST server1 <main> tid=0x1] initializing InternalDataSerializer with 3 services
+[info 2018/04/17 05:19:48.700 ART server1 <main> tid=0x1] initializing InternalDataSerializer with 3 services
 
-[info 2018/04/17 15:19:48.799 IST server1 <main> tid=0x1] Starting membership services
+[info 2018/04/17 05:19:48.799 ART server1 <main> tid=0x1] Starting membership services
 
-[info 2018/04/17 15:19:48.865 IST server1 <main> tid=0x1] JGroups channel created (took 66ms)
+[info 2018/04/17 05:19:48.865 ART server1 <main> tid=0x1] JGroups channel created (took 66ms)
 
-[info 2018/04/17 15:19:48.885 IST server1 <main> tid=0x1] GemFire P2P Listener started on /192.168.1.7:34134
+[info 2018/04/17 05:19:48.885 ART server1 <main> tid=0x1] GemFire P2P Listener started on /192.168.1.7:34134
 
-[info 2018/04/17 15:19:48.887 IST server1 <Geode Failure Detection Server thread 0> tid=0x1f] Started failure detection server thread on /192.168.1.7:19208.
+[info 2018/04/17 05:19:48.887 ART server1 <Geode Failure Detection Server thread 0> tid=0x1f] Started failure detection server thread on /192.168.1.7:19208.
 
-[info 2018/04/17 15:19:48.903 IST server1 <main> tid=0x1] Attempting to join the distributed system through coordinator 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 using address 192.168.1.7(server1:32310):1025
+[info 2018/04/17 05:19:48.903 ART server1 <main> tid=0x1] Attempting to join the distributed system through coordinator 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 using address 192.168.1.7(server1:32310):1025
 
-[info 2018/04/17 15:19:49.238 IST server1 <unicast receiver,bwayneMacBookPro-62747> tid=0x1b] received new view: View[192.168.1.7(locator1:32296:locator)<ec><v0>:1024|1] members: [192.168.1.7(locator1:32296:locator)<ec><v0>:1024, 192.168.1.7(server1:32310)<v1>:1025{lead}]
+[info 2018/04/17 05:19:49.238 ART server1 <unicast receiver,bwayneMacBookPro-62747> tid=0x1b] received new view: View[192.168.1.7(locator1:32296:locator)<ec><v0>:1024|1] members: [192.168.1.7(locator1:32296:locator)<ec><v0>:1024, 192.168.1.7(server1:32310)<v1>:1025{lead}]
   old view is: null
 
-[info 2018/04/17 15:19:49.244 IST server1 <main> tid=0x1] Finished joining (took 357ms).
+[info 2018/04/17 05:19:49.244 ART server1 <main> tid=0x1] Finished joining (took 357ms).
 
-[info 2018/04/17 15:19:49.244 IST server1 <main> tid=0x1] Starting DistributionManager 192.168.1.7(server1:32310)<v1>:1025.  (took 520 ms)
+[info 2018/04/17 05:19:49.244 ART server1 <main> tid=0x1] Starting DistributionManager 192.168.1.7(server1:32310)<v1>:1025.  (took 520 ms)
 
-[info 2018/04/17 15:19:49.246 IST server1 <main> tid=0x1] Initial (distribution manager) view =  View[192.168.1.7(locator1:32296:locator)<ec><v0>:1024|1] members: [192.168.1.7(locator1:32296:locator)<ec><v0>:1024, 192.168.1.7(server1:32310)<v1>:1025{lead}]
+[info 2018/04/17 05:19:49.246 ART server1 <main> tid=0x1] Initial (distribution manager) view =  View[192.168.1.7(locator1:32296:locator)<ec><v0>:1024|1] members: [192.168.1.7(locator1:32296:locator)<ec><v0>:1024, 192.168.1.7(server1:32310)<v1>:1025{lead}]
 
-[info 2018/04/17 15:19:49.246 IST server1 <main> tid=0x1] Admitting member <192.168.1.7(locator1:32296:locator)<ec><v0>:1024>. Now there are 1 non-admin member(s).
+[info 2018/04/17 05:19:49.246 ART server1 <main> tid=0x1] Admitting member <192.168.1.7(locator1:32296:locator)<ec><v0>:1024>. Now there are 1 non-admin member(s).
 
-[info 2018/04/17 15:19:49.247 IST server1 <main> tid=0x1] Admitting member <192.168.1.7(server1:32310)<v1>:1025>. Now there are 2 non-admin member(s).
+[info 2018/04/17 05:19:49.247 ART server1 <main> tid=0x1] Admitting member <192.168.1.7(server1:32310)<v1>:1025>. Now there are 2 non-admin member(s).
 
-[info 2018/04/17 15:19:49.279 IST server1 <P2P message reader for 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 shared unordered uid=1 port=58617> tid=0x26] Member 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 is equivalent or in the same redundancy zone.
+[info 2018/04/17 05:19:49.279 ART server1 <P2P message reader for 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 shared unordered uid=1 port=58617> tid=0x26] Member 192.168.1.7(locator1:32296:locator)<ec><v0>:1024 is equivalent or in the same redundancy zone.
 
-[info 2018/04/17 15:19:49.333 IST server1 <main> tid=0x1] Received cluster configuration from the locator
+[info 2018/04/17 05:19:49.333 ART server1 <main> tid=0x1] Received cluster configuration from the locator
 
-[info 2018/04/17 15:19:49.366 IST server1 <main> tid=0x1]
+[info 2018/04/17 05:19:49.366 ART server1 <main> tid=0x1]
   ***************************************************************
   Configuration for  'cluster'
 
@@ -495,70 +495,70 @@
   <cache xmlns="http://geode.apache.org/schema/cache" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" copy-on-read="false" is-server="false" lock-lease="120" lock-timeout="60" search-timeout="300" version="1.0" xsi:schemaLocation="http://geode.apache.org/schema/cache http://geode.apache.org/schema/cache/cache-1.0.xsd"/>
 
 
-[info 2018/04/17 15:19:49.367 IST server1 <main> tid=0x1] The "security-manager" configuration attribute can not be modified.
+[info 2018/04/17 05:19:49.367 ART server1 <main> tid=0x1] The "security-manager" configuration attribute can not be modified.
 
-[info 2018/04/17 15:19:49.463 IST server1 <main> tid=0x1] Requesting cluster configuration
+[info 2018/04/17 05:19:49.463 ART server1 <main> tid=0x1] Requesting cluster configuration
 
-[info 2018/04/17 15:19:49.561 IST server1 <main> tid=0x1] Initializing region _monitoringRegion_192.168.1.7<v1>1025
+[info 2018/04/17 05:19:49.561 ART server1 <main> tid=0x1] Initializing region _monitoringRegion_192.168.1.7<v1>1025
 
-[info 2018/04/17 15:19:49.565 IST server1 <main> tid=0x1] Initialization of region _monitoringRegion_192.168.1.7<v1>1025 completed
+[info 2018/04/17 05:19:49.565 ART server1 <main> tid=0x1] Initialization of region _monitoringRegion_192.168.1.7<v1>1025 completed
 
-[info 2018/04/17 15:19:50.078 IST server1 <main> tid=0x1] Initialized cache service org.apache.geode.connectors.jdbc.internal.JdbcConnectorServiceImpl
+[info 2018/04/17 05:19:50.078 ART server1 <main> tid=0x1] Initialized cache service org.apache.geode.connectors.jdbc.internal.JdbcConnectorServiceImpl
 
-[info 2018/04/17 15:19:50.091 IST server1 <main> tid=0x1] Initialized cache service org.apache.geode.cache.lucene.internal.LuceneServiceImpl
+[info 2018/04/17 05:19:50.091 ART server1 <main> tid=0x1] Initialized cache service org.apache.geode.cache.lucene.internal.LuceneServiceImpl
 
-[info 2018/04/17 15:19:50.092 IST server1 <main> tid=0x1] Initialized cache service com.gemstone.gemfire.OldClientSupportProvider
+[info 2018/04/17 05:19:50.092 ART server1 <main> tid=0x1] Initialized cache service com.gemstone.gemfire.OldClientSupportProvider
 
-[info 2018/04/17 15:19:50.188 IST server1 <main> tid=0x1] Initializing region PdxTypes
+[info 2018/04/17 05:19:50.188 ART server1 <main> tid=0x1] Initializing region PdxTypes
 
-[info 2018/04/17 15:19:50.189 IST server1 <main> tid=0x1] Initialization of region PdxTypes completed
+[info 2018/04/17 05:19:50.189 ART server1 <main> tid=0x1] Initialization of region PdxTypes completed
 
-[info 2018/04/17 15:19:50.255 IST server1 <main> tid=0x1] Cache server connection listener bound to address 192.168.1.7-0.0.0.0/0.0.0.0:40404 with backlog 1,000.
+[info 2018/04/17 05:19:50.255 ART server1 <main> tid=0x1] Cache server connection listener bound to address 192.168.1.7-0.0.0.0/0.0.0.0:40404 with backlog 1,000.
 
-[info 2018/04/17 15:19:50.264 IST server1 <main> tid=0x1] ClientHealthMonitorThread maximum allowed time between pings: 60,000
+[info 2018/04/17 05:19:50.264 ART server1 <main> tid=0x1] ClientHealthMonitorThread maximum allowed time between pings: 60,000
 
-[warning 2018/04/17 15:19:50.265 IST server1 <main> tid=0x1] Handshaker max Pool size: 4
+[warning 2018/04/17 05:19:50.265 ART server1 <main> tid=0x1] Handshaker max Pool size: 4
 
-[info 2018/04/17 15:19:50.273 IST server1 <main> tid=0x1] CacheServer Configuration:   port=40404 max-connections=800 max-threads=0 notify-by-subscription=true socket-buffer-size=32768 maximum-time-between-pings=60000 maximum-message-count=230000 message-time-to-live=180 eviction-policy=none capacity=1 overflow directory=. groups=[] loadProbe=ConnectionCountProbe loadPollInterval=5000 tcpNoDelay=true
+[info 2018/04/17 05:19:50.273 ART server1 <main> tid=0x1] CacheServer Configuration:   port=40404 max-connections=800 max-threads=0 notify-by-subscription=true socket-buffer-size=32768 maximum-time-between-pings=60000 maximum-message-count=230000 message-time-to-live=180 eviction-policy=none capacity=1 overflow directory=. groups=[] loadProbe=ConnectionCountProbe loadPollInterval=5000 tcpNoDelay=true
 
-[info 2018/04/17 15:19:58.304 IST server1 <Function Execution Processor1> tid=0x4a] Initializing region test
+[info 2018/04/17 05:19:58.304 ART server1 <Function Execution Processor1> tid=0x4a] Initializing region test
 
-[info 2018/04/17 15:19:58.306 IST server1 <Function Execution Processor1> tid=0x4a] Initialization of region test completed
+[info 2018/04/17 05:19:58.306 ART server1 <Function Execution Processor1> tid=0x4a] Initialization of region test completed
 
-[info 2018/04/17 15:19:58.340 IST server1 <Function Execution Processor1> tid=0x4a] XmlEntity:searchString: //cache:region[@name='test']
+[info 2018/04/17 05:19:58.340 ART server1 <Function Execution Processor1> tid=0x4a] XmlEntity:searchString: //cache:region[@name='test']
 
-[info 2018/04/17 15:19:59.679 IST server1 <Function Execution Processor1> tid=0x4a] Initializing region region
+[info 2018/04/17 05:19:59.679 ART server1 <Function Execution Processor1> tid=0x4a] Initializing region region
 
-[info 2018/04/17 15:19:59.680 IST server1 <Function Execution Processor1> tid=0x4a] Initialization of region region completed
+[info 2018/04/17 05:19:59.680 ART server1 <Function Execution Processor1> tid=0x4a] Initialization of region region completed
 
-[info 2018/04/17 15:19:59.686 IST server1 <Function Execution Processor1> tid=0x4a] XmlEntity:searchString: //cache:region[@name='region']
+[info 2018/04/17 05:19:59.686 ART server1 <Function Execution Processor1> tid=0x4a] XmlEntity:searchString: //cache:region[@name='region']
 
-[warning 2018/04/17 15:19:59.686 IST server1 <Handshaker /10.89.234.48:1528 Thread 38> tid=0x3218b] Bridge server: failed accepting client connection {0}
-java.io.EOFException
-at com.gemstone.gemfire.internal.cache.tier.sockets.AcceptorImpl.handleNewClientConnection(AcceptorImpl.java:1471)
-at com.gemstone.gemfire.internal.cache.tier.sockets.AcceptorImpl$5.run(AcceptorImpl.java:1368)
-at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
-at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
-at java.lang.Thread.run(Thread.java:748)
+[warning 2018/04/17 05:19:59.686 ART server1 <Handshaker /10.89.234.48:1528 Thread 38> tid=0x3218b] Bridge server: failed accepting client connection {0}
+  java.io.EOFException
+    at com.gemstone.gemfire.internal.cache.tier.sockets.AcceptorImpl.handleNewClientConnection(AcceptorImpl.java:1471)
+    at com.gemstone.gemfire.internal.cache.tier.sockets.AcceptorImpl$5.run(AcceptorImpl.java:1368)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+    at java.lang.Thread.run(Thread.java:748)
 
-[info 2018/04/17 15:20:43.448 IST server1 <Function Execution Processor1> tid=0x4a] Received GFSH shutdown. Shutting down member 192.168.1.7(server1:32310)<v1>:1025
+[info 2018/04/17 05:20:43.448 ART server1 <Function Execution Processor1> tid=0x4a] Received GFSH shutdown. Shutting down member 192.168.1.7(server1:32310)<v1>:1025
 
-[info 2018/04/17 15:20:44.464 IST server1 <pool-3-thread-1> tid=0x4e] GemFireCache[id = 1914615775; isClosing = true; isShutDownAll = false; created = Tue Apr 17 15:19:49 IST 2018; server = true; copyOnRead = false; lockLease = 120; lockTimeout = 60]: Now closing.
+[info 2018/04/17 05:20:44.464 ART server1 <pool-3-thread-1> tid=0x4e] GemFireCache[id = 1914615775; isClosing = true; isShutDownAll = false; created = Tue Apr 17 05:19:49 ART 2018; server = true; copyOnRead = false; lockLease = 120; lockTimeout = 60]: Now closing.
 
-[info 2018/04/17 15:20:44.478 IST server1 <pool-3-thread-1> tid=0x4e] Cache server on port 40,404 is shutting down.
+[info 2018/04/17 05:20:44.478 ART server1 <pool-3-thread-1> tid=0x4e] Cache server on port 40,404 is shutting down.
 
-[info 2018/04/17 15:20:44.488 IST server1 <pool-3-thread-1> tid=0x4e] Shutting down DistributionManager 192.168.1.7(server1:32310)<v1>:1025.
+[info 2018/04/17 05:20:44.488 ART server1 <pool-3-thread-1> tid=0x4e] Shutting down DistributionManager 192.168.1.7(server1:32310)<v1>:1025.
 
-[info 2018/04/17 15:20:45.596 IST server1 <pool-3-thread-1> tid=0x4e] Now closing distribution for 192.168.1.7(server1:32310)<v1>:1025
+[info 2018/04/17 05:20:45.596 ART server1 <pool-3-thread-1> tid=0x4e] Now closing distribution for 192.168.1.7(server1:32310)<v1>:1025
 
-[info 2018/04/17 15:20:45.596 IST server1 <pool-3-thread-1> tid=0x4e] Stopping membership services
+[info 2018/04/17 05:20:45.596 ART server1 <pool-3-thread-1> tid=0x4e] Stopping membership services
 
-[info 2018/04/17 15:20:45.598 IST server1 <Geode Failure Detection Server thread 0> tid=0x1f] GMSHealthMonitor server thread exiting
+[info 2018/04/17 05:20:45.598 ART server1 <Geode Failure Detection Server thread 0> tid=0x1f] GMSHealthMonitor server thread exiting
 
-[info 2018/04/17 15:20:45.598 IST server1 <pool-3-thread-1> tid=0x4e] GMSHealthMonitor server socket is closed in stopServices().
+[info 2018/04/17 05:20:45.598 ART server1 <pool-3-thread-1> tid=0x4e] GMSHealthMonitor server socket is closed in stopServices().
 
-[info 2018/04/17 15:20:45.598 IST server1 <pool-3-thread-1> tid=0x4e] GMSHealthMonitor serverSocketExecutor is terminated
+[info 2018/04/17 05:20:45.598 ART server1 <pool-3-thread-1> tid=0x4e] GMSHealthMonitor serverSocketExecutor is terminated
 
-[info 2018/04/17 15:20:45.609 IST server1 <pool-3-thread-1> tid=0x4e] DistributionManager stopped in 1,121ms.
+[info 2018/04/17 05:20:45.609 ART server1 <pool-3-thread-1> tid=0x4e] DistributionManager stopped in 1,121ms.
 
-[info 2018/04/17 15:20:45.610 IST server1 <pool-3-thread-1> tid=0x4e] Marking DistributionManager 192.168.1.7(server1:32310)<v1>:1025 as closed.
+[info 2018/04/17 05:20:45.610 ART server1 <pool-3-thread-1> tid=0x4e] Marking DistributionManager 192.168.1.7(server1:32310)<v1>:1025 as closed.

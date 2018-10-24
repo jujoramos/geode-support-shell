@@ -37,6 +37,7 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 
+import org.apache.geode.support.command.AbstractStatisticsCommand;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.Category;
 import org.apache.geode.support.domain.statistics.Sampling;
@@ -49,6 +50,7 @@ import org.apache.geode.support.utils.FormatUtils;
 @ShellComponent
 @ShellCommandGroup("Statistics Commands")
 public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
+  private StatisticsService statisticsService;
 
   /**
    * Representation about how the results should be grouped.
@@ -60,7 +62,8 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
 
   @Autowired
   public ShowStatisticsSummaryCommand(FilesService filesService, StatisticsService statisticsService) {
-    super(filesService, statisticsService);
+    super(filesService);
+    this.statisticsService = statisticsService;
   }
 
   /**
@@ -255,7 +258,7 @@ public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
     } else {
       Table resultsTable = GroupCriteria.Sampling.equals(groupCriteria) ? buildTableGroupedBySampling(sourcePath, showEmptyStatistics, statFilter, parsingResults) : buildTableGroupedByStatistic(sourcePath, showEmptyStatistics, statFilter, parsingResults);
       if (resultsTable != null) commandResult.add(resultsTable);
-      Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
+      @SuppressWarnings("unchecked") Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
       if (errorsTable != null) commandResult.add(errorsTable);
       if (commandResult.isEmpty()) commandResult.add("No matching results found.");
     }

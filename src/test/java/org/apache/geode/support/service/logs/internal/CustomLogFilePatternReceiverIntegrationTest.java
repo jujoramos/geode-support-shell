@@ -258,4 +258,19 @@ public class CustomLogFilePatternReceiverIntegrationTest {
       assertThat(patterns.parallelStream().anyMatch(message::contains)).isTrue();
     }
   }
+
+  @Test
+  public void parseFileShouldReturnAllLoggingEventsMatchingTheErrorLevelFilter() throws Exception {
+    logFilePatternReceiver = spy(new CustomLogFilePatternReceiver("(LEVEL >= ERROR)"));
+    List<LoggingEvent> loggingEvents = logFilePatternReceiver.parseFile(LogsSampleDataUtils.noHeaderLogPath, false);
+
+    assertThat(loggingEvents.size()).isEqualTo(2);
+    for (LoggingEvent loggingEvent : loggingEvents) {
+      List<String> errors = Arrays.asList("org.apache.geode.ForcedDisconnectException", "com.gemstone.gemfire.cache.CacheXmlException");
+      assertThat(loggingEvent.getMessage()).isNotNull();
+      assertThat(loggingEvent.getLevel()).isNotNull().isEqualTo(Level.ERROR);
+      String message = (String) loggingEvent.getMessage();
+      assertThat(errors.parallelStream().anyMatch(message::contains)).isTrue();
+    }
+  }
 }

@@ -30,6 +30,7 @@ public class Log4JParserIntegrationTest {
 
   @Test
   public void parseLogFileIntervalShouldWorkCorrectly() throws IOException {
+    LogsSampleDataUtils.assertNoHeaderMetadata(logParser.parseLogFileInterval(LogsSampleDataUtils.noHeaderLogPath));
     LogsSampleDataUtils.assertMember8XMetadata(logParser.parseLogFileInterval(LogsSampleDataUtils.member8XLogPath), true);
     LogsSampleDataUtils.assertMember9XMetadata(logParser.parseLogFileInterval(LogsSampleDataUtils.member9XLogPath), true);
   }
@@ -46,6 +47,7 @@ public class Log4JParserIntegrationTest {
 
   @Test
   public void parseLogFileMetadataShouldWorkCorrectly() throws IOException {
+    LogsSampleDataUtils.assertNoHeaderMetadata(logParser.parseLogFileInterval(LogsSampleDataUtils.noHeaderLogPath));
     LogsSampleDataUtils.assertMember8XMetadata(logParser.parseLogFileMetadata(LogsSampleDataUtils.member8XLogPath), false);
     LogsSampleDataUtils.assertMember9XMetadata(logParser.parseLogFileMetadata(LogsSampleDataUtils.member9XLogPath), false);
   }

@@ -85,7 +85,7 @@ public class DefaultLogsServiceTest {
   }
 
   @Test
-  public void parseSelectivelyShouldExecuteTheCorrectMethod() throws IOException {
+  public void parseSelectivelyShouldExecuteTheCorrectMethod() throws Exception {
     when(mockedLogParser.parseLogFileInterval(mockedFileOnePath)).thenReturn(mock(LogMetadata.class));
     assertThat(logsService.parseSelectively(mockedFileOnePath, true)).isNotNull();
     verify(mockedLogParser, times(1)).parseLogFileInterval(mockedFileOnePath);
@@ -99,9 +99,9 @@ public class DefaultLogsServiceTest {
 
   @Test
   @Parameters( { "true", "false" })
-  public void parseAllShouldReturnParsingErrorWhenSourcePathCanNotBeTraversed(String intervalOnly) throws Exception {
+  public void parseAllShouldReturnParsingErrorWhenSourcePathCanNotBeTraversed(boolean intervalOnly) throws Exception {
     when(Files.walk(mockedDirectoryPath)).thenThrow(new IOException("Mocked IOException"));
-    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, Boolean.valueOf(intervalOnly));
+    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
 
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(1);
@@ -115,9 +115,9 @@ public class DefaultLogsServiceTest {
 
   @Test
   @Parameters( { "true", "false" })
-  public void parseAllShouldReturnOnlyParsingErrorsWhenParseSelectivelyFailsForAllFiles(String intervalOnly) throws Exception {
+  public void parseAllShouldReturnOnlyParsingErrorsWhenParseSelectivelyFailsForAllFiles(boolean intervalOnly) throws Exception {
     doThrow(new IOException("Mocked Exception While Parsing File.")).when(logsService).parseSelectively(any(), anyBoolean());
-    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, Boolean.valueOf(intervalOnly));
+    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
 
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(2);
@@ -139,11 +139,11 @@ public class DefaultLogsServiceTest {
 
   @Test
   @Parameters( { "true", "false" })
-  public void parseAllShouldReturnOnlyParsingSuccessesWhenParseSelectivelySucceedsForAllFiles(String intervalOnly) throws Exception {
+  public void parseAllShouldReturnOnlyParsingSuccessesWhenParseSelectivelySucceedsForAllFiles(boolean intervalOnly) throws Exception {
     LogMetadata mockedMetadata = mock(LogMetadata.class);
     doReturn(mockedMetadata).when(logsService).parseSelectively(any(), anyBoolean());
 
-    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, Boolean.valueOf(intervalOnly));
+    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(2);
 
@@ -162,12 +162,12 @@ public class DefaultLogsServiceTest {
 
   @Test
   @Parameters( { "true", "false" })
-  public void parseAllShouldReturnBothParsingErrorsAndParsingSuccessesWhenParseSelectivelySucceedsForSomeFilesAndFailsForOthers(String intervalOnly) throws Exception {
+  public void parseAllShouldReturnBothParsingErrorsAndParsingSuccessesWhenParseSelectivelySucceedsForSomeFilesAndFailsForOthers(boolean intervalOnly) throws Exception {
     LogMetadata mockedMetadata = mock(LogMetadata.class);
-    doReturn(mockedMetadata).when(logsService).parseSelectively(mockedFileOnePath, Boolean.valueOf(intervalOnly));
-    doThrow(new IOException("Mocked Exception While Parsing File.")).when(logsService).parseSelectively(mockedFileTwoPath, Boolean.valueOf(intervalOnly));
+    doReturn(mockedMetadata).when(logsService).parseSelectively(mockedFileOnePath, intervalOnly);
+    doThrow(new IOException("Mocked Exception While Parsing File.")).when(logsService).parseSelectively(mockedFileTwoPath, intervalOnly);
 
-    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, Boolean.valueOf(intervalOnly));
+    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(2);
     verify(logsService, times(2)).parseSelectively(any(), anyBoolean());

@@ -3,6 +3,7 @@ package org.apache.geode.support.service.logs.internal;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.Supplier;
@@ -94,12 +95,13 @@ class Log4jParser extends AbstractLogParser {
     // Metadata not found, return what we can.
     if (loggingEvents.isEmpty()) return logMetadata;
 
-    // Metadata found, parse what we need.
+    // Metadata found, get what we need.
     String loggingEventMessage = loggingEvents.get(0).getMessage().toString();
     String productVersion = parseProductVersion(loggingEventMessage);
     String operatingSystem = parseOperatingSystem(loggingEventMessage);
     Properties systemProperties = parseSystemProperties(loggingEventMessage);
+    ZoneId logFileZoneId = ((systemProperties != null) && (systemProperties.containsKey("user.timezone"))) ? ZoneId.of(systemProperties.getProperty("user.timezone")) : null;
 
-    return LogMetadata.of(filePath.toString(), logMetadata.getStartTimeStamp(), logMetadata.getFinishTimeStamp(), productVersion, operatingSystem, systemProperties);
+    return LogMetadata.of(filePath.toString(), logFileZoneId, logMetadata.getStartTimeStamp(), logMetadata.getFinishTimeStamp(), productVersion, operatingSystem, systemProperties);
   }
 }

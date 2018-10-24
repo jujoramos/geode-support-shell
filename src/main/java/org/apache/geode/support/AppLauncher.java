@@ -38,7 +38,7 @@ import org.springframework.shell.jline.PromptProvider;
  *
  */
 @SpringBootApplication
-@ComponentScan(basePackages = { "org.apache.geode.support.service", "org.apache.geode.support.command.statistics" })
+@ComponentScan(basePackages = { "org.apache.geode.support.service", "org.apache.geode.support.command.statistics", "org.apache.geode.support.command.logs" })
 public class AppLauncher {
 
   public static void main(String args[]) {

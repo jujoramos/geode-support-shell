@@ -1,0 +1,189 @@
+
+[warning 2018/09/05 21:03:20.179 EDT server_10 <ServerConnection on port 40511 Thread 62> tid=0x6d15e] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:05:00.198 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] Server connection from [identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1; port=46756]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:05:00.214 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:05:51.013 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=54854]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:05:51.013 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:07:42.620 EDT server_10 <ServerConnection on port 40511 Thread 13> tid=0x876] Server connection from [identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1; port=34410]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:07:42.620 EDT server_10 <ServerConnection on port 40511 Thread 13> tid=0x876] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:08:10.228 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] Server connection from [identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1; port=37632]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:08:10.228 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:29:20.119 EDT server_10 <ServerConnection on port 40511 Thread 13> tid=0x876] Server connection from [identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1; port=34278]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:29:20.119 EDT server_10 <ServerConnection on port 40511 Thread 13> tid=0x876] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:34:20.130 EDT server_10 <ServerConnection on port 40511 Thread 13> tid=0x876] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=52534]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:34:20.131 EDT server_10 <ServerConnection on port 40511 Thread 13> tid=0x876] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:42:42.709 EDT server_10 <ServerConnection on port 40511 Thread 48> tid=0x6bc6f] Server connection from [identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1; port=35736]: connection disconnect detected by EOF.
+
+[info 2018/09/05 21:44:26.420 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=33450]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:44:26.420 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:50:29.683 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=38968]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:50:29.683 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:50:29.685 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] Server connection from [identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1; port=48014]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:50:29.685 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:50:50.130 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] Server connection from [identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1; port=35884]: connection disconnect detected by EOF.
+
+[info 2018/09/05 21:50:50.146 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=39256]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:50:50.147 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:53:05.493 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] Server connection from [identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1; port=49716]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:53:05.493 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 21:54:40.140 EDT server_10 <ServerConnection on port 40511 Thread 13> tid=0x876] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=42738]: connection disconnect detected by EOF.
+
+[info 2018/09/05 21:55:06.577 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] Server connection from [identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1; port=39804]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 21:55:06.577 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:22:loner):39814:4f82db1b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 22:00:16.313 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] Server connection from [identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1; port=54388]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 22:00:16.313 EDT server_10 <ServerConnection on port 40511 Thread 55> tid=0x6ca36] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[info 2018/09/05 22:01:34.975 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] Server connection from [identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1; port=55296]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 22:01:34.976 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:16:loner):54652:6e508225:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[warning 2018/09/05 22:02:58.100 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=50164]: Unexpected IOException: 
+java.net.SocketException: Connection reset
+	at java.net.SocketInputStream.read(SocketInputStream.java:210)
+	at java.net.SocketInputStream.read(SocketInputStream.java:141)
+	at org.apache.geode.internal.cache.tier.sockets.Message.fetchHeader(Message.java:809)
+	at org.apache.geode.internal.cache.tier.sockets.Message.readHeaderAndBody(Message.java:659)
+	at org.apache.geode.internal.cache.tier.sockets.Message.receiveWithHeaderReadTimeout(Message.java:1125)
+	at org.apache.geode.internal.cache.tier.sockets.Message.receive(Message.java:1136)
+	at org.apache.geode.internal.cache.tier.sockets.Message.receive(Message.java:1145)
+	at org.apache.geode.internal.cache.tier.sockets.BaseCommand.readRequest(BaseCommand.java:851)
+	at org.apache.geode.internal.cache.tier.sockets.ServerConnection.doNormalMsg(ServerConnection.java:792)
+	at org.apache.geode.internal.cache.tier.sockets.OriginalServerConnection.doOneMessage(OriginalServerConnection.java:85)
+	at org.apache.geode.internal.cache.tier.sockets.ServerConnection.run(ServerConnection.java:1248)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at org.apache.geode.internal.cache.tier.sockets.AcceptorImpl$4$1.run(AcceptorImpl.java:644)
+	at java.lang.Thread.run(Thread.java:748)
+
+[warning 2018/09/05 22:02:58.100 EDT server_10 <ServerConnection on port 40511 Thread 63> tid=0x6d160] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: Connection reset
+
+[info 2018/09/05 22:03:06.650 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=50416]: connection disconnect detected by EOF.
+
+[warning 2018/09/05 22:03:06.650 EDT server_10 <ServerConnection on port 40511 Thread 28> tid=0x4253f] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[warning 2018/09/05 23:10:00.656 EDT server_10 <ServerConnection on port 40511 Thread 57> tid=0x6ca4f] Server connection from [identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1; port=54370]: Unexpected IOException: 
+java.net.SocketException: Connection reset
+	at java.net.SocketInputStream.read(SocketInputStream.java:210)
+	at java.net.SocketInputStream.read(SocketInputStream.java:141)
+	at org.apache.geode.internal.cache.tier.sockets.Message.fetchHeader(Message.java:809)
+	at org.apache.geode.internal.cache.tier.sockets.Message.readHeaderAndBody(Message.java:659)
+	at org.apache.geode.internal.cache.tier.sockets.Message.receiveWithHeaderReadTimeout(Message.java:1125)
+	at org.apache.geode.internal.cache.tier.sockets.Message.receive(Message.java:1136)
+	at org.apache.geode.internal.cache.tier.sockets.Message.receive(Message.java:1145)
+	at org.apache.geode.internal.cache.tier.sockets.BaseCommand.readRequest(BaseCommand.java:851)
+	at org.apache.geode.internal.cache.tier.sockets.ServerConnection.doNormalMsg(ServerConnection.java:792)
+	at org.apache.geode.internal.cache.tier.sockets.OriginalServerConnection.doOneMessage(OriginalServerConnection.java:85)
+	at org.apache.geode.internal.cache.tier.sockets.ServerConnection.run(ServerConnection.java:1248)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at org.apache.geode.internal.cache.tier.sockets.AcceptorImpl$4$1.run(AcceptorImpl.java:644)
+	at java.lang.Thread.run(Thread.java:748)
+
+[warning 2018/09/05 23:10:40.147 EDT server_10 <ServerConnection on port 40511 Thread 81> tid=0xbfa40] ClientHealthMonitor: Unregistering client with member id identity(0.0.0.0(GemfireApplication:14:loner):41504:d12be61b:GemfireApplication(version:GFE 8.1),connection=1 due to: The connection has been reset while reading the header
+
+[severe 2018/09/05 23:10:30.147 EDT server_10 <unicast receiver,vplgemfirdcph10-52912> tid=0x1c] Membership service failure: Unable to form a TCP/IP connection in a reasonable amount of time
+org.apache.geode.ForcedDisconnectException: Unable to form a TCP/IP connection in a reasonable amount of time
+	at org.apache.geode.distributed.internal.membership.gms.mgr.GMSMembershipManager.forceDisconnect(GMSMembershipManager.java:2531)
+	at org.apache.geode.distributed.internal.membership.gms.membership.GMSJoinLeave.forceDisconnect(GMSJoinLeave.java:1045)
+	at org.apache.geode.distributed.internal.membership.gms.membership.GMSJoinLeave.processRemoveRequest(GMSJoinLeave.java:657)
+	at org.apache.geode.distributed.internal.membership.gms.membership.GMSJoinLeave.processMessage(GMSJoinLeave.java:1792)
+	at org.apache.geode.distributed.internal.membership.gms.messenger.JGroupsMessenger$JGroupsReceiver.receive(JGroupsMessenger.java:1284)
+	at org.jgroups.JChannel.invokeCallback(JChannel.java:816)
+	at org.jgroups.JChannel.up(JChannel.java:741)
+	at org.jgroups.stack.ProtocolStack.up(ProtocolStack.java:1030)
+	at org.jgroups.protocols.FRAG2.up(FRAG2.java:165)
+	at org.jgroups.protocols.FlowControl.up(FlowControl.java:390)
+	at org.jgroups.protocols.UNICAST3.deliverMessage(UNICAST3.java:1077)
+	at org.jgroups.protocols.UNICAST3.handleDataReceived(UNICAST3.java:792)
+	at org.jgroups.protocols.UNICAST3.up(UNICAST3.java:433)
+	at org.apache.geode.distributed.internal.membership.gms.messenger.StatRecorder.up(StatRecorder.java:73)
+	at org.apache.geode.distributed.internal.membership.gms.messenger.AddressManager.up(AddressManager.java:72)
+	at org.jgroups.protocols.TP.passMessageUp(TP.java:1658)
+	at org.jgroups.protocols.TP$SingleMessageHandler.run(TP.java:1876)
+	at org.jgroups.util.DirectExecutor.execute(DirectExecutor.java:10)
+	at org.jgroups.protocols.TP.handleSingleMessage(TP.java:1789)
+	at org.jgroups.protocols.TP.receive(TP.java:1714)
+	at org.apache.geode.distributed.internal.membership.gms.messenger.Transport.receive(Transport.java:152)
+	at org.jgroups.protocols.UDP$PacketReceiver.run(UDP.java:701)
+	at java.lang.Thread.run(Thread.java:748)
+
+[info 2018/09/05 23:11:13.822 EDT server_10 <ReconnectThread> tid=0x320a9] Initializing region _monitoringRegion_0.0.0.0<v7712>10386
+
+[info 2018/09/05 23:11:13.846 EDT server_10 <ReconnectThread> tid=0x320a9] Region _monitoringRegion_0.0.0.0<v7712>10386 requesting initial image from 0.0.0.0(locator:33611:locator)<ec><v0>:41078
+
+[info 2018/09/05 23:11:13.848 EDT server_10 <ReconnectThread> tid=0x320a9] _monitoringRegion_0.0.0.0<v7712>10386 is done getting image from 0.0.0.0(locator:33611:locator)<ec><v0>:41078. isDeltaGII is false
+
+[info 2018/09/05 23:11:13.848 EDT server_10 <ReconnectThread> tid=0x320a9] Initialization of region _monitoringRegion_0.0.0.0<v7712>10386 completed
+
+[info 2018/09/05 23:11:13.883 EDT server_10 <ReconnectThread> tid=0x320a9] The cache has been created with "use-cluster-configuration=false". It will not receive any cluster configuration
+
+[info 2018/09/05 23:11:13.897 EDT server_10 <ReconnectThread> tid=0x320a9] Resetting original MemoryPoolMXBean heap threshold bytes 0 on pool CMS Old Gen
+
+[info 2018/09/05 23:11:14.074 EDT server_10 <ReconnectThread> tid=0x320a9] Shutting down DistributionManager 0.0.0.0(server_10:1268)<v7712>:10386. 
+
+[info 2018/09/05 23:11:14.175 EDT server_10 <ReconnectThread> tid=0x320a9] Now closing distribution for 0.0.0.0(server_10:1268)<v7712>:10386
+
+[info 2018/09/05 23:11:14.346 EDT server_10 <ReconnectThread> tid=0x320a9] DistributionManager stopped in 272ms.
+
+[info 2018/09/05 23:11:14.346 EDT server_10 <ReconnectThread> tid=0x320a9] Marking DistributionManager 0.0.0.0(server_10:1268)<v7712>:10386 as closed.
+
+[error 2018/09/05 23:11:14.347 EDT server_10 <ReconnectThread> tid=0x320a9] Exception occurred while trying to create the cache during reconnect
+com.gemstone.gemfire.cache.CacheXmlException: While reading Cache XML null. Class "util.CustomSerializer" is not an instance of Declarable.
+	at com.gemstone.gemfire.internal.cache.xmlcache.CacheXmlParser.createDeclarable(CacheXmlParser.java:2202)
+	at com.gemstone.gemfire.internal.cache.xmlcache.CacheXmlParser.endPdxSerializer(CacheXmlParser.java:3573)
+	at com.gemstone.gemfire.internal.cache.xmlcache.CacheXmlParser.endElement(CacheXmlParser.java:3476)
+	at com.gemstone.gemfire.internal.cache.xmlcache.CacheXmlParser$DefaultHandlerDelegate.endElement(CacheXmlParser.java:3807)
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.endElement(AbstractSAXParser.java:609)
+	at com.sun.org.apache.xerces.internal.impl.xs.XMLSchemaValidator.endElement(XMLSchemaValidator.java:857)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanEndElement(XMLDocumentFragmentScannerImpl.java:1782)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl$FragmentContentDriver.next(XMLDocumentFragmentScannerImpl.java:2967)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl.next(XMLDocumentScannerImpl.java:602)
+	at com.sun.org.apache.xerces.internal.impl.XMLNSDocumentScannerImpl.next(XMLNSDocumentScannerImpl.java:112)
+	at com.sun.org.apache.xerces.internal.impl.XMLDocumentFragmentScannerImpl.scanDocument(XMLDocumentFragmentScannerImpl.java:505)
+	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:841)
+	at com.sun.org.apache.xerces.internal.parsers.XML11Configuration.parse(XML11Configuration.java:770)
+	at com.sun.org.apache.xerces.internal.parsers.XMLParser.parse(XMLParser.java:141)
+	at com.sun.org.apache.xerces.internal.parsers.AbstractSAXParser.parse(AbstractSAXParser.java:1213)
+	at com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl$JAXPSAXParser.parse(SAXParserImpl.java:643)
+	at com.sun.org.apache.xerces.internal.jaxp.SAXParserImpl.parse(SAXParserImpl.java:327)
+	at javax.xml.parsers.SAXParser.parse(SAXParser.java:195)
+	at com.gemstone.gemfire.internal.cache.xmlcache.CacheXmlParser.parse(CacheXmlParser.java:209)
+	at com.gemstone.gemfire.internal.cache.GemFireCacheImpl.loadCacheXml(GemFireCacheImpl.java:4259)
+	at com.gemstone.gemfire.internal.cache.GemFireCacheImpl.initializeDeclarativeCache(GemFireCacheImpl.java:1178)
+	at com.gemstone.gemfire.internal.cache.GemFireCacheImpl.init(GemFireCacheImpl.java:1020)
+	at com.gemstone.gemfire.internal.cache.GemFireCacheImpl.create(GemFireCacheImpl.java:684)
+	at com.gemstone.gemfire.distributed.internal.InternalDistributedSystem.reconnect(InternalDistributedSystem.java:2909)
+	at com.gemstone.gemfire.distributed.internal.InternalDistributedSystem.tryReconnect(InternalDistributedSystem.java:2655)
+	at com.gemstone.gemfire.distributed.internal.InternalDistributedSystem.disconnect(InternalDistributedSystem.java:1058)
+	at com.gemstone.gemfire.distributed.internal.DistributionManager$MyListener.membershipFailure(DistributionManager.java:4816)
+	at com.gemstone.gemfire.distributed.internal.membership.jgroup.JGroupMembershipManager.uncleanShutdown(JGroupMembershipManager.java:2729)
+	at com.gemstone.gemfire.distributed.internal.membership.jgroup.JGroupMembershipManager$Puller.channelClosing(JGroupMembershipManager.java:1211)
+	at com.gemstone.org.jgroups.JChannel$CloserThread.run(JChannel.java:1617)
+
+[info 2018/09/05 23:12:14.347 EDT server_10 <ReconnectThread> tid=0x320a9] Attempting to reconnect to the distributed system.  This is attempt #1,001.

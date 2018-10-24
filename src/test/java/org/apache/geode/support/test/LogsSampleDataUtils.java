@@ -18,9 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Properties;
 
 import org.apache.geode.support.domain.logs.LogMetadata;
+import org.apache.geode.support.utils.FormatUtils;
 
 /**
  * Class used in integration tests to store and assert the hardcoded contents of the logs files within the samples directory.
@@ -29,9 +33,13 @@ import org.apache.geode.support.domain.logs.LogMetadata;
  */
 public final class LogsSampleDataUtils {
   public static final File rootFolder = new File(LogsSampleDataUtils.class.getResource("/samples/logs").getFile());
-  public static final Path unknownLogPath = rootFolder.toPath().resolve("unknownFormat.log");
-  public static final Path member8XLogPath = rootFolder.toPath().resolve("member_8X.log");
-  public static final Path member9XLogPath = rootFolder.toPath().resolve("member_9X.log");
+  public static final File parseableFolder = rootFolder.toPath().resolve("parseable").toFile();
+  public static final File unparseableFolder = rootFolder.toPath().resolve("unparseable").toFile();
+  public static final Path noHeaderLogPath = parseableFolder.toPath().resolve("noHeader.log");
+  public static final Path member8XLogPath = parseableFolder.toPath().resolve("member_8X.log");
+  public static final Path member9XLogPath = parseableFolder.toPath().resolve("member_9X.log");
+  public static final Path unknownLogPath = unparseableFolder.toPath().resolve("unknownFormat.log");
+  private static final LogMetadata noHeader_Metadata;
   private static final LogMetadata member8X_Metadata;
   private static final LogMetadata member9X_Metadata;
 
@@ -155,11 +163,12 @@ public final class LogsSampleDataUtils {
     expectedProperties9x.setProperty("sun.rmi.dgc.server.gcInterval", "9223372036854775806");
     expectedProperties9x.setProperty("user.country", "US");
     expectedProperties9x.setProperty("user.language", "en");
-    expectedProperties9x.setProperty("user.timezone", "Europe/Dublin");
+    expectedProperties9x.setProperty("user.timezone", "America/Buenos_Aires");
 
-    String basePath = rootFolder.getAbsolutePath() + File.separator;
-    member8X_Metadata = LogMetadata.of(basePath + "member_8X.log", 1535122364384L, 1535123277866L, "8.2.0", "x86_64 Mac OS X 10.13.6", expectedProperties8x);
-    member9X_Metadata = LogMetadata.of(basePath + "member_9X.log", 1523974788658L, 1523974845610L, "9.4.0", "amd64 Linux 3.10.0-862.11.6.el7.x86_64", expectedProperties9x);
+    String basePath = parseableFolder.getAbsolutePath() + File.separator;
+    noHeader_Metadata = LogMetadata.of(basePath + "noHeader.log", null, 1536195800179L, 1536203534347L, null, null, null);
+    member8X_Metadata = LogMetadata.of(basePath + "member_8X.log", ZoneId.of("Europe/Dublin"), 1535122364384L, 1535123277866L, "8.2.0", "x86_64 Mac OS X 10.13.6", expectedProperties8x);
+    member9X_Metadata = LogMetadata.of(basePath + "member_9X.log", ZoneId.of("America/Buenos_Aires"), 1523953188658L, 1523953245610L, "9.4.0", "amd64 Linux 3.10.0-862.11.6.el7.x86_64", expectedProperties9x);
   }
 
   private static void assertFullMetadata(LogMetadata actualMetadata, LogMetadata expectedMetadata) {
@@ -171,6 +180,23 @@ public final class LogsSampleDataUtils {
     assertThat(actualMetadata.getSystemProperties()).isEqualTo(expectedMetadata.getSystemProperties());
   }
 
+  private static void assertFullMetadata(LogMetadata metadata, Path basePath, ZoneId zoneId, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
+    ZoneId formatZoneId = zoneId != null ? zoneId : (metadata.getTimeZoneId() != null) ? metadata.getTimeZoneId() : ZoneId.systemDefault();
+    Instant startInstant = Instant.ofEpochMilli(metadata.getStartTimeStamp());
+    Instant finishInstant = Instant.ofEpochMilli(metadata.getFinishTimeStamp());
+    ZonedDateTime startTime = ZonedDateTime.ofInstant(startInstant, formatZoneId);
+    ZonedDateTime finishTime = ZonedDateTime.ofInstant(finishInstant, formatZoneId);
+
+    String expectedFileName = FormatUtils.relativizePath(basePath, new File(metadata.getFileName()).toPath());
+    String expectedProductVersion = FormatUtils.trimProductVersion(metadata.getProductVersion());
+    assertThat(fileName).isEqualTo(expectedFileName);
+    assertThat(productVersion).isEqualTo(expectedProductVersion);
+    assertThat(operatingSystem).isEqualTo(metadata.getOperatingSystem());
+    assertThat(timeZoneId).isEqualTo(metadata.getTimeZoneId().toString());
+    assertThat(startTimeStamp).isEqualTo(startTime.format(FormatUtils.getDateTimeFormatter()));
+    assertThat(finishTimeStamp).isEqualTo(finishTime.format(FormatUtils.getDateTimeFormatter()));
+  }
+
   private static void assertIntervalOnly(LogMetadata actualMetadata, LogMetadata expectedMetadata) {
     assertThat(actualMetadata.getFileName()).isEqualTo(expectedMetadata.getFileName());
     assertThat(actualMetadata.getProductVersion()).isNull();
@@ -180,13 +206,47 @@ public final class LogsSampleDataUtils {
     assertThat(actualMetadata.getFinishTimeStamp()).isEqualTo(expectedMetadata.getFinishTimeStamp());
   }
 
+  private static void assertIntervalOnly(LogMetadata metadata, Path basePath, ZoneId zoneId, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
+    ZoneId formatZoneId = zoneId != null ? zoneId : ZoneId.systemDefault();
+    Instant startInstant = Instant.ofEpochMilli(metadata.getStartTimeStamp());
+    Instant finishInstant = Instant.ofEpochMilli(metadata.getFinishTimeStamp());
+    ZonedDateTime startTime = ZonedDateTime.ofInstant(startInstant, formatZoneId);
+    ZonedDateTime finishTime = ZonedDateTime.ofInstant(finishInstant, formatZoneId);
+
+    String expectedFileName = FormatUtils.relativizePath(basePath, new File(metadata.getFileName()).toPath());
+    assertThat(fileName).isEqualTo(expectedFileName);
+    assertThat(productVersion).isEqualTo("");
+    assertThat(operatingSystem).isEqualTo("");
+    assertThat(timeZoneId).isEqualTo("");
+    assertThat(startTimeStamp).isEqualTo(startTime.format(FormatUtils.getDateTimeFormatter()));
+    assertThat(finishTimeStamp).isEqualTo(finishTime.format(FormatUtils.getDateTimeFormatter()));
+  }
+
+  public static void assertNoHeaderMetadata(LogMetadata metadata) {
+    assertIntervalOnly(metadata, noHeader_Metadata);
+  }
+
+  public static void assertNoHeaderMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp) {
+    assertIntervalOnly(noHeader_Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+  }
+
   public static void assertMember8XMetadata(LogMetadata actualMetadata, boolean intervalOnly) {
     if (intervalOnly) assertIntervalOnly(actualMetadata, member8X_Metadata);
     else assertFullMetadata(actualMetadata, member8X_Metadata);
   }
 
+  public static void assertMember8XMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp, boolean intervalOnly) {
+    if (intervalOnly) assertIntervalOnly(member8X_Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    else assertFullMetadata(member8X_Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+  }
+
   public static void assertMember9XMetadata(LogMetadata actualMetadata, boolean intervalOnly) {
     if (intervalOnly) assertIntervalOnly(actualMetadata, member9X_Metadata);
     else assertFullMetadata(actualMetadata, member9X_Metadata);
+  }
+
+  public static void assertMember9XMetadata(Path basePath, ZoneId formatTimeZone, String fileName, String productVersion, String operatingSystem, String timeZoneId, String startTimeStamp, String finishTimeStamp, boolean intervalOnly) {
+    if (intervalOnly) assertIntervalOnly(member9X_Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
+    else assertFullMetadata(member9X_Metadata, basePath, formatTimeZone, fileName, productVersion, operatingSystem, timeZoneId, startTimeStamp, finishTimeStamp);
   }
 }

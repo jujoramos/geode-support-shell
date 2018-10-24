@@ -14,6 +14,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.component.ULogger;
+import org.apache.log4j.component.spi.NOPULogger;
 import org.apache.log4j.receivers.varia.LogFilePatternReceiver;
 import org.apache.log4j.spi.LoggingEvent;
 import org.slf4j.Logger;
@@ -44,6 +46,11 @@ class CustomLogFilePatternReceiver extends LogFilePatternReceiver {
 
   List<String> getUnparsedLines() {
     return unparsedLines;
+  }
+
+  @Override
+  protected ULogger getLogger() {
+    return NOPULogger.NOP_LOGGER;
   }
 
   CustomLogFilePatternReceiver(String filterExpression) {
