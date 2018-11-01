@@ -5,6 +5,9 @@
 2. [Building From Source](#building)
 3. [Configuration Properties](#configuring)
 4. [Execution of Commands](#commands)
+    * [Miscellaneous](#misc)
+    * [Logs Commands](#logs)
+    * [Statistics Commands](#statistics)
 
 
 ## <a name="overview"></a>Overview
@@ -31,7 +34,8 @@ executing the same thing over and over again. The goal of this project is to sta
 
 ## <a name="building"></a>Building From Source
 
-All platforms require a Java installation with JDK 1.8 or more recent version. The JAVA\_HOME environment variable can be set as below:
+All platforms require a Java installation with JDK 1.8 or more recent version. The JAVA\_HOME 
+environment variable can be set as below:
 
 | Platform | Command |
 | :---: | --- |
@@ -93,7 +97,9 @@ All commands included are self descriptive, more information about specific comm
 obtained with the assistance of the `help` command. The list below contains a detailed  description 
 about each command, its arguments and what it should be used for.
 
-### help
+
+### <a name="misc"></a>Miscellaneous
+#### help
 
 Displays all available commands. When using with a command name as an argument, displays help for 
 the specified command and its arguments.
@@ -116,12 +122,12 @@ SYNOPSYS
 |  --C, --command | *Optional*. The command to obtain help for. |
 
 
-### start vsd
+#### start vsd
  
 Starts the Visual Statistics Display Tool (VSD) and loads the specified statistics (decompress them 
-if needed) into the tool for further analysis. The [VSD tool](https://network.pivotal.io/products/pivotal-gemfire) is an external library which does not get 
-shipped with this project and, as such, it should be installed on the local system before running 
-this command, otherwise it will fail stating that the tool can not be found.
+if needed) into the tool for further analysis. The [VSD tool](https://network.pivotal.io/products/pivotal-gemfire) 
+is an external library which does not get shipped with this project and, as such, it should be installed 
+on the local system before running this command, otherwise it will fail stating that the tool can not be found.
 
 There are three different ways that can be used to configure the folder where VSD is installed:
 * Using the `--vsdHome` command argument.
@@ -189,7 +195,202 @@ $ tree
 |  --timeZone | *Optional*. Time Zone to set as system environment variable. This will be used by the Visual Statistics Display Tool (VSD) when showing data. If not set, none is used. |
 
 
-### show statistics metadata
+### <a name="logs"></a>Logs Commands
+Keep in mind that **_only log files using the default log format shipped with GemFire/Geode_** are 
+currently supported by the tool, namely the [Apache Log4j 2](https://logging.apache.org/log4j/2.x/) 
+pattern `[%level{lowerCase=true} %date{yyyy/MM/dd HH:mm:ss.SSS z} &lt;%thread&gt; tid=%hexTid] %message%n%throwable%n`.
+
+
+#### show logs metadata
+
+Displays general information about the log file specified, or about the full set of log files 
+contained within the directory specified. When a folder is specified as the `--path` argument, 
+the command will recursively iterate and parse all files matching the extension `.log`. The 
+command aims to provide an overview of the log files, allowing the user to quickly asses the 
+version and time frame covered.
+
+The result includes one or two tables, depending on whether the parsing of the different log 
+files fails or succeeds.
+
+The _Results_ table includes a list of the log files for which the parsing succeeded, along with the 
+_File Name_ (relative to the original path), _Product Version_, _Operating System_ installed on the 
+host where the member was running, the original _Time Zone_ on which the file was created and the 
+interval of time covered by the log file (_Start Time_ and _Finish Time_). It is worth noting that 
+GemFire/Geode does not add the metadata header when rolling log files, so some values (_Product Version_, 
+_Operating System_ and _Time Zone_) might be empty if the metadata was not found or if the 
+`intervalOnly` parameter is set as `true`. Also, depending on whether the _Time Zone_ was found and 
+whether a specific _Time Zone_ was specified as a parameter, will present _Start Time_ and _Finish Time_ 
+according to the following rules:
+* If the `--timeZone` parameter is specified, then both values will be shown using the filter.
+* If the `--timeZone` parameter is not specified and the _Time Zone_ **is found** within the metadata, then both values will be shown using the original _Time Zone_ from the log file.
+* If the `--timeZone` parameter is not specified and the _Time Zone_ **is not found** within the metadata, then both values will be shown using the default _Time Zone_ from the system.
+
+The _Errors_ table includes a list of the log files for which the parsing failed, along with 
+the _File Name_ (relative to the original path) and the _Error Description_.
+
+##### Syntax:
+```
+$ geode-support-shell>show logs metadata --path ./samples
+╔════════════════════════╦═══════════════╦══════════════════════════════════════╦════════════════════╦═══════════════════════╦═══════════════════════╗
+║File Name               ║Product Version║Operating System                      ║Time Zone           ║Start Time             ║Finish Time            ║
+╠════════════════════════╬═══════════════╬══════════════════════════════════════╬════════════════════╬═══════════════════════╬═══════════════════════╣
+║/parseable/member_8X.log║8.2.0          ║x86_64 Mac OS X 10.13.6               ║Europe/Dublin       ║Aug 24, 2018 3:52:44 PM║Aug 24, 2018 4:07:57 PM║
+╠════════════════════════╬═══════════════╬══════════════════════════════════════╬════════════════════╬═══════════════════════╬═══════════════════════╣
+║/parseable/member_9X.log║9.4.0          ║amd64 Linux 3.10.0-862.11.6.el7.x86_64║America/Buenos_Aires║Apr 17, 2018 5:19:48 AM║Apr 17, 2018 5:20:45 AM║
+╠════════════════════════╬═══════════════╬══════════════════════════════════════╬════════════════════╬═══════════════════════╬═══════════════════════╣
+║/parseable/noHeader.log ║               ║                                      ║                    ║Sep 06, 2018 2:03:20 AM║Sep 06, 2018 4:12:14 AM║
+╚════════════════════════╩═══════════════╩══════════════════════════════════════╩════════════════════╩═══════════════════════╩═══════════════════════╝
+
+╔══════════════════════════════╦══════════════════════════╗
+║File Name                     ║Error Description         ║
+╠══════════════════════════════╬══════════════════════════╣
+║/unparseable/unknownFormat.log║Log format not recognized.║
+╚══════════════════════════════╩══════════════════════════╝
+
+$ geode-support-shell>show logs metadata --path ./samples --timeZone "America/Chicago" --intervalOnly true
+╔════════════════════════╦═══════════════╦════════════════╦═════════╦═══════════════════════════╦════════════════════════════╗
+║File Name               ║Product Version║Operating System║Time Zone║Start Time[America/Chicago]║Finish Time[America/Chicago]║
+╠════════════════════════╬═══════════════╬════════════════╬═════════╬═══════════════════════════╬════════════════════════════╣
+║/parseable/member_8X.log║               ║                ║         ║Aug 24, 2018 9:52:44 AM    ║Aug 24, 2018 10:07:57 AM    ║
+╠════════════════════════╬═══════════════╬════════════════╬═════════╬═══════════════════════════╬════════════════════════════╣
+║/parseable/member_9X.log║               ║                ║         ║Apr 17, 2018 3:19:48 AM    ║Apr 17, 2018 3:20:45 AM     ║
+╠════════════════════════╬═══════════════╬════════════════╬═════════╬═══════════════════════════╬════════════════════════════╣
+║/parseable/noHeader.log ║               ║                ║         ║Sep 05, 2018 8:03:20 PM    ║Sep 05, 2018 10:12:14 PM    ║
+╚════════════════════════╩═══════════════╩════════════════╩═════════╩═══════════════════════════╩════════════════════════════╝
+
+╔══════════════════════════════╦══════════════════════════╗
+║File Name                     ║Error Description         ║
+╠══════════════════════════════╬══════════════════════════╣
+║/unparseable/unknownFormat.log║Log format not recognized.║
+╚══════════════════════════════╩══════════════════════════╝
+```
+
+##### Parameters:
+
+| Name | Description |
+| :--- | :--- |
+|  --path | *Mandatory*. Path to the log file, or directory to scan for log files. |
+|  --intervalOnly | *Optional*. Whether to parse the full metadata (default, slower) or only the time covered by the log file (extremely faster). |
+|  --timeZone | *Optional*. Time Zone Id to use when showing results. If not set, the default from the local system will be used (or the one from the log file, if found and '--intervalOnly' is set as 'false').|
+
+
+#### filter logs by date-time
+
+Scans the log files contained within the `sourceFolder`, and copies them to different 
+directories depending on whether they match (`matchingFolder`) the time frame specified as the 
+filter or not (`nonMatchingFolder`). The command aims to quickly setup an organized folder structure 
+where files covering a time frame of interest are grouped together, allowing the user to start the 
+proper analysis on a valid set instead of manually checking and moving the files one by one.
+
+The result includes one or two tables, depending on whether the parsing of the different log files fails or succeeds.
+
+The _Results_ table includes a list of the log files for which the parsing succeeded, along 
+with the _File Name_ (relative to the original path), and the flag _Matches_, which states whether 
+the file matches the specified time frame or not. Considering that the _Time Zone_ for each file might 
+or might not be found (metadata header not included in rolled logs), the time period specified as the 
+filter is compared against the time interval covered by the log file using the _Time Zone_ specified 
+through the parameter `--timeZone` or, if not set, the default system _Time Zone_; either way, no 
+manual conversion should be done by the user. 
+
+The _Errors_ table includes a list of the log files for which there was an error, either 
+parsing the file or copying it to the corresponding folder, along with the _File Name_ (relative to 
+the original path) and the _Error Description_.
+
+##### Syntax:
+```
+$ tree
+.
+└── samples
+    ├── parseable
+    │   ├── member_8X.log
+    │   ├── member_9X.log
+    │   └── noHeader.log
+    └── unparseable
+        └── unknownFormat.log
+
+$ geode-support-shell>filter logs by date-time --sourceFolder ./samples --matchingFolder ./relevant --nonMatchingFolder ./irrelevant --year 2018 --month 04 --day 17
+╔════════════════════════╦═══════╗
+║File Name               ║Matches║
+╠════════════════════════╬═══════╣
+║/parseable/member_8X.log║false  ║
+╠════════════════════════╬═══════╣
+║/parseable/member_9X.log║true   ║
+╠════════════════════════╬═══════╣
+║/parseable/noHeader.log ║false  ║
+╚════════════════════════╩═══════╝
+
+╔══════════════════════════════╦══════════════════════════╗
+║File Name                     ║Error Description         ║
+╠══════════════════════════════╬══════════════════════════╣
+║/unparseable/unknownFormat.log║Log format not recognized.║
+╚══════════════════════════════╩══════════════════════════╝
+
+$ tree
+.
+├── irrelevant
+│   ├── member_8X.log
+│   └── noHeader.log
+├── relevant
+│   └── member_9X.log
+└── samples
+    ├── parseable
+    │   ├── member_8X.log
+    │   ├── member_9X.log
+    │   └── noHeader.log
+    └── unparseable
+        └── unknownFormat.log
+
+$ geode-support-shell>filter logs by date-time --sourceFolder ./samples --matchingFolder ./relevant --nonMatchingFolder ./irrelevant --year 2018 --month 09 --day 05 --hour 21 --minute 30 --second 00 --timeZone "America/Chicago"
+╔════════════════════════╦═══════╗
+║File Name               ║Matches║
+╠════════════════════════╬═══════╣
+║/parseable/member_8X.log║false  ║
+╠════════════════════════╬═══════╣
+║/parseable/member_9X.log║false  ║
+╠════════════════════════╬═══════╣
+║/parseable/noHeader.log ║true   ║
+╚════════════════════════╩═══════╝
+
+╔══════════════════════════════╦══════════════════════════╗
+║File Name                     ║Error Description         ║
+╠══════════════════════════════╬══════════════════════════╣
+║/unparseable/unknownFormat.log║Log format not recognized.║
+╚══════════════════════════════╩══════════════════════════╝
+
+$ tree
+.
+├── irrelevant
+│   ├── member_8X.log
+│   └── member_9X.log
+├── relevant
+│   └── noHeader.log
+└── samples
+    ├── parseable
+    │   ├── member_8X.log
+    │   ├── member_9X.log
+    │   └── noHeader.log
+    └── unparseable
+        └── unknownFormat.log
+```
+
+##### Parameters:
+
+| Name | Description |
+| :--- | :--- |
+|  --year | *Mandatory*. Year [2010 - ...] to look for within the log samples. |
+|  --month | *Mandatory*. Month of Year [1 - 12] to look for within the log samples. |
+|  --day | *Mandatory*. Day of Month [1 - 31] to look for within the log samples. |
+|  --hour | *Optional*. Hour of day [00 - 23] to look for within the log samples. |
+|  --minute | *Optional*. Minute of Hour [00 - 59] to look for within the log samples. |
+|  --second | *Optional*. Second of minute [00 - 59] to look for within the log samples. |
+|  --sourceFolder | *Mandatory*. Directory to scan for logs. |
+|  --matchingFolder | *Mandatory*. Directory where matching files should be copied to. |
+|  --nonMatchingFolder | *Mandatory*. Directory where non matching files should be copied to. |
+|  --timeZone | *Optional*. Time Zone Id to use when filtering. If not set, the system Time Zone will be used. |
+
+
+### <a name="statistics"></a>Statistics
+#### show statistics metadata
 
 Displays general information about the statistics file specified, or about the full set of statistics 
 files contained within the directory specified. When a folder is specified as the `--path` argument, 
@@ -279,8 +480,7 @@ $ geode-support-shell>show statistics metadata --path ./samples --timeZone "Amer
 |  --path | *Mandatory*. Path to statistics file, or directory to scan for statistics files. |
 |  --timeZone | *Optional*. Time Zone Id to use when showing results. If not set, the default from the statistics file will be used. Useful when analyzing files written in different time zones (clusters replicating data over the WAN, as an example).|
 
-
-### filter statistics by date-time
+#### filter statistics by date-time
 
 Scans the statistics files contained within the `sourceFolder`, and copies them to different 
 directories depending on whether they match (`matchingFolder`) the time frame specified as the 
@@ -441,8 +641,7 @@ $ tree
 |  --nonMatchingFolder | *Mandatory*. Directory where non matching files should be copied to. |
 |  --timeZone | *Optional*. Time Zone Id to use when filtering. If not set, the Time Zone from the statistics file will be used. Useful when filtering a set of statistics files from different time zones. |
 
-
-### show statistics summary
+#### show statistics summary
 
 Displays the summary statistical values for a particular Geode/GemFire statistic, or a set of statistics that matches a filter.
 
@@ -452,7 +651,6 @@ The _Results_ table includes a list of statistics for which the filter matched, 
 
 The _Errors_ table includes a list of the statistics files for which the parsing failed, along with 
 the _File Name_ (relative to the original path) and the _Error Description_.
-
 
 ##### Syntax:
 ```

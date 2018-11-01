@@ -21,6 +21,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.shell.table.Table;
 
 import org.apache.geode.support.domain.ParsingResult;
@@ -49,6 +51,7 @@ import org.apache.geode.support.test.assertj.TableAssert;
 import org.apache.geode.support.test.mockito.MockUtils;
 
 @RunWith(JUnitParamsRunner.class)
+@PrepareForTest({ ZoneId.class, FilterLogsByDateTimeCommand.class })
 public class FilterLogsByDateTimeCommandTest {
   private File mockedSourceFolder;
   private Path mockedSourceFolderPath;
@@ -83,7 +86,7 @@ public class FilterLogsByDateTimeCommandTest {
 
     logsService = mock(LogsService.class);
     filesService = mock(FilesService.class);
-    logsCommand = new FilterLogsByDateTimeCommand(filesService, logsService);
+    logsCommand = spy(new FilterLogsByDateTimeCommand(filesService, logsService));
   }
 
   @Test
@@ -217,8 +220,150 @@ public class FilterLogsByDateTimeCommandTest {
 
   @Test
   @SuppressWarnings("unchecked")
+  public void filterLogsByDateTimeShouldUseSystemZoneIdWhenNoCustomZoneIdIsSpecified() throws Exception {
+    ZoneId dublinZoneId = ZoneId.of("Europe/Dublin");
+    ZoneId chicagoZoneId = ZoneId.of("America/Chicago");
+    when(logsCommand.getFilterZoneId(any())).thenReturn(ZoneId.of("America/Buenos_Aires"));
+
+    // 05/01/2018 14:00 - 07/01/2018 01:00 [Dublin]
+    // 05/01/2018 11:00 - 06/01/2018 22:00 [Buenos_Aires]
+    Path dublinServerPath = MockUtils.mockPath("dublinServer.log", false);
+    LogMetadata dublinServerMetadata = mock(LogMetadata.class);
+    when(dublinServerMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 1, 5, 14, 0, 0, dublinZoneId));
+    when(dublinServerMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 1, 7, 1, 0, 0, dublinZoneId)));
+
+    // 05/01/2018 06:00 - 06/01/2018 23:00 [Chicago]
+    // 05/01/2018 08:00 - 07/01/2018 01:00 [Buenos_Aires]
+    Path chicagoLocatorPath = MockUtils.mockPath("chicagoLocator.log", false);
+    LogMetadata chicagoLocatorMetadata = mock(LogMetadata.class);
+    when(chicagoLocatorMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 1, 5, 6, 0, 0, chicagoZoneId));
+    when(chicagoLocatorMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 1, 6, 23, 0, 0, chicagoZoneId)));
+
+    ParsingResult<LogMetadata> dublinServerResult = new ParsingResult<>(dublinServerPath, dublinServerMetadata);
+    ParsingResult<LogMetadata> chicagoLocatorResult = new ParsingResult<>(chicagoLocatorPath, chicagoLocatorMetadata);
+    List<ParsingResult<LogMetadata>> mockedResults = Arrays.asList(dublinServerResult, chicagoLocatorResult);
+    when(logsService.parseInterval(any())).thenReturn(mockedResults);
+
+    // Filter by deterministic point in time: 06/01/2018 12:05 AM [America/Buenos_Aires]
+    Object resultObject = logsCommand.filterLogsByDateTime(2018, 1, 6, 12, 5, 0, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    List<Table> resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(1);
+    Table resultTable = resultList.get(0);
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "true");
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
+    reset(filesService);
+
+    // Filter by day and hour: 05/01/2018 07:30 [America/Buenos_Aires]
+    resultObject = logsCommand.filterLogsByDateTime(2018, 1, 5, 7, 30, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(1);
+    resultTable = resultList.get(0);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "false");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "false");
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedNonMatchingFolderPath);
+    reset(filesService);
+
+    // Filter by day only: 07/01/2018 [America/Buenos_Aires]
+    resultObject = logsCommand.filterLogsByDateTime(2018, 1, 7, null, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, null);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(1);
+    resultTable = resultList.get(0);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "false");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "true");
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
+    reset(filesService);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void filterLogsByDateTimeShouldUseCustomZoneIdForFilteringWhenSpecified() throws Exception {
+    ZoneId dublinZoneId = ZoneId.of("Europe/Dublin");
+    ZoneId chicagoZoneId = ZoneId.of("America/Chicago");
+    ZoneId filterZoneId = ZoneId.of("America/Argentina/Buenos_Aires");
+
+    // 05/01/2018 14:00 - 07/01/2018 01:00 [Dublin]
+    // 05/01/2018 10:00 - 06/01/2018 21:00 [Buenos_Aires]
+    Path dublinServerPath = MockUtils.mockPath("dublinServer.log", false);
+    LogMetadata dublinServerMetadata = mock(LogMetadata.class);
+    when(dublinServerMetadata.getTimeZoneId()).thenReturn(dublinZoneId);
+    when(dublinServerMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 1, 5, 14, 0, 0, dublinZoneId));
+    when(dublinServerMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 1, 7, 1, 0, 0, dublinZoneId)));
+
+    // 05/01/2018 06:00 - 06/01/2018 23:00 [Chicago]
+    // 05/01/2018 08:00 - 07/01/2018 01:00 [Buenos_Aires]
+    Path chicagoLocatorPath = MockUtils.mockPath("chicagoLocator.log", false);
+    LogMetadata chicagoLocatorMetadata = mock(LogMetadata.class);
+    when(chicagoLocatorMetadata.getTimeZoneId()).thenReturn(chicagoZoneId);
+    when(chicagoLocatorMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 1, 5, 6, 0, 0, chicagoZoneId));
+    when(chicagoLocatorMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 1, 6, 23, 0, 0, chicagoZoneId)));
+
+    ParsingResult<LogMetadata> dublinServerResult = new ParsingResult<>(dublinServerPath, dublinServerMetadata);
+    ParsingResult<LogMetadata> chicagoLocatorResult = new ParsingResult<>(chicagoLocatorPath, chicagoLocatorMetadata);
+    List<ParsingResult<LogMetadata>> mockedResults = Arrays.asList(dublinServerResult, chicagoLocatorResult);
+    when(logsService.parseInterval(any())).thenReturn(mockedResults);
+
+    // Filter by deterministic point in time: 06/01/2018 12:05 AM [America/Buenos_Aires]
+    Object resultObject = logsCommand.filterLogsByDateTime(2018, 1, 6, 12, 5, 0, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    List<Table> resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(1);
+    Table resultTable = resultList.get(0);
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "true");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "true");
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
+    reset(filesService);
+
+    // Filter by day and hour: 05/01/2018 07:30 [America/Buenos_Aires]
+    resultObject = logsCommand.filterLogsByDateTime(2018, 1, 5, 7, 30, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(1);
+    resultTable = resultList.get(0);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "false");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "false");
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedNonMatchingFolderPath);
+    reset(filesService);
+
+    // Filter by day only: 07/01/2018 [America/Buenos_Aires]
+    resultObject = logsCommand.filterLogsByDateTime(2018, 1, 7, null, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(1);
+    resultTable = resultList.get(0);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "false");
+    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "true");
+    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
+    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
+    reset(filesService);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
-  public void filterLogsByDateTimeShouldUseCustomZoneIdForFiltering(String timeZoneId) throws Exception {
+  public void filterLogsByDateTimeShouldUseCustomZoneIdForFilteringWhenSpecified(String timeZoneId) throws Exception {
     ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? ZoneId.systemDefault() : ZoneId.of(timeZoneId);
 
     // 05/01/2018 12:00 - 15/01/2018 16:00
@@ -296,78 +441,6 @@ public class FilterLogsByDateTimeCommandTest {
     verify(filesService, times(1)).copyFile(januaryFifthTwelveAMToJanuaryFifteenthFourPMPath, mockedMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfOnePMToJanuaryTenthHalfTwoPMPath, mockedNonMatchingFolderPath);
     verify(filesService, times(1)).copyFile(januaryTenthHalfTwoPMToJanuaryThirteenthHalfFivePMPath, mockedMatchingFolderPath);
-    reset(filesService);
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void filterLogsByDateTimeShouldUseCustomZoneIdForFiltering() throws Exception {
-    ZoneId dublinZoneId = ZoneId.of("Europe/Dublin");
-    ZoneId chicagoZoneId = ZoneId.of("America/Chicago");
-    ZoneId filterZoneId = ZoneId.of("America/Argentina/Buenos_Aires");
-
-    // 05/01/2018 14:00 - 07/01/2018 01:00 [Dublin]
-    // 05/01/2018 10:00 - 06/01/2018 21:00 [Buenos_Aires]
-    Path dublinServerPath = MockUtils.mockPath("dublinServer.log", false);
-    LogMetadata dublinServerMetadata = mock(LogMetadata.class);
-    when(dublinServerMetadata.getTimeZoneId()).thenReturn(dublinZoneId);
-    when(dublinServerMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 1, 5, 14, 0, 0, dublinZoneId));
-    when(dublinServerMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 1, 7, 1, 0, 0, dublinZoneId)));
-
-    // 05/01/2018 06:00 - 06/01/2018 23:00 [Chicago]
-    // 05/01/2018 08:00 - 07/01/2018 01:00 [Buenos_Aires]
-    Path chicagoLocatorPath = MockUtils.mockPath("chicagoLocator.log", false);
-    LogMetadata chicagoLocatorMetadata = mock(LogMetadata.class);
-    when(chicagoLocatorMetadata.getTimeZoneId()).thenReturn(chicagoZoneId);
-    when(chicagoLocatorMetadata.getStartTimeStamp()).thenReturn(MockUtils.mockTimeStamp(2018, 1, 5, 6, 0, 0, chicagoZoneId));
-    when(chicagoLocatorMetadata.getFinishTimeStamp()).thenReturn((MockUtils.mockTimeStamp(2018, 1, 6, 23, 0, 0, chicagoZoneId)));
-
-    ParsingResult<LogMetadata> dublinServerResult = new ParsingResult<>(dublinServerPath, dublinServerMetadata);
-    ParsingResult<LogMetadata> chicagoLocatorResult = new ParsingResult<>(chicagoLocatorPath, chicagoLocatorMetadata);
-    List<ParsingResult<LogMetadata>> mockedResults = Arrays.asList(dublinServerResult, chicagoLocatorResult);
-    when(logsService.parseInterval(any())).thenReturn(mockedResults);
-
-    // Filter by deterministic point in time: 06/01/2018 12:05 AM [America/Buenos_Aires]
-    Object resultObject = logsCommand.filterLogsByDateTime(2018, 1, 6, 12, 5, 0, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
-    assertThat(resultObject).isNotNull();
-    assertThat(resultObject).isInstanceOf(List.class);
-    List<Table> resultList = (List)resultObject;
-    assertThat(resultList.size()).isEqualTo(1);
-    Table resultTable = resultList.get(0);
-    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
-    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
-    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "true");
-    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "true");
-    verify(filesService, times(1)).copyFile(dublinServerPath, mockedMatchingFolderPath);
-    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
-    reset(filesService);
-
-    // Filter by day and hour: 05/01/2018 07:30 [America/Buenos_Aires]
-    resultObject = logsCommand.filterLogsByDateTime(2018, 1, 5, 7, 30, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
-    assertThat(resultObject).isNotNull();
-    assertThat(resultObject).isInstanceOf(List.class);
-    resultList = (List)resultObject;
-    assertThat(resultList.size()).isEqualTo(1);
-    resultTable = resultList.get(0);
-    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
-    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "false");
-    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "false");
-    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
-    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedNonMatchingFolderPath);
-    reset(filesService);
-
-    // Filter by day only: 07/01/2018 [America/Buenos_Aires]
-    resultObject = logsCommand.filterLogsByDateTime(2018, 1, 7, null, null, null, mockedSourceFolder, mockedMatchingFolder, mockedNonMatchingFolder, filterZoneId);
-    assertThat(resultObject).isNotNull();
-    assertThat(resultObject).isInstanceOf(List.class);
-    resultList = (List)resultObject;
-    assertThat(resultList.size()).isEqualTo(1);
-    resultTable = resultList.get(0);
-    TableAssert.assertThat(resultTable).row(0).isEqualTo("File Name", "Matches");
-    TableAssert.assertThat(resultTable).row(1).isEqualTo("dublinServer.log", "false");
-    TableAssert.assertThat(resultTable).row(2).isEqualTo("chicagoLocator.log", "true");
-    verify(filesService, times(1)).copyFile(dublinServerPath, mockedNonMatchingFolderPath);
-    verify(filesService, times(1)).copyFile(chicagoLocatorPath, mockedMatchingFolderPath);
     reset(filesService);
   }
 }

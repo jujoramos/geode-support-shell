@@ -53,6 +53,10 @@ public class FilterLogsByDateTimeCommand extends AbstractCommand {
     this.logsService = logsService;
   }
 
+  ZoneId getFilterZoneId(ZoneId zoneIdParameter) {
+    return zoneIdParameter != null ? zoneIdParameter : ZoneId.systemDefault();
+  }
+
   @ShellMethod(key = "filter logs by date-time", value = "Scan the log files contained within the source folder and copy them to different folders, depending on whether they match the specified date time or not.")
   List<?> filterLogsByDateTime(
       @ShellOption(help = "Year to look for within the log samples.", value = "--year") @Min(2010) Integer year,
@@ -64,7 +68,7 @@ public class FilterLogsByDateTimeCommand extends AbstractCommand {
       @ShellOption(help = "Directory to scan for logs.", value = "--sourceFolder") File sourceFolder,
       @ShellOption(help = "Directory where matching files should be copied to.", value = "--matchingFolder") File matchingTargetFolder,
       @ShellOption(help = "Directory where non matching files should be copied to.", value = "--nonMatchingFolder") File nonMatchingTargetFolder,
-      @ShellOption(help = "Time Zone Id to use when filtering.", value = "--timeZone") ZoneId zoneId) {
+      @ShellOption(help = "Time Zone Id to use when filtering. If not set, the system Time Zone will be used.", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId) {
 
     // Use paths from here.
     Path sourceFolderPath = sourceFolder.toPath();
@@ -103,7 +107,7 @@ public class FilterLogsByDateTimeCommand extends AbstractCommand {
               LogMetadata metadataFile = parsingResult.getData();
               Instant startInstant = Instant.ofEpochMilli(metadataFile.getStartTimeStamp());
               Instant finishInstant = Instant.ofEpochMilli(metadataFile.getFinishTimeStamp());
-              Interval fileInterval = Interval.of(zoneId, startInstant, finishInstant);
+              Interval fileInterval = Interval.of(getFilterZoneId(zoneId), startInstant, finishInstant);
               matches = intervalMatchesFilter(fileInterval, year, month, day, hour, minute, second);
 
               // Add row to results table no matter what.
