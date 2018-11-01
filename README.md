@@ -219,11 +219,11 @@ interval of time covered by the log file (_Start Time_ and _Finish Time_). It is
 GemFire/Geode does not add the metadata header when rolling log files, so some values (_Product Version_, 
 _Operating System_ and _Time Zone_) might be empty if the metadata was not found or if the 
 `intervalOnly` parameter is set as `true`. Also, depending on whether the _Time Zone_ was found and 
-whether a specific _Time Zone_ was specified as a parameter, will present _Start Time_ and _Finish Time_ 
-according to the following rules:
-* If the `--timeZone` parameter is specified, then both values will be shown using the filter.
+whether a specific _Time Zone_ was specified as a parameter, the command will present _Start Time_ 
+and _Finish Time_ according to the following rules:
+* If the `--timeZone` parameter is specified, then both values will be shown using the _Time Zone_ specified as the filter.
 * If the `--timeZone` parameter is not specified and the _Time Zone_ **is found** within the metadata, then both values will be shown using the original _Time Zone_ from the log file.
-* If the `--timeZone` parameter is not specified and the _Time Zone_ **is not found** within the metadata, then both values will be shown using the default _Time Zone_ from the system.
+* If the `--timeZone` parameter is not specified and the _Time Zone_ **is not found** within the metadata (or `intervalOnly=true`), then both values will be shown using the default _Time Zone_ from the system.
 
 The _Errors_ table includes a list of the log files for which the parsing failed, along with 
 the _File Name_ (relative to the original path) and the _Error Description_.
