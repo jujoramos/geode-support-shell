@@ -12,7 +12,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package org.apache.geode.support.command.statistics;
+package org.apache.geode.support.command.logs;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,34 +37,34 @@ import org.springframework.shell.table.TableModelBuilder;
 import org.apache.geode.support.command.AbstractCommand;
 import org.apache.geode.support.domain.Interval;
 import org.apache.geode.support.domain.ParsingResult;
-import org.apache.geode.support.domain.statistics.SamplingMetadata;
+import org.apache.geode.support.domain.logs.LogMetadata;
 import org.apache.geode.support.service.FilesService;
-import org.apache.geode.support.service.StatisticsService;
+import org.apache.geode.support.service.LogsService;
 import org.apache.geode.support.utils.FormatUtils;
 
 @ShellComponent
-@ShellCommandGroup("Statistics Commands")
-public class FilterStatisticsByDateTimeCommand extends AbstractCommand {
-  private StatisticsService statisticsService;
+@ShellCommandGroup("Logs Commands")
+public class FilterLogsByDateTimeCommand extends AbstractCommand {
+  private LogsService logsService;
 
   @Autowired
-  public FilterStatisticsByDateTimeCommand(FilesService filesService, StatisticsService statisticsService) {
+  public FilterLogsByDateTimeCommand(FilesService filesService, LogsService logsService) {
     super(filesService);
-    this.statisticsService = statisticsService;
+    this.logsService = logsService;
   }
 
-  @ShellMethod(key = "filter statistics by date-time", value = "Scan the statistics files contained within the source folder and copy them to different folders, depending on whether they match the specified date time or not.")
-  List<?> filterStatisticsByDateTime(
-      @ShellOption(help = "Year to look for within the statistics samples.", value = "--year") @Min(2010) Integer year,
-      @ShellOption(help = "Month [1 - 12] to look for within the statistics samples.", value = "--month") @Min(1) @Max(12) Integer month,
-      @ShellOption(help = "Day of Month [1 - 31] to look for within the statistics samples.", value = "--day") @Min(1) @Max(31) Integer day,
-      @ShellOption(help = "Hour of day [00 - 23] to look for within the statistics samples.", value = "--hour", defaultValue = ShellOption.NULL) @Min(0) @Max(23) Integer hour,
-      @ShellOption(help = "Minute of Hour [00 - 59] to look for within the statistics samples.", value = "--minute", defaultValue = ShellOption.NULL) @Min(0) @Max(59) Integer minute,
-      @ShellOption(help = "Second of minute [00 - 59] to look for within the statistics samples.", value = "--second", defaultValue = ShellOption.NULL) @Min(0) @Max(59) Integer second,
-      @ShellOption(help = "Directory to scan for statistics.", value = "--sourceFolder") File sourceFolder,
+  @ShellMethod(key = "filter logs by date-time", value = "Scan the log files contained within the source folder and copy them to different folders, depending on whether they match the specified date time or not.")
+  List<?> filterLogsByDateTime(
+      @ShellOption(help = "Year to look for within the log samples.", value = "--year") @Min(2010) Integer year,
+      @ShellOption(help = "Month [1 - 12] to look for within the log samples.", value = "--month") @Min(1) @Max(12) Integer month,
+      @ShellOption(help = "Day of Month [1 - 31] to look for within the log samples.", value = "--day") @Min(1) @Max(31) Integer day,
+      @ShellOption(help = "Hour of day [00 - 23] to look for within the log samples.", value = "--hour", defaultValue = ShellOption.NULL) @Min(0) @Max(23) Integer hour,
+      @ShellOption(help = "Minute of Hour [00 - 59] to look for within the log samples.", value = "--minute", defaultValue = ShellOption.NULL) @Min(0) @Max(59) Integer minute,
+      @ShellOption(help = "Second of minute [00 - 59] to look for within the log samples.", value = "--second", defaultValue = ShellOption.NULL) @Min(0) @Max(59) Integer second,
+      @ShellOption(help = "Directory to scan for logs.", value = "--sourceFolder") File sourceFolder,
       @ShellOption(help = "Directory where matching files should be copied to.", value = "--matchingFolder") File matchingTargetFolder,
       @ShellOption(help = "Directory where non matching files should be copied to.", value = "--nonMatchingFolder") File nonMatchingTargetFolder,
-      @ShellOption(help = "Time Zone Id to use when filtering. If not set, the Time Zone from the statistics file will be used. Useful when filtering a set of statistics files from different time zones.", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId) {
+      @ShellOption(help = "Time Zone Id to use when filtering.", value = "--timeZone") ZoneId zoneId) {
 
     // Use paths from here.
     Path sourceFolderPath = sourceFolder.toPath();
@@ -79,9 +79,9 @@ public class FilterStatisticsByDateTimeCommand extends AbstractCommand {
     filesService.assertPathsInequality(sourceFolderPath, nonMatchingFolderPath, "sourceFolder", "nonMatchingFolder");
     filesService.assertPathsInequality(matchingFolderPath, nonMatchingFolderPath, "matchingFolder", "nonMatchingFolder");
 
-    // Parse statistics metadata.
+    // Parse logs metadata.
     List<Object> commandResult = new ArrayList<>();
-    List<ParsingResult<SamplingMetadata>> parsingResults = statisticsService.parseMetadata(sourceFolder.toPath());
+    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseInterval(sourceFolder.toPath());
     TableModelBuilder<String> resultModelBuilder = new TableModelBuilder<>();
     resultModelBuilder.addRow().addValue("File Name").addValue("Matches");
     TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<>();
@@ -89,7 +89,7 @@ public class FilterStatisticsByDateTimeCommand extends AbstractCommand {
 
     // Process Results.
     if (parsingResults.isEmpty()) {
-      commandResult.add("No statistics files found.");
+      commandResult.add("No log files found.");
     } else {
       parsingResults.sort(Comparator.comparing(ParsingResult::getFile));
 
@@ -100,11 +100,10 @@ public class FilterStatisticsByDateTimeCommand extends AbstractCommand {
 
             // Proceed if parsing succeeded.
             if (parsingResult.isSuccess()) {
-              SamplingMetadata metadataFile = parsingResult.getData();
-              ZoneId filterZoneId = zoneId != null ? zoneId : metadataFile.getTimeZoneId();
+              LogMetadata metadataFile = parsingResult.getData();
               Instant startInstant = Instant.ofEpochMilli(metadataFile.getStartTimeStamp());
               Instant finishInstant = Instant.ofEpochMilli(metadataFile.getFinishTimeStamp());
-              Interval fileInterval = Interval.of(filterZoneId, startInstant, finishInstant);
+              Interval fileInterval = Interval.of(zoneId, startInstant, finishInstant);
               matches = intervalMatchesFilter(fileInterval, year, month, day, hour, minute, second);
 
               // Add row to results table no matter what.

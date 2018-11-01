@@ -45,14 +45,14 @@ import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
-import org.apache.geode.support.command.AbstractStatisticsCommand;
+import org.apache.geode.support.command.AbstractCommand;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
 import org.apache.geode.support.utils.FormatUtils;
 
 @ShellComponent
 @ShellCommandGroup("Statistics Commands")
-public class StartVisualStatisticsDisplayCommand extends AbstractStatisticsCommand {
+public class StartVisualStatisticsDisplayCommand extends AbstractCommand {
   public static final String VSD_HOME_KEY = "VSD_HOME";
   private static final Logger logger = LoggerFactory.getLogger(StartVisualStatisticsDisplayCommand.class);
   private StatisticsService statisticsService;

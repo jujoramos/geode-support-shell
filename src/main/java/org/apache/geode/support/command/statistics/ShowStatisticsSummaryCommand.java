@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.geode.support.command.AbstractCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
@@ -37,7 +38,6 @@ import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 
-import org.apache.geode.support.command.AbstractStatisticsCommand;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.Category;
 import org.apache.geode.support.domain.statistics.Sampling;
@@ -49,7 +49,7 @@ import org.apache.geode.support.utils.FormatUtils;
 
 @ShellComponent
 @ShellCommandGroup("Statistics Commands")
-public class ShowStatisticsSummaryCommand extends AbstractStatisticsCommand {
+public class ShowStatisticsSummaryCommand extends AbstractCommand {
   private StatisticsService statisticsService;
 
   /**

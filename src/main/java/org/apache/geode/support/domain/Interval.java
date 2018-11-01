@@ -24,11 +24,15 @@ public class Interval {
   private final ZonedDateTime startTime;
   private final ZonedDateTime finishTime;
 
-  public ZonedDateTime getStart() {
+  public ZoneId getZoneId() {
+    return zoneId;
+  }
+
+  ZonedDateTime getStart() {
     return startTime;
   }
 
-  public ZonedDateTime getFinish() {
+  ZonedDateTime getFinish() {
     return finishTime;
   }
 
@@ -87,7 +91,7 @@ public class Interval {
     return filterDateTime.compareTo(startTime) >= 0 && filterDateTime.compareTo(finishTime) <= 0;
   }
 
-  public boolean contains(Interval interval) {
+  boolean contains(Interval interval) {
     Objects.requireNonNull(interval, "Interval can't be null.");
     Interval other = interval;
 

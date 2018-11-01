@@ -15,7 +15,12 @@
 package org.apache.geode.support.command;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.table.BorderStyle;
@@ -23,17 +28,18 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
+import org.apache.geode.support.domain.Interval;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.utils.FormatUtils;
 
 // TODO: Spring doesn't know how to convert from String to Path. Add a custom converter and use Path instead of the old Sampling class.
-public class AbstractStatisticsCommand<V>  {
+public class AbstractCommand<V>  {
   protected FilesService filesService;
   protected final BorderStyle borderStyle = BorderStyle.fancy_double;
 
   @Autowired
-  public AbstractStatisticsCommand(FilesService filesService) {
+  public AbstractCommand(FilesService filesService) {
     this.filesService = filesService;
   }
 
@@ -63,5 +69,29 @@ public class AbstractStatisticsCommand<V>  {
     if (errorsTableBuilder.getModel().getRowCount() > 1) errorsTable = errorsTableBuilder.addFullBorder(borderStyle).build();
 
     return errorsTable;
+  }
+
+
+  protected boolean intervalMatchesFilter(Interval interval, Integer year, Integer month, Integer day, Integer hour, Integer minute, Integer second) {
+    boolean matches;
+    ZoneId filterZoneId = interval.getZoneId();
+    LocalDate dateFilter = LocalDate.of(year, month, day);
+    Optional<Integer> hourWrapper = Optional.ofNullable(hour);
+    Optional<Integer> minuteWrapper = Optional.ofNullable(minute);
+    Optional<Integer> secondsWrapper = Optional.ofNullable(second);
+
+    // Specific point within the time line.
+    if (hourWrapper.isPresent() && minuteWrapper.isPresent()) {
+      LocalTime timeFilter = LocalTime.of(hourWrapper.get(), minuteWrapper.get(), secondsWrapper.orElse(0));
+      ZonedDateTime filterDateTime = ZonedDateTime.of(dateFilter, timeFilter, filterZoneId);
+      matches = interval.contains(filterDateTime);
+    } else {
+      // Interval within the time line.
+      ZonedDateTime startOfFilterInterval = ZonedDateTime.of(dateFilter, LocalTime.of(hourWrapper.orElse(0), minuteWrapper.orElse(0), secondsWrapper.orElse(0)), filterZoneId);
+      ZonedDateTime finishOfFilterInterval = ZonedDateTime.of(dateFilter, LocalTime.of(hourWrapper.orElse(23), minuteWrapper.orElse(59), secondsWrapper.orElse(59)), filterZoneId);
+      matches = interval.overlaps(Interval.of(startOfFilterInterval, finishOfFilterInterval));
+    }
+
+    return matches;
   }
 }

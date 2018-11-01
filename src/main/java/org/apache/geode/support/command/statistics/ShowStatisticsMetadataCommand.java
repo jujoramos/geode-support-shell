@@ -32,7 +32,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
-import org.apache.geode.support.command.AbstractStatisticsCommand;
+import org.apache.geode.support.command.AbstractCommand;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.service.FilesService;
@@ -41,7 +41,7 @@ import org.apache.geode.support.utils.FormatUtils;
 
 @ShellComponent
 @ShellCommandGroup("Statistics Commands")
-public class ShowStatisticsMetadataCommand extends AbstractStatisticsCommand {
+public class ShowStatisticsMetadataCommand extends AbstractCommand {
   private StatisticsService statisticsService;
 
   @Autowired
