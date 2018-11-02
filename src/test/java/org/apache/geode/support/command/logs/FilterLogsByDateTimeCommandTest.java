@@ -40,7 +40,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.shell.table.Table;
 
 import org.apache.geode.support.domain.ParsingResult;
@@ -51,7 +50,6 @@ import org.apache.geode.support.test.assertj.TableAssert;
 import org.apache.geode.support.test.mockito.MockUtils;
 
 @RunWith(JUnitParamsRunner.class)
-@PrepareForTest({ ZoneId.class, FilterLogsByDateTimeCommand.class })
 public class FilterLogsByDateTimeCommandTest {
   private File mockedSourceFolder;
   private Path mockedSourceFolderPath;
