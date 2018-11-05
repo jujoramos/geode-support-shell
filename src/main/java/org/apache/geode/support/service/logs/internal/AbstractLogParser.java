@@ -42,12 +42,12 @@ public abstract class AbstractLogParser implements LogParser {
 
     // Read only first non-empty line of the file.
     try (Scanner fileReader = new Scanner(path)) {
-      do {
-        firstLine = fileReader.nextLine();
-      } while (StringUtils.isBlank(firstLine));
+      while ((firstLine = fileReader.nextLine()) != null) {
+        if (!StringUtils.isBlank(firstLine)) return firstLine;
+      }
     }
 
-    return firstLine;
+    return null;
   }
 
   String readLastLine(Path path) throws IOException {
@@ -55,12 +55,12 @@ public abstract class AbstractLogParser implements LogParser {
 
     // Read only last non-empty line of the file.
     try (ReversedLinesFileReader reversedLinesFileReader = new ReversedLinesFileReader(path.toFile(), Charset.defaultCharset())) {
-      do {
-        finishLine = reversedLinesFileReader.readLine();
-      } while (StringUtils.isBlank(finishLine));
+      while ((finishLine = reversedLinesFileReader.readLine()) != null) {
+        if (!StringUtils.isBlank(finishLine) && finishLine.startsWith("[")) return finishLine;
+      }
     }
 
-    return finishLine;
+    return null;
   }
 
   @Override
