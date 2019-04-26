@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-version '1.1.1'
+version '1.1.1.SNAPSHOT'
 group 'org.apache.geode.support'
 
 buildscript {
@@ -59,6 +59,7 @@ repositories {
 }
 
 dependencies {
+    compile ("org.apache.commons:commons-csv:1.6")
     compile ("org.apache.commons:commons-lang3:3.7")
     compile ("org.springframework.boot:spring-boot-starter")
     compile ("org.springframework.shell:spring-shell-starter:2.0.0.RELEASE")
