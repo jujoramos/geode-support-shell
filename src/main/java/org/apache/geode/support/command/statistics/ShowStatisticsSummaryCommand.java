@@ -27,17 +27,15 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.geode.support.command.AbstractCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableBuilder;
-import org.springframework.shell.table.TableModel;
 import org.springframework.shell.table.TableModelBuilder;
 
+import org.apache.geode.support.command.ExportableCommand;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.Category;
 import org.apache.geode.support.domain.statistics.Sampling;
@@ -45,11 +43,12 @@ import org.apache.geode.support.domain.statistics.Statistic;
 import org.apache.geode.support.domain.statistics.filters.RegexValueFilter;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
+import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.utils.FormatUtils;
 
 @ShellComponent
 @ShellCommandGroup("Statistics Commands")
-public class ShowStatisticsSummaryCommand extends AbstractCommand {
+public class ShowStatisticsSummaryCommand extends ExportableCommand {
   private StatisticsService statisticsService;
 
   /**
@@ -61,8 +60,8 @@ public class ShowStatisticsSummaryCommand extends AbstractCommand {
   }
 
   @Autowired
-  public ShowStatisticsSummaryCommand(FilesService filesService, StatisticsService statisticsService) {
-    super(filesService);
+  public ShowStatisticsSummaryCommand(FilesService filesService, TableExportService tableExportService, StatisticsService statisticsService) {
+    super(filesService, tableExportService);
     this.statisticsService = statisticsService;
   }
 
@@ -114,7 +113,6 @@ public class ShowStatisticsSummaryCommand extends AbstractCommand {
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
    */
   Table buildTableGroupedBySampling(Path sourcePath, boolean includeEmptyStatistics, Statistic.Filter filter, List<ParsingResult<Sampling>> parsingResults) {
-    Table result = null;
     parsingResults.sort(Comparator.comparing(ParsingResult::getFile));
     TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<>();
 
@@ -141,13 +139,7 @@ public class ShowStatisticsSummaryCommand extends AbstractCommand {
           }
         });
 
-    TableModel resultModel = resultsModelBuilder.build();
-    if (resultModel.getRowCount() > 0) {
-      TableBuilder resultsTableBuilder = new TableBuilder(resultModel);
-      result = resultsTableBuilder.addFullBorder(borderStyle).build();
-    }
-
-    return result;
+    return buildResultsTable(resultsModelBuilder);
   }
 
   /**
@@ -173,7 +165,6 @@ public class ShowStatisticsSummaryCommand extends AbstractCommand {
    * +------------------------------------------------+-------+-------+-------+----------+------------------+
    */
   Table buildTableGroupedByStatistic(Path sourcePath, boolean includeEmptyStatistics, Statistic.Filter filter, List<ParsingResult<Sampling>> parsingResults) {
-    Table result = null;
     Set<String> statistics = new TreeSet<>();
     Map<String, Map<String, Statistic>> fileToStatisticMap = new TreeMap<>();
     TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<>();
@@ -219,13 +210,7 @@ public class ShowStatisticsSummaryCommand extends AbstractCommand {
       });
     });
 
-    TableModel resultModel = resultsModelBuilder.build();
-    if (resultModel.getRowCount() > 0) {
-      TableBuilder resultsTableBuilder = new TableBuilder(resultModel);
-      result = resultsTableBuilder.addFullBorder(borderStyle).build();
-    }
-
-    return result;
+    return buildResultsTable(resultsModelBuilder);
   }
 
   @ShellMethod(key = "show statistics summary", value = "Shows Minimum, Maximum, Average, Last Value and Standard Deviation values for a (set of) defined statistics.")
@@ -236,7 +221,8 @@ public class ShowStatisticsSummaryCommand extends AbstractCommand {
       @ShellOption(help = "Whether to include statistics for which all sample values are 0.", value = "--showEmptyStatistics", arity = 1, defaultValue = "false") boolean showEmptyStatistics,
       @ShellOption(help = "Category of the statistic to search for (VMStats, IndexStats, etc.). Can be a regular expression.", value = "--category", defaultValue = ShellOption.NULL) String categoryId,
       @ShellOption(help = "Instance of the statistic to search for (region name, function name, etc.). Can be a regular expression.", value = "--instance", defaultValue = ShellOption.NULL) String instanceId,
-      @ShellOption(help = "Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression.", value = "--statistic", defaultValue = ShellOption.NULL) String statisticId) {
+      @ShellOption(help = "Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression.", value = "--statistic", defaultValue = ShellOption.NULL) String statisticId,
+      @ShellOption(help = EXPORT_OPTION_HELP, value = EXPORT_OPTION, defaultValue = ShellOption.NULL) File outputFile) {
 
     // Limit the output, showing everything would be overkilling.
     if ((StringUtils.isBlank(categoryId)) && (StringUtils.isBlank(instanceId)) && (StringUtils.isBlank(statisticId))) {
@@ -257,9 +243,7 @@ public class ShowStatisticsSummaryCommand extends AbstractCommand {
       commandResult.add("No statistics files found.");
     } else {
       Table resultsTable = GroupCriteria.Sampling.equals(groupCriteria) ? buildTableGroupedBySampling(sourcePath, showEmptyStatistics, statFilter, parsingResults) : buildTableGroupedByStatistic(sourcePath, showEmptyStatistics, statFilter, parsingResults);
-      if (resultsTable != null) commandResult.add(resultsTable);
-      @SuppressWarnings("unchecked") Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
-      if (errorsTable != null) commandResult.add(errorsTable);
+      buildCommandResult(sourcePath, parsingResults, resultsTable, outputFile, commandResult);
       if (commandResult.isEmpty()) commandResult.add("No matching results found.");
     }
 

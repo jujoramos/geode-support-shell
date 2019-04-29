@@ -28,7 +28,6 @@ import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModelBuilder;
 
 import org.apache.geode.support.command.ExportableCommand;
@@ -99,7 +98,7 @@ public class ShowLogsMetadataCommand extends ExportableCommand {
           }
       );
 
-      buildCommandResult(sourcePath, parsingResults, resultsModelBuilder, outputFile, commandResult);
+      buildCommandResult(sourcePath, parsingResults, buildResultsTable(resultsModelBuilder), outputFile, commandResult);
     }
 
     return commandResult;

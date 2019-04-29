@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
@@ -44,6 +45,8 @@ import org.springframework.shell.table.Table;
 
 import org.apache.geode.internal.statistics.StatValue;
 import org.apache.geode.internal.statistics.ValueFilter;
+import org.apache.geode.support.command.AbstractExportableCommandTest;
+import org.apache.geode.support.command.ExportableCommand;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.Category;
 import org.apache.geode.support.domain.statistics.Sampling;
@@ -52,23 +55,32 @@ import org.apache.geode.support.domain.statistics.Statistic;
 import org.apache.geode.support.domain.statistics.filters.RegexValueFilter;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
+import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.test.assertj.TableAssert;
 import org.apache.geode.support.test.mockito.MockUtils;
 
 @RunWith(JUnitParamsRunner.class)
-public class ShowStatisticsSummaryCommandTest {
+public class ShowStatisticsSummaryCommandTest extends AbstractExportableCommandTest {
   private Path mockedRootPath;
   private FilesService filesService;
   private StatisticsService statisticsService;
   private ShowStatisticsSummaryCommand showStatisticsSummaryCommand;
+
+  @Override
+  protected ExportableCommand getCommand() {
+    return showStatisticsSummaryCommand;
+  }
 
   @Before
   public void setUp() {
     mockedRootPath = MockUtils.mockPath("/samples", true);
 
     filesService = mock(FilesService.class);
+    exportService = mock(TableExportService.class);
     statisticsService = mock(StatisticsService.class);
-    showStatisticsSummaryCommand = spy(new ShowStatisticsSummaryCommand(filesService, statisticsService));
+    showStatisticsSummaryCommand = spy(new ShowStatisticsSummaryCommand(filesService, exportService, statisticsService));
+
+    super.setUp();
   }
 
   @Test
@@ -200,7 +212,8 @@ public class ShowStatisticsSummaryCommandTest {
     ParsingResult locatorResult = new ParsingResult<>(mockedLocatorFile, locatorSampling);
 
     Table resultTable;
-    @SuppressWarnings("unchecked") List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
+    @SuppressWarnings("unchecked")
+    List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
 
     // ############ includeEmptyStatistics = false
     resultTable = showStatisticsSummaryCommand.buildTableGroupedBySampling(mockedRootPath, false, Statistic.Filter.None, parsingResults);
@@ -287,7 +300,8 @@ public class ShowStatisticsSummaryCommandTest {
     ParsingResult locatorResult = new ParsingResult<>(mockedLocatorFile, locatorSampling);
 
     Table resultTable;
-    @SuppressWarnings("unchecked") List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
+    @SuppressWarnings("unchecked")
+    List<ParsingResult<Sampling>> parsingResults = Arrays.asList(clientResult, serverResult, locatorResult);
 
     // ############ includeEmptyStatistics = false
     resultTable = showStatisticsSummaryCommand.buildTableGroupedByStatistic(mockedRootPath, false, Statistic.Filter.None, parsingResults);
@@ -329,17 +343,17 @@ public class ShowStatisticsSummaryCommandTest {
   @Test
   public void showStatisticsSummaryShouldThrowExceptionWhenCategoryIdAndStatisticIdAreBothEmpty() {
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.Sample, true, null, null, null))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.Sample, true, null, null, null, null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Either '--category', '--instance' or '--statistic' parameter should be specified.");
 
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "", "", ""))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "", "", "", null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Either '--category', '--instance' or '--statistic' parameter should be specified.");
 
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "   ", "     ", "    "))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "   ", "     ", "    " , null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Either '--category', '--instance' or '--statistic' parameter should be specified.");
   }
@@ -348,7 +362,7 @@ public class ShowStatisticsSummaryCommandTest {
   public void showStatisticsSummaryShouldThrowExceptionWhenFileIsNotReadable() {
     doThrow(new IllegalArgumentException("Mocked IllegalArgumentException.")).when(filesService).assertFileReadability(any());
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId"))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Mocked IllegalArgumentException.");
   }
@@ -357,7 +371,7 @@ public class ShowStatisticsSummaryCommandTest {
   public void showStatisticsSummaryShouldPropagateExceptionsThrownByTheServiceLayer() {
     doThrow(new RuntimeException()).when(statisticsService).parseSampling(any(), any());
     assertThatThrownBy(() -> showStatisticsSummaryCommand
-        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId"))
+        .showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null))
         .isInstanceOf(RuntimeException.class);
   }
 
@@ -367,7 +381,7 @@ public class ShowStatisticsSummaryCommandTest {
     ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
     when(statisticsService.parseSampling(any(), any())).thenReturn(Collections.emptyList());
 
-    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
+    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
     verify(statisticsService, times(1)).parseSampling(any(), argumentCaptor.capture());
     List<ValueFilter> filtersUsed = argumentCaptor.getValue();
     assertThat(filtersUsed).isNotNull();
@@ -378,7 +392,7 @@ public class ShowStatisticsSummaryCommandTest {
   @Test
   public void showStatisticsSummaryShouldReturnStringWhenNoStatisticsFilesAreFound() {
     when(statisticsService.parseSampling(any(), any())).thenReturn(Collections.emptyList());
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
@@ -396,7 +410,7 @@ public class ShowStatisticsSummaryCommandTest {
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
     doReturn(null).when(showStatisticsSummaryCommand).buildTableGroupedByStatistic(any(), anyBoolean(), any(), any());
     doReturn(null).when(showStatisticsSummaryCommand).buildTableGroupedBySampling(any(), anyBoolean(), any(), any());
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), criteria, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), criteria, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
 
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
@@ -411,23 +425,23 @@ public class ShowStatisticsSummaryCommandTest {
     List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(new ParsingResult<>(MockUtils.mockPath("/samples/file.gfs", false), mock(Sampling.class)));
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
 
-    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Sampling, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
+    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Sampling, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
     verify(showStatisticsSummaryCommand, times(1)).buildTableGroupedBySampling(mockedRootPath, false, Statistic.Filter.None, mockedResults);
     verify(showStatisticsSummaryCommand, times(0)).buildTableGroupedByStatistic(mockedRootPath, false, Statistic.Filter.None, mockedResults);
 
     reset(showStatisticsSummaryCommand);
-    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
+    showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
     verify(showStatisticsSummaryCommand, times(0)).buildTableGroupedBySampling(mockedRootPath, false, Statistic.Filter.None, mockedResults);
     verify(showStatisticsSummaryCommand, times(1)).buildTableGroupedByStatistic(mockedRootPath, false, Statistic.Filter.None, mockedResults);
   }
 
   @Test
-  public void showStatisticsSummaryShouldReturnOnlyErrorTableIfParsingFailsForAllFiles() {
+  public void showStatisticsSummaryShouldReturnOnlyErrorTableWhenParsingFailsForAllFiles() {
     Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs", false);
     List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception")));
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
 
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
@@ -439,7 +453,20 @@ public class ShowStatisticsSummaryCommandTest {
   }
 
   @Test
-  public void showStatisticsSummaryShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() {
+  public void showStatisticsSummaryShouldReturnErrorTableAndIgnoreExportFileWhenParsingFailsForAllFilesAndExportFileIsSet() throws IOException {
+    Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs", false);
+    List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception")));
+    when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
+
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", mockedExportFile);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    assertThat(((List)resultObject).size()).isEqualTo(1);
+    verify(exportService, times(0)).export(any(), any(), any());
+  }
+
+  @Test
+  public void showStatisticsSummaryShouldReturnOnlyResultsTableWhenParsingSucceedsForAllFiles() {
     StatValue replyWaitsInProgressStatValue = MockUtils.mockStatValue("replyWaitsInProgress", "replyWaitsInProgress", true, "replyWaitsInProgress", 2, 8, 0.67, 0, 0);
     Statistic replyWaitsInProgressStatistic = spy(new Statistic(replyWaitsInProgressStatValue));
     Category distributionStatsCategory = new Category("DistributionStats", "DistributionStatsCategory");
@@ -451,8 +478,8 @@ public class ShowStatisticsSummaryCommandTest {
     ParsingResult parsingResult = new ParsingResult<>(mockedPath, sampling);
     @SuppressWarnings("unchecked") List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(parsingResult);
     when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
 
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
@@ -461,6 +488,34 @@ public class ShowStatisticsSummaryCommandTest {
     TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
     TableAssert.assertThat(resultTable).row(0).isEqualTo("DistributionStats.replyWaitsInProgress", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
     TableAssert.assertThat(resultTable).row(1).isEqualTo("└──/server.gfs", "2.00", "8.00", "0.67", "0.00", "0.00");
+  }
+
+  @Test
+  @Parameters({ "true", "false" })
+  public void showStatisticsSummaryShouldReturnMetadataTableAndExportResultMessageWhenParsingSucceedsForAllFilesAndExportFileIsSet(boolean exportSucceeds) throws IOException {
+    StatValue replyWaitsInProgressStatValue = MockUtils.mockStatValue("replyWaitsInProgress", "replyWaitsInProgress", true, "replyWaitsInProgress", 2, 8, 0.67, 0, 0);
+    Statistic replyWaitsInProgressStatistic = spy(new Statistic(replyWaitsInProgressStatValue));
+    Category distributionStatsCategory = new Category("DistributionStats", "DistributionStatsCategory");
+    distributionStatsCategory.addStatistic(replyWaitsInProgressStatistic);
+    Map<String, Category> categoryMap = new HashMap<>();
+    categoryMap.put(distributionStatsCategory.getName(), distributionStatsCategory);
+    Path mockedPath = MockUtils.mockPath("/samples/server.gfs", false);
+    Sampling sampling = new Sampling(mock(SamplingMetadata.class), categoryMap);
+    ParsingResult parsingResult = new ParsingResult<>(mockedPath, sampling);
+    @SuppressWarnings("unchecked") List<ParsingResult<Sampling>> mockedResults = Collections.singletonList(parsingResult);
+    when(statisticsService.parseSampling(any(), any())).thenReturn(mockedResults);
+    setExportServiceAnswer(exportSucceeds);
+
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", mockedExportFile);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(2);
+    Table resultTable = (Table) resultList.get(0);
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("DistributionStats.replyWaitsInProgress", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──/server.gfs", "2.00", "8.00", "0.67", "0.00", "0.00");
+    assertExportServiceResultMessageAndInvocation(resultList, exportSucceeds);
   }
 
   @Test
@@ -475,7 +530,7 @@ public class ShowStatisticsSummaryCommandTest {
     Sampling sampling = new Sampling(mock(SamplingMetadata.class), categoryMap);
     when(statisticsService.parseSampling(any(), any())).thenReturn(Arrays.asList(new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception")), new ParsingResult<>(mockedParseableFile, sampling)));
 
-    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId");
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", null);
     assertThat(resultObject).isNotNull();
     assertThat(resultObject).isInstanceOf(List.class);
     @SuppressWarnings("unchecked") List<Table> resultList = (List)resultObject;
@@ -492,5 +547,41 @@ public class ShowStatisticsSummaryCommandTest {
     TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
     TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
     TableAssert.assertThat(errorsTable).row(1).isEqualTo("mockedUnparseableFile.gfs", "Mocked Exception");
+  }
+
+  @Test
+  @Parameters({ "true", "false" })
+  public void showStatisticsSummaryShouldBothTablesAndExportResultMessageInOrderWhenExportFileIsSet(boolean exportSucceeds) throws IOException {
+    Path mockedParseableFile = MockUtils.mockPath("/samples/server.gfs", false);
+    Path mockedUnparseablePath = MockUtils.mockPath("mockedUnparseableFile.gfs", false);
+    Statistic replyWaitsInProgressStatistic = spy(new Statistic(MockUtils.mockStatValue("replyWaitsInProgress", "replyWaitsInProgress", true, "replyWaitsInProgress", 2, 8, 0.67, 0, 0)));
+    Category distributionStatsCategory = new Category("DistributionStats", "DistributionStatsCategory");
+    distributionStatsCategory.addStatistic(replyWaitsInProgressStatistic);
+    Map<String, Category> categoryMap = new HashMap<>();
+    categoryMap.put(distributionStatsCategory.getName(), distributionStatsCategory);
+    Sampling sampling = new Sampling(mock(SamplingMetadata.class), categoryMap);
+    when(statisticsService.parseSampling(any(), any())).thenReturn(Arrays.asList(new ParsingResult<>(mockedUnparseablePath, new Exception("Mocked Exception")), new ParsingResult<>(mockedParseableFile, sampling)));
+    setExportServiceAnswer(exportSucceeds);
+
+    Object resultObject = showStatisticsSummaryCommand.showStatisticsSummary(mockedRootPath.toFile(), ShowStatisticsSummaryCommand.GroupCriteria.Statistic, Statistic.Filter.None, false, "categoryId", "instanceId", "statisticId", mockedExportFile);
+    assertThat(resultObject).isNotNull();
+    assertThat(resultObject).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List)resultObject;
+    assertThat(resultList.size()).isEqualTo(3);
+
+    // Results Table First
+    Table resultTable = (Table) resultList.get(0);
+    TableAssert.assertThat(resultTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(6);
+    TableAssert.assertThat(resultTable).row(0).isEqualTo("DistributionStats.replyWaitsInProgress", "Minimum", "Maximum", "Average", "Last Value", "Standard Deviation");
+    TableAssert.assertThat(resultTable).row(1).isEqualTo("└──/server.gfs", "2.00", "8.00", "0.67", "0.00", "0.00");
+
+    // Error Table Last
+    Table errorsTable = (Table) resultList.get(1);
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(2).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo("mockedUnparseableFile.gfs", "Mocked Exception");
+
+    // Export Message should be the last.
+    assertExportServiceResultMessageAndInvocation(resultList, exportSucceeds);
   }
 }

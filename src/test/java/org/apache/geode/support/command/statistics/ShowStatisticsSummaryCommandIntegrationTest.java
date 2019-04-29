@@ -18,10 +18,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +45,7 @@ import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
 import org.apache.geode.support.domain.statistics.Statistic;
+import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.test.StatisticsSampleDataUtils;
 import org.apache.geode.support.test.assertj.TableAssert;
 
@@ -97,7 +101,7 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
     assertThat(methodTarget.getAvailability().isAvailable()).isTrue();
     assertThat(methodTarget.getGroup()).isEqualTo("Statistics Commands");
     assertThat(methodTarget.getHelp()).isEqualTo("Shows Minimum, Maximum, Average, Last Value and Standard Deviation values for a (set of) defined statistics.");
-    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowStatisticsSummaryCommand.class, "showStatisticsSummary", File.class, ShowStatisticsSummaryCommand.GroupCriteria.class, Statistic.Filter.class, boolean.class, String.class, String.class, String.class));
+    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowStatisticsSummaryCommand.class, "showStatisticsSummary", File.class, ShowStatisticsSummaryCommand.GroupCriteria.class, Statistic.Filter.class, boolean.class, String.class, String.class, String.class, File.class));
   }
 
   @Test
@@ -157,6 +161,52 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
   }
 
   @Test
+  public void showStatisticsSummaryShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles() {
+    Path basePath = StatisticsSampleDataUtils.corruptedFolder.toPath();
+    String command = "show statistics summary"
+        + " --path " + basePath.toString()
+        + " --category VMStats"
+        + " --instance vmStats"
+        + " --statistic .*fd.*"
+        + " --groupBy Statistic";
+
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
+    assertThat(resultList.size()).isEqualTo(1);
+
+    // Errors Table.
+    Table errorsTable = resultList.get(0);
+    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
+    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
+    TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
+    TableAssert.assertThat(errorsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+  }
+
+  @Test
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showStatisticsSummaryShouldReturnOnlyErrorsTableAndIgnoreExportParameterWhenParsingFailsForAllFiles(String format) {
+    Path basePath = StatisticsSampleDataUtils.corruptedFolder.toPath();
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String command = "show statistics summary"
+        + " --path " + basePath.toString()
+        + " --category VMStats"
+        + " --instance vmStats"
+        + " --statistic .*fd.*"
+        + " --groupBy Statistic"
+        + " --export " + outputFile;
+
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(1);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+
+    // File Should Not Exist.
+    assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+  }
+
+  @Test
   public void showStatisticsSummaryShouldReturnOnlyResultsTableIfParsingSucceedsForAllFiles() {
     Path basePath = StatisticsSampleDataUtils.uncorruptedFolder.toPath();
     String command = "show statistics summary"
@@ -191,26 +241,33 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
   }
 
   @Test
-  public void showStatisticsSummaryShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles() {
-    Path basePath = StatisticsSampleDataUtils.corruptedFolder.toPath();
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showStatisticsSummaryShouldReturnMetadataTableAndExportResultWhenParsingSucceedsForAllFiles(String format) {
+    Path basePath = StatisticsSampleDataUtils.uncorruptedFolder.toPath();
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
     String command = "show statistics summary"
         + " --path " + basePath.toString()
         + " --category VMStats"
         + " --instance vmStats"
         + " --statistic .*fd.*"
-        + " --groupBy Statistic";
+        + " --groupBy Statistic"
+        + " --export " + outputFile;
 
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
-    assertThat(resultList.size()).isEqualTo(1);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(2);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+    assertThat(resultList.get(1)).isInstanceOf(String.class);
 
-    // Errors Table.
-    Table errorsTable = resultList.get(0);
-    TableAssert.assertThat(errorsTable).rowCountIsEqualsTo(3).columnCountIsEqualsTo(2);
-    TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
-    TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
-    TableAssert.assertThat(errorsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+    // File Should (Not) Exist for (Un) Known Formats.
+    if (TableExportService.Format.isSupported(format)) {
+      assertThat(Files.exists(Paths.get(outputFile))).isTrue();
+      assertThat(resultList.get(1)).isInstanceOf(String.class).isEqualTo("Data successfully exported to " + outputFile + ".");
+    } else {
+      assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+      assertThat(resultList.get(1)).isInstanceOf(String.class).isEqualTo("There was en error while exporting the data to " + outputFile + ": No exporter found for extension " + format + ".");
+    }
   }
 
   @Test
@@ -251,5 +308,35 @@ public class ShowStatisticsSummaryCommandIntegrationTest {
     TableAssert.assertThat(errorsTable).row(0).isEqualTo("File Name", "Error Description");
     TableAssert.assertThat(errorsTable).row(1).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath), "Unexpected token byte value: 67");
     TableAssert.assertThat(errorsTable).row(2).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath), "Not in GZIP format");
+  }
+
+  @Test
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showStatisticsSummaryShouldReturnBothTablesAndExportMessageInOrder(String format) {
+    Path basePath = StatisticsSampleDataUtils.rootFolder.toPath();
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String command = "show statistics summary"
+        + " --path " + basePath.toString()
+        + " --groupBy Sampling"
+        + " --statistic delayDuration"
+        + " --showEmptyStatistics true"
+        + " --export " + outputFile;
+
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(3);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+    assertThat(resultList.get(1)).isInstanceOf(Table.class);
+    assertThat(resultList.get(2)).isInstanceOf(String.class);
+
+    // File Should (Not) Exist for (Un) Known Formats.
+    if (TableExportService.Format.isSupported(format)) {
+      assertThat(Files.exists(Paths.get(outputFile))).isTrue();
+      assertThat(resultList.get(2)).isInstanceOf(String.class).isEqualTo("Data successfully exported to " + outputFile + ".");
+    } else {
+      assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+      assertThat(resultList.get(2)).isInstanceOf(String.class).isEqualTo("There was en error while exporting the data to " + outputFile + ": No exporter found for extension " + format + ".");
+    }
   }
 }

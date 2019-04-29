@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableModelBuilder;
 
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.service.FilesService;
@@ -49,10 +48,8 @@ public abstract class ExportableCommand<V> extends AbstractCommand {
     }
   }
 
-  protected void buildCommandResult(Path sourcePath, List<ParsingResult<V>> parsingResults, TableModelBuilder<String> resultsModelBuilder, File outputFile, List<Object> commandResult) {
-    // Build Regular Tables First.
-    Table resultsTable = buildResultsTable(resultsModelBuilder);
-    Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
+  protected void buildCommandResult(Path sourcePath, List<ParsingResult<V>> parsingResults, Table resultsTable, File outputFile, List<Object> commandResult) {
+    @SuppressWarnings("unchecked") Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
     if (resultsTable != null) commandResult.add(resultsTable);
     if (errorsTable != null) commandResult.add(errorsTable);
 

@@ -95,7 +95,7 @@ public class ShowStatisticsMetadataCommand extends ExportableCommand {
           }
       );
 
-      buildCommandResult(sourcePath, parsingResults, resultsModelBuilder, outputFile, commandResult);
+      buildCommandResult(sourcePath, parsingResults, buildResultsTable(resultsModelBuilder), outputFile, commandResult);
     }
 
     return commandResult;
