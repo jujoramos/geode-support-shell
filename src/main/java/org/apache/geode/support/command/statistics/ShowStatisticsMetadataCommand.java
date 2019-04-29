@@ -62,9 +62,9 @@ public class ShowStatisticsMetadataCommand extends AbstractCommand {
     filesService.assertFileReadability(sourcePath);
 
     List<Object> commandResult = new ArrayList<>();
-    String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     List<ParsingResult<SamplingMetadata>> parsingResults = statisticsService.parseMetadata(sourcePath);
-    TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Product Version").addValue("Operating System").addValue("Time Zone").addValue("Start Time" + zoneIdDesc).addValue("Finish Time" + zoneIdDesc);
+    TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<>();
+    addMetadataHeader(resultsModelBuilder, zoneId);
 
     if (parsingResults.isEmpty()) {
       commandResult.add("No statistics files found.");

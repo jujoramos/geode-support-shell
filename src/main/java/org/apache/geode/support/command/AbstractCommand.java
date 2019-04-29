@@ -34,7 +34,7 @@ import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.utils.FormatUtils;
 
 // TODO: Spring doesn't know how to convert from String to Path. Add a custom converter and use Path instead of the old Sampling class.
-public class AbstractCommand<V>  {
+public abstract class AbstractCommand<V>  {
   protected FilesService filesService;
   protected final BorderStyle borderStyle = BorderStyle.fancy_double;
 
@@ -43,8 +43,33 @@ public class AbstractCommand<V>  {
     this.filesService = filesService;
   }
 
+  protected void addMetadataHeader(TableModelBuilder<String> tableModelBuilder, ZoneId zoneId) {
+    String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
+    tableModelBuilder.addRow()
+        .addValue("File Name")
+        .addValue("Product Version")
+        .addValue("Operating System")
+        .addValue("Time Zone")
+        .addValue("Start Time" + zoneIdDesc)
+        .addValue("Finish Time" + zoneIdDesc);
+  }
+
   /**
-   * Builds the Errors Table, containing the errors that happened while parsing the statistics files.
+   * Builds the Results Table.
+   *
+   * @param resultsModelBuilder The actual data to insert into the table.
+   * @return The results Table, or null if no there is no data available.
+   */
+  protected Table buildResultsTable(TableModelBuilder<String> resultsModelBuilder) {
+    Table resultsTable = null;
+    TableBuilder resultsTableBuilder = new TableBuilder(resultsModelBuilder.build());
+    if (resultsTableBuilder.getModel().getRowCount() > 1) resultsTable = resultsTableBuilder.addFullBorder(borderStyle).build();
+
+    return resultsTable;
+  }
+
+  /**
+   * Builds the Errors Table, containing the errors that happened while parsing the files.
    *
    * @param sourcePath The original sourcePath used to scan for statistics to parse.
    * @param parsingResults The list of parsing results returned by the service layer.
@@ -70,7 +95,6 @@ public class AbstractCommand<V>  {
 
     return errorsTable;
   }
-
 
   protected boolean intervalMatchesFilter(Interval interval, Integer year, Integer month, Integer day, Integer hour, Integer minute, Integer second) {
     boolean matches;

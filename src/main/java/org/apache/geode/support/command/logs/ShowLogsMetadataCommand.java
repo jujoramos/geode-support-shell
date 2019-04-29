@@ -29,24 +29,24 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
-import org.apache.geode.support.command.AbstractCommand;
+import org.apache.geode.support.command.ExportableCommand;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.logs.LogMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.LogsService;
+import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.utils.FormatUtils;
 
 @ShellComponent
 @ShellCommandGroup("Logs Commands")
-public class ShowLogsMetadataCommand extends AbstractCommand {
+public class ShowLogsMetadataCommand extends ExportableCommand {
   private LogsService logsService;
 
   @Autowired
-  public ShowLogsMetadataCommand(FilesService filesService, LogsService logsService) {
-    super(filesService);
+  public ShowLogsMetadataCommand(FilesService filesService, TableExportService tableExportService, LogsService logsService) {
+    super(filesService, tableExportService);
     this.logsService = logsService;
   }
 
@@ -54,7 +54,8 @@ public class ShowLogsMetadataCommand extends AbstractCommand {
   List<?> showLogsMetadata(
       @ShellOption(help = "Path to the log file, or directory to scan for log files.", value = "--path") File source,
       @ShellOption(help = "Whether to parse the full metadata (slower) or only the time covered by the log file (much faster).", value = "--intervalOnly", arity = 1, defaultValue = "false") boolean intervalOnly,
-      @ShellOption(help = "Time Zone Id to use when showing results. If not set, the default from the local system will be used (or the one from the log file, if found and '--intervalOnly' is set as 'false').", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId) {
+      @ShellOption(help = "Time Zone Id to use when showing results. If not set, the default from the local system will be used (or the one from the log file, if found and '--intervalOnly' is set as 'false').", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId,
+      @ShellOption(help = EXPORT_OPTION_HELP, value = EXPORT_OPTION, defaultValue = ShellOption.NULL) File outputFile) {
 
     // Use paths from here.
     Path sourcePath = source.toPath();
@@ -64,15 +65,9 @@ public class ShowLogsMetadataCommand extends AbstractCommand {
 
     ZoneId defaultZoneId = ZoneId.systemDefault();
     List<Object> commandResult = new ArrayList<>();
-    String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     List<ParsingResult<LogMetadata>> parsingResults = (intervalOnly) ? logsService.parseInterval(sourcePath) : logsService.parseMetadata(sourcePath);
-    TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<String>().addRow()
-        .addValue("File Name")
-        .addValue("Product Version")
-        .addValue("Operating System")
-        .addValue("Time Zone")
-        .addValue("Start Time" + zoneIdDesc)
-        .addValue("Finish Time" + zoneIdDesc);
+    TableModelBuilder<String> resultsModelBuilder = new TableModelBuilder<>();
+    addMetadataHeader(resultsModelBuilder, zoneId);
 
     if (parsingResults.isEmpty()) {
       commandResult.add("No log files found.");
@@ -104,10 +99,12 @@ public class ShowLogsMetadataCommand extends AbstractCommand {
           }
       );
 
-      TableBuilder resultsTableBuilder = new TableBuilder(resultsModelBuilder.build());
-      if (resultsTableBuilder.getModel().getRowCount() > 1) commandResult.add(resultsTableBuilder.addFullBorder(borderStyle).build());
+      Table resultsTable = buildResultsTable(resultsModelBuilder);
       @SuppressWarnings("unchecked") Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
+
+      if (resultsTable != null) commandResult.add(resultsTable);
       if (errorsTable != null) commandResult.add(errorsTable);
+      exportResultsTable(resultsTable, outputFile, commandResult);
     }
 
     return commandResult;

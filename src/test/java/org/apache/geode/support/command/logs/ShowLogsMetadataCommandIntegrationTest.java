@@ -18,6 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -44,6 +46,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
+import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.test.LogsSampleDataUtils;
 import org.apache.geode.support.utils.FormatUtils;
 
@@ -96,7 +99,7 @@ public class ShowLogsMetadataCommandIntegrationTest {
     assertThat(methodTarget.getAvailability().isAvailable()).isTrue();
     assertThat(methodTarget.getGroup()).isEqualTo("Logs Commands");
     assertThat(methodTarget.getHelp()).isEqualTo("Show general information about log files.");
-    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowLogsMetadataCommand.class, "showLogsMetadata", File.class, boolean.class, ZoneId.class));
+    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowLogsMetadataCommand.class, "showLogsMetadata", File.class, boolean.class, ZoneId.class, File.class));
   }
 
   @Test
@@ -124,7 +127,53 @@ public class ShowLogsMetadataCommandIntegrationTest {
 
   @Test
   @Parameters({ ",true", ",false", "Australia/Sydney,true", "Australia/Sydney,false", "America/Argentina/Buenos_Aires,true", "America/Argentina/Buenos_Aires,false", "Asia/Shanghai,true", "Asia/Shanghai, false" })
-  public void showLogsMetadataShouldReturnOnlyMetadataTableIfParsingSucceedsForAllFiles(String timeZoneId, boolean intervalOnly) {
+  public void showLogsMetadataShouldReturnOnlyErrorsTableWhenParsingFailsForAllFiles(String timeZoneId, boolean intervalOnly) {
+    ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
+    String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
+    String intervalOnlyCommandOption = " --intervalOnly " + intervalOnly;
+
+    File basePath = LogsSampleDataUtils.unparseableFolder;
+    String command = "show logs metadata --path " + basePath.getAbsolutePath() + zoneIdCommandOption + intervalOnlyCommandOption;
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
+    assertThat(resultList.size()).isEqualTo(1);
+
+    // Error Table.
+    TableModel errorsTable = resultList.get(0).getModel();
+    int errorsRowCount = errorsTable.getRowCount();
+    int errorsColumnCount = errorsTable.getColumnCount();
+    assertThat(errorsRowCount).isEqualTo(2);
+    assertThat(errorsColumnCount).isEqualTo(2);
+
+    // Assert Table Data.
+    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
+    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
+    assertThat(errorsTable.getValue(1, 0)).isEqualTo(FormatUtils.relativizePath(basePath.toPath(), LogsSampleDataUtils.unknownLogPath));
+    assertThat(errorsTable.getValue(1, 1)).isEqualTo("Log format not recognized.");
+  }
+
+  @Test
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showLogsMetadataShouldReturnOnlyErrorsTableAndIgnoreExportParameterWhenParsingFailsForAllFiles(String format) {
+    File basePath = LogsSampleDataUtils.unparseableFolder;
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String exportCommandOption = " --export " + outputFile;
+
+    String command = "show logs metadata --path " + basePath.getAbsolutePath() + exportCommandOption;
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(1);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+
+    // File Should Not Exist.
+    assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+  }
+
+  @Test
+  @Parameters({ ",true", ",false", "Australia/Sydney,true", "Australia/Sydney,false", "America/Argentina/Buenos_Aires,true", "America/Argentina/Buenos_Aires,false", "Asia/Shanghai,true", "Asia/Shanghai, false" })
+  public void showLogsMetadataShouldReturnOnlyMetadataTableWhenParsingSucceedsForAllFiles(String timeZoneId, boolean intervalOnly) {
     ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
@@ -137,14 +186,14 @@ public class ShowLogsMetadataCommandIntegrationTest {
     @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
-    // Correct Results.
+    // Results Table.
     TableModel resultsTable = resultList.get(0).getModel();
     int rowCount = resultsTable.getRowCount();
     int columnCount = resultsTable.getColumnCount();
     assertThat(rowCount).isEqualTo(4);
     assertThat(columnCount).isEqualTo(6);
 
-    // Assert Titles
+    // Assert Titles.
     assertThat(resultsTable.getValue(0, 0)).isEqualTo("File Name");
     assertThat(resultsTable.getValue(0, 1)).isEqualTo("Product Version");
     assertThat(resultsTable.getValue(0, 2)).isEqualTo("Operating System");
@@ -159,31 +208,28 @@ public class ShowLogsMetadataCommandIntegrationTest {
   }
 
   @Test
-  @Parameters({ ",true", ",false", "Australia/Sydney,true", "Australia/Sydney,false", "America/Argentina/Buenos_Aires,true", "America/Argentina/Buenos_Aires,false", "Asia/Shanghai,true", "Asia/Shanghai, false" })
-  public void showLogsMetadataShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles(String timeZoneId, boolean intervalOnly) {
-    ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
-    String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
-    String intervalOnlyCommandOption = " --intervalOnly " + intervalOnly;
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showLogsMetadataShouldReturnMetadataTableAndExportResultWhenParsingSucceedsForAllFiles(String format) {
+    File basePath = LogsSampleDataUtils.parseableFolder;
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String exportCommandOption = " --export " + outputFile;
 
-    File basePath = LogsSampleDataUtils.unparseableFolder;
-    String command = "show logs metadata --path " + basePath.getAbsolutePath() + zoneIdCommandOption + intervalOnlyCommandOption;
+    String command = "show logs metadata --path " + basePath.getAbsolutePath() + exportCommandOption;
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
-    assertThat(resultList.size()).isEqualTo(1);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(2);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+    assertThat(resultList.get(1)).isInstanceOf(String.class);
 
-    // Error Results should come last.
-    TableModel errorsTable = resultList.get(0).getModel();
-    int errorsRowCount = errorsTable.getRowCount();
-    int errorsColumnCount = errorsTable.getColumnCount();
-    assertThat(errorsRowCount).isEqualTo(2);
-    assertThat(errorsColumnCount).isEqualTo(2);
-
-    // Assert Table Data
-    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTable.getValue(1, 0)).isEqualTo(FormatUtils.relativizePath(basePath.toPath(), LogsSampleDataUtils.unknownLogPath));
-    assertThat(errorsTable.getValue(1, 1)).isEqualTo("Log format not recognized.");
+    // File Should (Not) Exist for (Un) Known Formats.
+    if (TableExportService.Format.isSupported(format)) {
+      assertThat(Files.exists(Paths.get(outputFile))).isTrue();
+      assertThat(resultList.get(1)).isInstanceOf(String.class).isEqualTo("Data successfully exported to " + outputFile + ".");
+    } else {
+      assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+      assertThat(resultList.get(1)).isInstanceOf(String.class).isEqualTo("There was en error while exporting the data to " + outputFile + ": No exporter found for extension " + format + ".");
+    }
   }
 
   @Test
@@ -233,5 +279,31 @@ public class ShowLogsMetadataCommandIntegrationTest {
     assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
     assertThat(errorsTable.getValue(1, 0)).isEqualTo(FormatUtils.relativizePath(basePath.toPath(), LogsSampleDataUtils.unknownLogPath));
     assertThat(errorsTable.getValue(1, 1)).isEqualTo("Log format not recognized.");
+  }
+
+  @Test
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showLogsMetadataShouldReturnBothTablesAndExportMessageInOrder(String format) {
+    File basePath = LogsSampleDataUtils.rootFolder;
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String exportCommandOption = " --export " + outputFile;
+
+    String command = "show logs metadata --path " + basePath.getAbsolutePath() + exportCommandOption;
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(3);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+    assertThat(resultList.get(1)).isInstanceOf(Table.class);
+    assertThat(resultList.get(2)).isInstanceOf(String.class);
+
+    // File Should (Not) Exist for (Un) Known Formats.
+    if (TableExportService.Format.isSupported(format)) {
+      assertThat(Files.exists(Paths.get(outputFile))).isTrue();
+      assertThat(resultList.get(2)).isInstanceOf(String.class).isEqualTo("Data successfully exported to " + outputFile + ".");
+    } else {
+      assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+      assertThat(resultList.get(2)).isInstanceOf(String.class).isEqualTo("There was en error while exporting the data to " + outputFile + ": No exporter found for extension " + format + ".");
+    }
   }
 }

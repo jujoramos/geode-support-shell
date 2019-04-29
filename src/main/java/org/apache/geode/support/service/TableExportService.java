@@ -2,14 +2,28 @@ package org.apache.geode.support.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import org.springframework.shell.table.Table;
 
 public interface TableExportService {
+
+  /**
+   * Formats currently supported by the export service.
+   */
   enum Format {
     TXT,
     CSV,
-    TSV
+    TSV;
+
+    private static final List<String> knownFormats = Arrays.asList("TXT", "CSV", "TSV");
+
+    public static boolean isSupported(String format) {
+      Objects.requireNonNull(format);
+      return knownFormats.contains(format.toUpperCase());
+    }
   }
 
   /**
@@ -20,5 +34,5 @@ public interface TableExportService {
    * @param table The actual data that should be written to the file using the selected format.
    * @throws IOException If an exception occurs while writing the results to disk.
    */
-  public void export(Path file, Format format, Table table) throws IOException;
+  void export(Path file, Format format, Table table) throws IOException;
 }
