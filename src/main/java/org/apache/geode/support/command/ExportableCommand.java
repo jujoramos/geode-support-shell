@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.shell.table.Table;
+import org.springframework.shell.table.TableModelBuilder;
 
+import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.TableExportService;
 
-public abstract class ExportableCommand extends AbstractCommand {
+public abstract class ExportableCommand<V> extends AbstractCommand {
   private TableExportService tableExportService;
   protected final String EXPORT_OPTION = "--export";
   protected final String EXPORT_OPTION_HELP = "Path to file where command results should be written to (extension determines the output format: txt, csv, tsv).";
@@ -30,7 +32,7 @@ public abstract class ExportableCommand extends AbstractCommand {
     throw new IllegalArgumentException(String.format("No exporter found for extension %s", fileExtension));
   }
 
-  protected void exportResultsTable(Table resultTable, File targetFile, List<Object> commandResult) {
+  void exportResultsTable(Table resultTable, File targetFile, List<Object> commandResult) {
     // Do nothing.
     if ((targetFile == null) || (resultTable == null)) return;
 
@@ -45,5 +47,15 @@ public abstract class ExportableCommand extends AbstractCommand {
     } catch (Exception exception) {
       commandResult.add(String.format("There was en error while exporting the data to %s: %s.", targetPath.toAbsolutePath().toString(), exception.getMessage()));
     }
+  }
+
+  protected void buildCommandResult(Path sourcePath, List<ParsingResult<V>> parsingResults, TableModelBuilder<String> resultsModelBuilder, File outputFile, List<Object> commandResult) {
+    // Build Regular Tables First.
+    Table resultsTable = buildResultsTable(resultsModelBuilder);
+    Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
+    if (resultsTable != null) commandResult.add(resultsTable);
+    if (errorsTable != null) commandResult.add(errorsTable);
+
+    exportResultsTable(resultsTable, outputFile, commandResult);
   }
 }

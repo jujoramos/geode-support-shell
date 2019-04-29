@@ -28,32 +28,32 @@ import org.springframework.shell.standard.ShellCommandGroup;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import org.springframework.shell.table.Table;
-import org.springframework.shell.table.TableBuilder;
 import org.springframework.shell.table.TableModelBuilder;
 
-import org.apache.geode.support.command.AbstractCommand;
+import org.apache.geode.support.command.ExportableCommand;
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.statistics.SamplingMetadata;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.StatisticsService;
+import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.utils.FormatUtils;
 
 @ShellComponent
 @ShellCommandGroup("Statistics Commands")
-public class ShowStatisticsMetadataCommand extends AbstractCommand {
+public class ShowStatisticsMetadataCommand extends ExportableCommand {
   private StatisticsService statisticsService;
 
   @Autowired
-  public ShowStatisticsMetadataCommand(FilesService filesService, StatisticsService statisticsService) {
-    super(filesService);
+  public ShowStatisticsMetadataCommand(FilesService filesService, TableExportService tableExportService, StatisticsService statisticsService) {
+    super(filesService, tableExportService);
     this.statisticsService = statisticsService;
   }
 
   @ShellMethod(key = "show statistics metadata", value = "Show general information about statistics files.")
   List<?> showStatisticsMetadata(
       @ShellOption(help = "Path to statistics file, or directory to scan for statistics files.", value = "--path") File source,
-      @ShellOption(help = "Time Zone Id to use when showing results. If not set, the default from the statistics file will be used.", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId) {
+      @ShellOption(help = "Time Zone Id to use when showing results. If not set, the default from the statistics file will be used.", value = "--timeZone", defaultValue = ShellOption.NULL) ZoneId zoneId,
+      @ShellOption(help = EXPORT_OPTION_HELP, value = EXPORT_OPTION, defaultValue = ShellOption.NULL) File outputFile) {
 
     // Use paths from here.
     Path sourcePath = source.toPath();
@@ -95,10 +95,7 @@ public class ShowStatisticsMetadataCommand extends AbstractCommand {
           }
       );
 
-      TableBuilder resultsTableBuilder = new TableBuilder(resultsModelBuilder.build());
-      if (resultsTableBuilder.getModel().getRowCount() > 1) commandResult.add(resultsTableBuilder.addFullBorder(borderStyle).build());
-      @SuppressWarnings("unchecked") Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
-      if (errorsTable != null) commandResult.add(errorsTable);
+      buildCommandResult(sourcePath, parsingResults, resultsModelBuilder, outputFile, commandResult);
     }
 
     return commandResult;

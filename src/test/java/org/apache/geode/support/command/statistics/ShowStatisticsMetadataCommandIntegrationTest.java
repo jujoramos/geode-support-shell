@@ -18,6 +18,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.util.List;
 
@@ -44,6 +46,7 @@ import org.springframework.test.context.junit4.rules.SpringClassRule;
 import org.springframework.test.context.junit4.rules.SpringMethodRule;
 import org.springframework.util.ReflectionUtils;
 
+import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.test.StatisticsSampleDataUtils;
 import org.apache.geode.support.utils.FormatUtils;
 
@@ -96,7 +99,7 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     assertThat(methodTarget.getAvailability().isAvailable()).isTrue();
     assertThat(methodTarget.getGroup()).isEqualTo("Statistics Commands");
     assertThat(methodTarget.getHelp()).isEqualTo("Show general information about statistics files.");
-    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowStatisticsMetadataCommand.class, "showStatisticsMetadata", File.class, ZoneId.class));
+    assertThat(methodTarget.getMethod()).isEqualTo(ReflectionUtils.findMethod(ShowStatisticsMetadataCommand.class, "showStatisticsMetadata", File.class, ZoneId.class, File.class));
   }
 
   @Test
@@ -124,7 +127,54 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
 
   @Test
   @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
-  public void showStatisticsMetadataShouldReturnOnlyMetadataTableIfParsingSucceedsForAllFiles(String timeZoneId) {
+  public void showStatisticsMetadataShouldReturnOnlyErrorsTableWhenParsingFailsForAllFiles(String timeZoneId) {
+    ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
+    String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
+
+    File basePath = StatisticsSampleDataUtils.corruptedFolder;
+    String command = "show statistics metadata --path " + basePath.getAbsolutePath() + zoneIdCommandOption;
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
+    assertThat(resultList.size()).isEqualTo(1);
+
+    // Errors Table.
+    TableModel errorsTable = resultList.get(0).getModel();
+    int errorsRowCount = errorsTable.getRowCount();
+    int errorsColumnCount = errorsTable.getColumnCount();
+    assertThat(errorsRowCount).isEqualTo(3);
+    assertThat(errorsColumnCount).isEqualTo(2);
+
+    // Assert Table Data.
+    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
+    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
+    assertThat(errorsTable.getValue(1, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath.toPath()));
+    assertThat(errorsTable.getValue(1, 1)).isEqualTo("Unexpected token byte value: 67");
+    assertThat(errorsTable.getValue(2, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath.toPath()));
+    assertThat(errorsTable.getValue(2, 1)).isEqualTo("Not in GZIP format");
+  }
+
+  @Test
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showStatisticsMetadataShouldReturnOnlyErrorsTableAndIgnoreExportParameterWhenParsingFailsForAllFiles(String format) {
+    File basePath = StatisticsSampleDataUtils.corruptedFolder;
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String exportCommandOption = " --export " + outputFile;
+
+    String command = "show statistics metadata --path " + basePath.getAbsolutePath() + exportCommandOption;
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(1);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+
+    // File Should Not Exist.
+    assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+  }
+
+  @Test
+  @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
+  public void showStatisticsMetadataShouldReturnOnlyMetadataTableWhenParsingSucceedsForAllFiles(String timeZoneId) {
     ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
     String zoneIdDesc = FormatUtils.formatTimeZoneId(zoneId);
     String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
@@ -136,14 +186,14 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(1);
 
-    // Correct Results.
+    // Results Table.
     TableModel resultsTable = resultList.get(0).getModel();
     int rowCount = resultsTable.getRowCount();
     int columnCount = resultsTable.getColumnCount();
     assertThat(rowCount).isEqualTo(8);
     assertThat(columnCount).isEqualTo(6);
 
-    // Assert Titles
+    // Assert Titles.
     assertThat(resultsTable.getValue(0, 0)).isEqualTo("File Name");
     assertThat(resultsTable.getValue(0, 1)).isEqualTo("Product Version");
     assertThat(resultsTable.getValue(0, 2)).isEqualTo("Operating System");
@@ -158,37 +208,32 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     StatisticsSampleDataUtils.assertClusterTwoLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(4, 0), (String) resultsTable.getValue(4, 1), (String) resultsTable.getValue(4, 2), (String) resultsTable.getValue(4, 3), (String) resultsTable.getValue(4, 4), (String) resultsTable.getValue(4, 5));
     StatisticsSampleDataUtils.assertClusterTwoServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(5, 0), (String) resultsTable.getValue(5, 1), (String) resultsTable.getValue(5, 2), (String) resultsTable.getValue(5, 3), (String) resultsTable.getValue(5, 4), (String) resultsTable.getValue(5, 5));
     StatisticsSampleDataUtils.assertClusterTwoServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(6, 0), (String) resultsTable.getValue(6, 1), (String) resultsTable.getValue(6, 2), (String) resultsTable.getValue(6, 3), (String) resultsTable.getValue(6, 4), (String) resultsTable.getValue(6, 5));
-    StatisticsSampleDataUtils
-        .assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
+    StatisticsSampleDataUtils.assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
   }
 
   @Test
-  @Parameters({ "", "Australia/Sydney", "America/Argentina/Buenos_Aires", "Asia/Shanghai" })
-  public void showStatisticsMetadataShouldReturnOnlyErrorsTableIfParsingFailsForAllFiles(String timeZoneId) {
-    ZoneId zoneId = StringUtils.isBlank(timeZoneId) ? null : ZoneId.of(timeZoneId);
-    String zoneIdCommandOption = zoneId != null ? " --timeZone " + timeZoneId : "";
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showStatisticsMetadataShouldReturnMetadataTableAndExportResultWhenParsingSucceedsForAllFiles(String format) {
+    File basePath = StatisticsSampleDataUtils.uncorruptedFolder;
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String exportCommandOption = " --export " + outputFile;
 
-    File basePath = StatisticsSampleDataUtils.corruptedFolder;
-    String command = "show statistics metadata --path " + basePath.getAbsolutePath() + zoneIdCommandOption;
+    String command = "show statistics metadata --path " + basePath.getAbsolutePath() + exportCommandOption;
     Object commandResult = shell.evaluate(() -> command);
     assertThat(commandResult).isInstanceOf(List.class);
-    @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
-    assertThat(resultList.size()).isEqualTo(1);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(2);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+    assertThat(resultList.get(1)).isInstanceOf(String.class);
 
-    // Error Results should come last.
-    TableModel errorsTable = resultList.get(0).getModel();
-    int errorsRowCount = errorsTable.getRowCount();
-    int errorsColumnCount = errorsTable.getColumnCount();
-    assertThat(errorsRowCount).isEqualTo(3);
-    assertThat(errorsColumnCount).isEqualTo(2);
-
-    // Assert Table Data
-    assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
-    assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
-    assertThat(errorsTable.getValue(1, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath.toPath()));
-    assertThat(errorsTable.getValue(1, 1)).isEqualTo("Unexpected token byte value: 67");
-    assertThat(errorsTable.getValue(2, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath.toPath()));
-    assertThat(errorsTable.getValue(2, 1)).isEqualTo("Not in GZIP format");
+    // File Should (Not) Exist for (Un) Known Formats.
+    if (TableExportService.Format.isSupported(format)) {
+      assertThat(Files.exists(Paths.get(outputFile))).isTrue();
+      assertThat(resultList.get(1)).isInstanceOf(String.class).isEqualTo("Data successfully exported to " + outputFile + ".");
+    } else {
+      assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+      assertThat(resultList.get(1)).isInstanceOf(String.class).isEqualTo("There was en error while exporting the data to " + outputFile + ": No exporter found for extension " + format + ".");
+    }
   }
 
   @Test
@@ -205,14 +250,14 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     @SuppressWarnings("unchecked") List<Table> resultList = (List) commandResult;
     assertThat(resultList.size()).isEqualTo(2);
 
-    // Correct Results should come first.
+    // Results Table should come first.
     TableModel resultsTable = resultList.get(0).getModel();
     int rowCount = resultsTable.getRowCount();
     int columnCount = resultsTable.getColumnCount();
     assertThat(rowCount).isEqualTo(8);
     assertThat(columnCount).isEqualTo(6);
 
-    // Assert Titles
+    // Assert Titles.
     assertThat(resultsTable.getValue(0, 0)).isEqualTo("File Name");
     assertThat(resultsTable.getValue(0, 1)).isEqualTo("Product Version");
     assertThat(resultsTable.getValue(0, 2)).isEqualTo("Operating System");
@@ -227,22 +272,47 @@ public class ShowStatisticsMetadataCommandIntegrationTest {
     StatisticsSampleDataUtils.assertClusterTwoLocatorMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(4, 0), (String) resultsTable.getValue(4, 1), (String) resultsTable.getValue(4, 2), (String) resultsTable.getValue(4, 3), (String) resultsTable.getValue(4, 4), (String) resultsTable.getValue(4, 5));
     StatisticsSampleDataUtils.assertClusterTwoServerOneMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(5, 0), (String) resultsTable.getValue(5, 1), (String) resultsTable.getValue(5, 2), (String) resultsTable.getValue(5, 3), (String) resultsTable.getValue(5, 4), (String) resultsTable.getValue(5, 5));
     StatisticsSampleDataUtils.assertClusterTwoServerTwoMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(6, 0), (String) resultsTable.getValue(6, 1), (String) resultsTable.getValue(6, 2), (String) resultsTable.getValue(6, 3), (String) resultsTable.getValue(6, 4), (String) resultsTable.getValue(6, 5));
-    StatisticsSampleDataUtils
-        .assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
+    StatisticsSampleDataUtils.assertClientMetadata(basePath.toPath(), zoneId, (String) resultsTable.getValue(7, 0), (String) resultsTable.getValue(7, 1), (String) resultsTable.getValue(7, 2), (String) resultsTable.getValue(7, 3), (String) resultsTable.getValue(7, 4), (String) resultsTable.getValue(7, 5));
 
-    // Error Results should come last.
+    // Error Results should come afterwards.
     TableModel errorsTable = resultList.get(1).getModel();
     int errorsRowCount = errorsTable.getRowCount();
     int errorsColumnCount = errorsTable.getColumnCount();
     assertThat(errorsRowCount).isEqualTo(3);
     assertThat(errorsColumnCount).isEqualTo(2);
 
-    // Assert Table Data
+    // Assert Table Data.
     assertThat(errorsTable.getValue(0, 0)).isEqualTo("File Name");
     assertThat(errorsTable.getValue(0, 1)).isEqualTo("Error Description");
     assertThat(errorsTable.getValue(1, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE.getRelativeFilePath(basePath.toPath()));
     assertThat(errorsTable.getValue(1, 1)).isEqualTo("Unexpected token byte value: 67");
     assertThat(errorsTable.getValue(2, 0)).isEqualTo(StatisticsSampleDataUtils.SampleType.UNPARSEABLE_COMPRESSED.getRelativeFilePath(basePath.toPath()));
     assertThat(errorsTable.getValue(2, 1)).isEqualTo("Not in GZIP format");
+  }
+
+  @Test
+  @Parameters({ "txt", "pdf", "csv", "tsv" })
+  public void showStatisticsMetadataShouldReturnBothTablesAndExportMessageInOrder(String format) {
+    File basePath = StatisticsSampleDataUtils.rootFolder;
+    String outputFile = temporaryFolder.getRoot().getAbsolutePath() + File.separator + "output." + format;
+    String exportCommandOption = " --export " + outputFile;
+
+    String command = "show statistics metadata --path " + basePath.getAbsolutePath() + exportCommandOption;
+    Object commandResult = shell.evaluate(() -> command);
+    assertThat(commandResult).isInstanceOf(List.class);
+    @SuppressWarnings("unchecked") List<Object> resultList = (List<Object>) commandResult;
+    assertThat(resultList.size()).isEqualTo(3);
+    assertThat(resultList.get(0)).isInstanceOf(Table.class);
+    assertThat(resultList.get(1)).isInstanceOf(Table.class);
+    assertThat(resultList.get(2)).isInstanceOf(String.class);
+
+    // File Should (Not) Exist for (Un) Known Formats.
+    if (TableExportService.Format.isSupported(format)) {
+      assertThat(Files.exists(Paths.get(outputFile))).isTrue();
+      assertThat(resultList.get(2)).isInstanceOf(String.class).isEqualTo("Data successfully exported to " + outputFile + ".");
+    } else {
+      assertThat(Files.exists(Paths.get(outputFile))).isFalse();
+      assertThat(resultList.get(2)).isInstanceOf(String.class).isEqualTo("There was en error while exporting the data to " + outputFile + ": No exporter found for extension " + format + ".");
+    }
   }
 }

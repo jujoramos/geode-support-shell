@@ -56,8 +56,7 @@ import org.apache.geode.support.test.mockito.MockUtils;
 import org.apache.geode.support.utils.FormatUtils;
 
 @RunWith(JUnitParamsRunner.class)
-public class ShowLogsMetadataCommandTest
-    extends AbstractExportableCommandTest {
+public class ShowLogsMetadataCommandTest extends AbstractExportableCommandTest {
   private File mockedFolderFile;
   private LogsService logsService;
   private FilesService filesService;
@@ -277,9 +276,9 @@ public class ShowLogsMetadataCommandTest
     ParsingResult<LogMetadata> errorResult1 = new ParsingResult<>(unparseableFile1, mockedExceptions.get(0));
 
     List<ParsingResult<LogMetadata>> mockedResults = Arrays.asList(correctResult1, errorResult1);
-    setExportServiceAnswer(exportSucceeds);
     when(logsService.parseMetadata(any())).thenReturn(mockedResults);
     when(logsService.parseInterval(any())).thenReturn(mockedResults);
+    setExportServiceAnswer(exportSucceeds);
 
     Object resultObject = logsCommand.showLogsMetadata(mockedFolderFile, intervalOnly, zoneId, mockedExportFile);
     assertThat(resultObject).isInstanceOf(List.class);

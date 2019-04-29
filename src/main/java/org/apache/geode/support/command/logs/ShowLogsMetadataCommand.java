@@ -99,12 +99,7 @@ public class ShowLogsMetadataCommand extends ExportableCommand {
           }
       );
 
-      Table resultsTable = buildResultsTable(resultsModelBuilder);
-      @SuppressWarnings("unchecked") Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
-
-      if (resultsTable != null) commandResult.add(resultsTable);
-      if (errorsTable != null) commandResult.add(errorsTable);
-      exportResultsTable(resultsTable, outputFile, commandResult);
+      buildCommandResult(sourcePath, parsingResults, resultsModelBuilder, outputFile, commandResult);
     }
 
     return commandResult;
