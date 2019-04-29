@@ -24,14 +24,17 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Properties;
 
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.apache.geode.support.domain.logs.LogMetadata;
+import org.apache.geode.support.test.junit.TimeZoneRule;
 import org.apache.geode.support.test.mockito.MockUtils;
 
 public class Log4JParserTest extends AbstractLogParserTest {
@@ -170,6 +173,9 @@ public class Log4JParserTest extends AbstractLogParserTest {
 
   private Properties expectedProperties8x;
   private Properties expectedProperties9x;
+
+  @Rule
+  public TimeZoneRule timeZoneRule = new TimeZoneRule(ZoneId.of("Europe/Dublin"));
 
   @Before
   public void setUp() {

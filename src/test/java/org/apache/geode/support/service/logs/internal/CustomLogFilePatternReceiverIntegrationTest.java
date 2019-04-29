@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -31,12 +32,17 @@ import java.util.Optional;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.apache.geode.support.test.LogsSampleDataUtils;
+import org.apache.geode.support.test.junit.TimeZoneRule;
 
 public class CustomLogFilePatternReceiverIntegrationTest {
   private CustomLogFilePatternReceiver logFilePatternReceiver;
+
+  @Rule
+  public TimeZoneRule timeZoneRule = new TimeZoneRule(ZoneId.of("Europe/Dublin"));
 
   @Before
   public void setUp() {

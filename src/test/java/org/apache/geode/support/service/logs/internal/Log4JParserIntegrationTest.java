@@ -17,15 +17,21 @@ package org.apache.geode.support.service.logs.internal;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.time.ZoneId;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.test.LogsSampleDataUtils;
+import org.apache.geode.support.test.junit.TimeZoneRule;
 
 public class Log4JParserIntegrationTest {
   private LogParser logParser;
+
+  @Rule
+  public TimeZoneRule timeZoneRule = new TimeZoneRule(ZoneId.of("Europe/Dublin"));
 
   @Before
   public void setUp() {

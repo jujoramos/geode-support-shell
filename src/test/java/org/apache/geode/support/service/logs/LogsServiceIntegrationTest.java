@@ -18,8 +18,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.List;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.logs.LogMetadata;
 import org.apache.geode.support.service.LogsService;
 import org.apache.geode.support.test.LogsSampleDataUtils;
+import org.apache.geode.support.test.junit.TimeZoneRule;
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
@@ -44,6 +47,9 @@ public class LogsServiceIntegrationTest {
 
   @Autowired
   private LogsService logsService;
+
+  @Rule
+  public TimeZoneRule timeZoneRule = new TimeZoneRule(ZoneId.of("Europe/Dublin"));
 
   @Test
   public void parseIntervalShouldReturnParsingErrorsWhenFileDoestNotExist() {

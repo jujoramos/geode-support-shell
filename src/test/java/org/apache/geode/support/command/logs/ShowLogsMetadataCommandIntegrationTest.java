@@ -48,6 +48,7 @@ import org.springframework.util.ReflectionUtils;
 
 import org.apache.geode.support.service.TableExportService;
 import org.apache.geode.support.test.LogsSampleDataUtils;
+import org.apache.geode.support.test.junit.TimeZoneRule;
 import org.apache.geode.support.utils.FormatUtils;
 
 /**
@@ -69,6 +70,9 @@ public class ShowLogsMetadataCommandIntegrationTest {
 
   @Rule
   public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
+  @Rule
+  public TimeZoneRule timeZoneRule = new TimeZoneRule(ZoneId.of("Europe/Dublin"));
 
   @ClassRule
   public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
