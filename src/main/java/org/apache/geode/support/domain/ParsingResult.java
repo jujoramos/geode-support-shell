@@ -16,8 +16,8 @@ package org.apache.geode.support.domain;
 
 import java.nio.file.Path;
 
-public class ParsingResult<V> {
-  private final V data;
+public class ParsingResult<T> {
+  private final T data;
   private final Path file;
   private final boolean success;
   private final Exception exception;
@@ -34,7 +34,7 @@ public class ParsingResult<V> {
     return file;
   }
 
-  public V getData() {
+  public T getData() {
     if (!success)
       throw new IllegalArgumentException("Parsing failed, no data available.");
 
@@ -48,7 +48,7 @@ public class ParsingResult<V> {
     return exception;
   }
 
-  public ParsingResult(Path file, V data) {
+  public ParsingResult(Path file, T data) {
     this.file = file;
     this.data = data;
     this.success = true;

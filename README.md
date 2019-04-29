@@ -155,7 +155,7 @@ $ tree
         ├── cluster2-server2.gfs
         └── sampleClient.gfs
 
-$ geode-support-shell>start vsd --path ./samples --vsdHome /Users/jramos/Applications/GemFire/vsd --decompressionFolder ./decompressed --timeZone "America/Buenos_Aires"
+$ geode-support-shell>start vsd --path ./samples --vsdHome /Applications/GemFire/vsd --decompressionFolder ./decompressed --timeZone "America/Buenos_Aires"
 ╔═════════════════════════════╦══════════════════╗
 ║File Name                    ║Error Description ║
 ╠═════════════════════════════╬══════════════════╣
@@ -204,13 +204,15 @@ pattern `[%level{lowerCase=true} %date{yyyy/MM/dd HH:mm:ss.SSS z} &lt;%thread&gt
 #### show logs metadata
 
 Displays general information about the log file specified, or about the full set of log files 
-contained within the directory specified. When a folder is specified as the `--path` argument, 
-the command will recursively iterate and parse all files matching the extension `.log`. The 
-command aims to provide an overview of the log files, allowing the user to quickly asses the 
-version and time frame covered.
+contained within the directory specified, and exports the information to the desired format.
+When a folder is specified as the `--path` argument, the command will recursively iterate and parse 
+all files matching the extension `.log`. The command aims to provide an overview of the log files, 
+allowing the user to quickly asses the version and time frame covered.
 
 The result includes one or two tables, depending on whether the parsing of the different log 
-files fails or succeeds.
+files fails or succeeds, and a message indicating whether the export was successful or not. The 
+parsing results can be exported to a file through the `--export` parameter, the output format is 
+chosen based on the file extension (only `txt`, `csv` and `tsv` are currently supported).
 
 The _Results_ table includes a list of the log files for which the parsing succeeded, along with the 
 _File Name_ (relative to the original path), _Product Version_, _Operating System_ installed on the 
@@ -247,7 +249,7 @@ $ geode-support-shell>show logs metadata --path ./samples
 ║/unparseable/unknownFormat.log║Log format not recognized.║
 ╚══════════════════════════════╩══════════════════════════╝
 
-$ geode-support-shell>show logs metadata --path ./samples --timeZone "America/Chicago" --intervalOnly true
+$ geode-support-shell>show logs metadata --path ./samples --timeZone "America/Chicago" --intervalOnly true --export /temp/output.txt
 ╔════════════════════════╦═══════════════╦════════════════╦═════════╦═══════════════════════════╦════════════════════════════╗
 ║File Name               ║Product Version║Operating System║Time Zone║Start Time[America/Chicago]║Finish Time[America/Chicago]║
 ╠════════════════════════╬═══════════════╬════════════════╬═════════╬═══════════════════════════╬════════════════════════════╣
@@ -263,6 +265,8 @@ $ geode-support-shell>show logs metadata --path ./samples --timeZone "America/Ch
 ╠══════════════════════════════╬══════════════════════════╣
 ║/unparseable/unknownFormat.log║Log format not recognized.║
 ╚══════════════════════════════╩══════════════════════════╝
+
+Data successfully exported to /temp/output.txt.
 ```
 
 ##### Parameters:
@@ -272,7 +276,7 @@ $ geode-support-shell>show logs metadata --path ./samples --timeZone "America/Ch
 |  --path | *Mandatory*. Path to the log file, or directory to scan for log files. |
 |  --intervalOnly | *Optional*. Whether to parse the full metadata (default, slower) or only the time covered by the log file (extremely faster). |
 |  --timeZone | *Optional*. Time Zone Id to use when showing results. If not set, the default from the local system will be used (or the one from the log file, if found and '--intervalOnly' is set as 'false').|
-
+|  --export | *Optional*. Path to file where command results should be written to (the extension sets the output format: `txt`, `csv`, `tsv`). |
 
 #### filter logs by date-time
 
@@ -399,7 +403,9 @@ command aims to provide an overview of the statistics files, allowing the user t
 version and time frame covered by the sampling.
 
 The result includes one or two tables, depending on whether the parsing of the different statistics 
-files fails or succeeds.
+files fails or succeeds, and a message indicating whether the export was successful or not. The 
+parsing results can be exported to a file through the `--export` parameter, the output format is 
+chosen based on the file extension (only `txt`, `csv` and `tsv` are currently supported).
 
 The _Results_ table includes a list of the statistics files for which the parsing succeeded, along 
 with the _File Name_ (relative to the original path), the _Product Version_ on which the member that 
@@ -445,7 +451,7 @@ $ geode-support-shell>show statistics metadata --path ./samples
 ║/corrupted/unparseableFile.gz ║Not in GZIP format             ║
 ╚══════════════════════════════╩═══════════════════════════════╝
 
-$ geode-support-shell>show statistics metadata --path ./samples --timeZone "America/Buenos_Aires"
+$ geode-support-shell>show statistics metadata --path ./samples --timeZone "America/Buenos_Aires" --export /temp/output.csv
 ╔═════════════════════════════════╦═══════════════╦════════════════╦═══════════════╦════════════════════════════════╦═════════════════════════════════╗
 ║File Name                        ║Product Version║Operating System║Time Zone      ║Start Time[America/Buenos_Aires]║Finish Time[America/Buenos_Aires]║
 ╠═════════════════════════════════╬═══════════════╬════════════════╬═══════════════╬════════════════════════════════╬═════════════════════════════════╣
@@ -471,6 +477,8 @@ $ geode-support-shell>show statistics metadata --path ./samples --timeZone "Amer
 ╠══════════════════════════════╬═══════════════════════════════╣
 ║/corrupted/unparseableFile.gz ║Not in GZIP format             ║
 ╚══════════════════════════════╩═══════════════════════════════╝
+
+Data successfully exported to /temp/output.csv.
 ```
 
 ##### Parameters:
@@ -479,6 +487,7 @@ $ geode-support-shell>show statistics metadata --path ./samples --timeZone "Amer
 | :--- | :--- |
 |  --path | *Mandatory*. Path to statistics file, or directory to scan for statistics files. |
 |  --timeZone | *Optional*. Time Zone Id to use when showing results. If not set, the default from the statistics file will be used. Useful when analyzing files written in different time zones (clusters replicating data over the WAN, as an example).|
+|  --export | *Optional*. Path to file where command results should be written to (the extension sets the output format: `txt`, `csv`, `tsv`). |
 
 #### filter statistics by date-time
 
@@ -643,9 +652,13 @@ $ tree
 
 #### show statistics summary
 
-Displays the summary statistical values for a particular Geode/GemFire statistic, or a set of statistics that matches a filter.
+Displays the summary statistical values for a particular Geode/GemFire statistic, or a set of 
+statistics that matches a filter.
 
-The result includes one or two tables, depending on whether the parsing of the different statistics files fails or succeeds.
+The result includes one or two tables, depending on whether the parsing of the different statistics 
+files fails or succeeds, and a message indicating whether the export was successful or not. The 
+parsing results can be exported to a file through the `--export` parameter, the output format is 
+chosen based on the file extension (only `txt`, `csv` and `tsv` are currently supported).
 
 The _Results_ table includes a list of statistics for which the filter matched, grouped by `Statistic` or `Sampling`, along with the _maximum_, _minimum_, _average_, _standard deviation_ and _last sample_ values for each match. The `groupBy` parameter specifies how the results will be shown; `Statistic` is preferred when searching and comparing a particular statistic over a set of files, and `Sampling` is better when searching and comparing several statistics per file.
 
@@ -654,8 +667,8 @@ the _File Name_ (relative to the original path) and the _Error Description_.
 
 ##### Syntax:
 ```
-# Search strictly for StatSampler.jvmPauses, include those results for which all values are 0 and group results by statistic id.
-$ geode-support-shell>show statistics summary --path ./samples --statistic jvmPauses --category StatSampler --groupBy Statistic --showEmptyStatistics true
+# Search strictly for StatSampler.jvmPauses, include those results for which all values are 0 and group results by statistic id. Export result table to /tmp/jvmPauses.tsv
+$ geode-support-shell>show statistics summary --path ./samples --statistic jvmPauses --category StatSampler --groupBy Statistic --showEmptyStatistics true --export /tmp/jvmPauses.tsv
 ╔════════════════════════════════════╦═══════╦═══════╦═══════╦══════════╦══════════════════╗
 ║StatSampler[statSampler].jvmPauses  ║Minimum║Maximum║Average║Last Value║Standard Deviation║
 ╠════════════════════════════════════╬═══════╬═══════╬═══════╬══════════╬══════════════════╣
@@ -681,6 +694,8 @@ $ geode-support-shell>show statistics summary --path ./samples --statistic jvmPa
 ╠══════════════════════════════╬═══════════════════════════════╣
 ║/corrupted/unparseableFile.gz ║Not in GZIP format             ║
 ╚══════════════════════════════╩═══════════════════════════════╝
+
+Data successfully exported to /tmp/jvmPauses.tsv.
 
 # Search for all statistics with name ending in "InProgress", ignore those for which all values are zero and group results by sampling file.
 $ geode-support-shell>show statistics summary --path ./samples --statistic .*InProgress
@@ -888,3 +903,4 @@ $ geode-support-shell>show statistics summary --path ./samples --category CacheP
 | category | *Optional*. Category of the statistic to search for (VMStats, IndexStats, etc.). Can be a regular expression. |
 | instance | *Optional*. Instance of the statistic to search for (region name, function name, etc.). Can be a regular expression. |
 | statistic | *Optional*. Name of the statistic to search for (replyWaitsInProgress, delayDuration, etc.). Can be a regular expression. |
+|  --export | *Optional*. Path to file where command results should be written to (the extension sets the output format: `txt`, `csv`, `tsv`). |

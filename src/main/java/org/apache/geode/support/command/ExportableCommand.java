@@ -11,7 +11,7 @@ import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.TableExportService;
 
-public abstract class ExportableCommand<V> extends AbstractCommand {
+public abstract class ExportableCommand<T> extends AbstractCommand {
   private TableExportService tableExportService;
   protected final String EXPORT_OPTION = "--export";
   protected final String EXPORT_OPTION_HELP = "Path to file where command results should be written to (extension determines the output format: txt, csv, tsv).";
@@ -48,7 +48,7 @@ public abstract class ExportableCommand<V> extends AbstractCommand {
     }
   }
 
-  protected void buildCommandResult(Path sourcePath, List<ParsingResult<V>> parsingResults, Table resultsTable, File outputFile, List<Object> commandResult) {
+  protected void buildCommandResult(Path sourcePath, List<ParsingResult<T>> parsingResults, Table resultsTable, File outputFile, List<Object> commandResult) {
     @SuppressWarnings("unchecked") Table errorsTable = buildErrorsTable(sourcePath, parsingResults);
     if (resultsTable != null) commandResult.add(resultsTable);
     if (errorsTable != null) commandResult.add(errorsTable);

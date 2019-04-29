@@ -91,26 +91,27 @@ public class Interval {
     return filterDateTime.compareTo(startTime) >= 0 && filterDateTime.compareTo(finishTime) <= 0;
   }
 
-  boolean contains(Interval interval) {
-    Objects.requireNonNull(interval, "Interval can't be null.");
+  private Interval withMyTimeZone(Interval interval) {
     Interval other = interval;
 
     // Use the same ZoneId to execute the comparision.
     if (!zoneId.equals(interval.zoneId)) {
       other = new Interval(zoneId, interval.startTime.withZoneSameInstant(zoneId), interval.finishTime.withZoneSameInstant(zoneId));
     }
+
+    return other;
+  }
+
+  boolean contains(Interval interval) {
+    Objects.requireNonNull(interval, "Interval can't be null.");
+    Interval other = withMyTimeZone(interval);
 
     return other.startTime.compareTo(startTime) >= 0 && other.finishTime.compareTo(finishTime) <= 0;
   }
 
   public boolean overlaps(Interval interval) {
     Objects.requireNonNull(interval, "Interval can't be null.");
-    Interval other = interval;
-
-    // Use the same ZoneId to execute the comparision.
-    if (!zoneId.equals(interval.zoneId)) {
-      other = new Interval(zoneId, interval.startTime.withZoneSameInstant(zoneId), interval.finishTime.withZoneSameInstant(zoneId));
-    }
+    Interval other = withMyTimeZone(interval);
 
     return contains(other) || (startTime.compareTo(other.finishTime) <= 0 && other.startTime.compareTo(finishTime) <= 0);
   }

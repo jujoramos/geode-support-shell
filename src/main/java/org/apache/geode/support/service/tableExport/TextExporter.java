@@ -7,7 +7,7 @@ import java.nio.file.Path;
 
 import org.springframework.shell.table.Table;
 
-public class TextExporter extends AbstractExporter {
+class TextExporter extends AbstractExporter {
 
   @Override
   void export(Path path, Table table) throws IOException {

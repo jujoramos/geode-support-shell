@@ -34,7 +34,7 @@ import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.utils.FormatUtils;
 
 // TODO: Spring doesn't know how to convert from String to Path. Add a custom converter and use Path instead of the old Sampling class.
-public abstract class AbstractCommand<V>  {
+public abstract class AbstractCommand<T>  {
   protected FilesService filesService;
   protected final BorderStyle borderStyle = BorderStyle.fancy_double;
 
@@ -75,7 +75,7 @@ public abstract class AbstractCommand<V>  {
    * @param parsingResults The list of parsing results returned by the service layer.
    * @return The errors Table, or null if no errors happened while parsing the files.
    */
-  protected Table buildErrorsTable(Path sourcePath, List<ParsingResult<V>> parsingResults) {
+  Table buildErrorsTable(Path sourcePath, List<ParsingResult<T>> parsingResults) {
     Table errorsTable = null;
     TableModelBuilder<String> errorsModelBuilder = new TableModelBuilder<String>().addRow().addValue("File Name").addValue("Error Description");
 
@@ -96,6 +96,11 @@ public abstract class AbstractCommand<V>  {
     return errorsTable;
   }
 
+  /**
+   * Checks whether a certain time interval contains the specific date and time.
+   *
+   * @return true if the date and time are included within the interval, false otherwise.
+   */
   protected boolean intervalMatchesFilter(Interval interval, Integer year, Integer month, Integer day, Integer hour, Integer minute, Integer second) {
     boolean matches;
     ZoneId filterZoneId = interval.getZoneId();
