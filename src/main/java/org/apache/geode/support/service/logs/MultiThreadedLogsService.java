@@ -44,8 +44,13 @@ import org.apache.geode.support.service.logs.internal.LogParser;
 @Service
 class MultiThreadedLogsService implements LogsService {
   private final FilesService filesService;
-  private final ExecutorService executorService = Executors.newCachedThreadPool();
   private static final Logger logger = LoggerFactory.getLogger(MultiThreadedLogsService.class);
+  private final ExecutorService executorService = Executors.newCachedThreadPool((Runnable runnable) -> {
+        Thread thread = new Thread(runnable);
+        thread.setDaemon(true);
+        return thread;
+      }
+  );
 
   Predicate<Path> isLogFile() {
     return path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".log");
@@ -68,9 +73,7 @@ class MultiThreadedLogsService implements LogsService {
     try {
       Files.walk(path)
           .filter(isLogFile())
-          .forEach(currentPath -> {
-            parserTasks.add(executorService.submit(createParserTask(currentPath, intervalOnly)));
-          });
+          .forEach(currentPath -> parserTasks.add(executorService.submit(createParserTask(currentPath, intervalOnly))));
     } catch (IOException ioException) {
       String errorMessage = String.format("There was a problem while parsing file %s.", path.toString());
       logger.error(errorMessage, ioException);
