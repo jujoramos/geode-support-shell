@@ -29,7 +29,7 @@ import org.apache.geode.support.service.FilesService;
 public abstract class AbstractLogParser implements LogParser {
   private final FilesService filesService;
 
-  public AbstractLogParser(FilesService filesService) {
+  AbstractLogParser(FilesService filesService) {
     this.filesService = filesService;
   }
 

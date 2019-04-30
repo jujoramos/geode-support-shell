@@ -24,8 +24,6 @@ import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.logs.LogMetadata;
@@ -33,9 +31,9 @@ import org.apache.geode.support.service.LogsService;
 import org.apache.geode.support.service.logs.internal.LogParser;
 
 /**
- *
+ * @deprecated since 1.2.0, use {@link MultiThreadedLogsService} instead.
  */
-@Service
+@Deprecated
 class DefaultLogsService implements LogsService {
   private LogParser logParser;
   private static final Logger logger = LoggerFactory.getLogger(DefaultLogsService.class);
@@ -44,8 +42,7 @@ class DefaultLogsService implements LogsService {
     return path -> Files.isRegularFile(path) && path.getFileName().toString().endsWith(".log");
   }
 
-  @Autowired
-  public DefaultLogsService(LogParser logParser) {
+  DefaultLogsService(LogParser logParser) {
     this.logParser = logParser;
   }
 

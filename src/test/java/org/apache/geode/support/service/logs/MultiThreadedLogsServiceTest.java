@@ -15,7 +15,6 @@
 package org.apache.geode.support.service.logs;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
@@ -45,34 +44,43 @@ import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 import org.apache.geode.support.domain.ParsingResult;
 import org.apache.geode.support.domain.logs.LogMetadata;
+import org.apache.geode.support.service.FilesService;
 import org.apache.geode.support.service.logs.internal.LogParser;
 import org.apache.geode.support.test.mockito.MockUtils;
 
 @RunWith(PowerMockRunner.class)
 @PowerMockRunnerDelegate(JUnitParamsRunner.class)
-@PrepareForTest({ Files.class, DefaultLogsService.class })
-@SuppressWarnings("deprecation")
-public class DefaultLogsServiceTest {
+@PrepareForTest({ Files.class, MultiThreadedLogsService.class })
+public class MultiThreadedLogsServiceTest {
   private Path mockedFileOnePath;
   private Path mockedFileTwoPath;
   private Path mockedDirectoryPath;
-  private LogParser mockedLogParser;
-  private DefaultLogsService logsService;
+  private MultiThreadedLogsService logsService;
+  private LogParser mockedLogParserIntervalOnly;
+  private LogParser mockedLogParserFullMetadata;
+  private MultiThreadedLogsService.ParserTask intervalOnlyParserTask;
+  private MultiThreadedLogsService.ParserTask fullMetadataParserTask;
 
   @Before
   public void setUp() throws IOException {
-    mockedLogParser = mock(LogParser.class);
-    logsService = spy(new DefaultLogsService(mockedLogParser));
+    logsService = spy(new MultiThreadedLogsService(mock(FilesService.class)));
 
     mockedDirectoryPath = MockUtils.mockPath("/mockedDirectory", true);
     mockedFileOnePath = MockUtils.mockPath("/mockedDirectory/mockedFile1.log", false);
     mockedFileTwoPath = MockUtils.mockPath("/mockedDirectory/mockedFile2.log", false);
+
+    mockedLogParserIntervalOnly = mock(LogParser.class);
+    mockedLogParserFullMetadata = mock(LogParser.class);
+    intervalOnlyParserTask = spy(new MultiThreadedLogsService.ParserTask(mockedFileOnePath, mockedLogParserIntervalOnly, true));
+    fullMetadataParserTask = spy(new MultiThreadedLogsService.ParserTask(mockedFileTwoPath, mockedLogParserFullMetadata, false));
 
     Stream<Path> mockedDirectoryStream = Stream.of(mockedFileOnePath, mockedFileTwoPath);
     PowerMockito.mockStatic(Files.class);
 
     when(Files.isRegularFile(any())).thenReturn(true);
     when(Files.walk(mockedDirectoryPath)).thenReturn(mockedDirectoryStream);
+    when(logsService.createParserTask(mockedFileOnePath, true)).thenReturn(intervalOnlyParserTask);
+    when(logsService.createParserTask(mockedFileTwoPath, false)).thenReturn(fullMetadataParserTask);
   }
 
   @Test
@@ -91,25 +99,32 @@ public class DefaultLogsServiceTest {
   }
 
   @Test
-  public void parseSelectivelyShouldPropagateExceptionsThrownByLogParser() throws IOException {
-    doThrow(new IOException("Mocked IOException Interval Only")).when(mockedLogParser).parseLogFileInterval(any());
-    doThrow(new IOException("Mocked IOException Full Metadata")).when(mockedLogParser).parseLogFileMetadata(any());
+  public void parserTaskShouldReturnExceptionsThrownByLogParser() throws IOException {
+    doThrow(new IOException("Mocked IOException Interval Only")).when(mockedLogParserIntervalOnly).parseLogFileInterval(any());
+    doThrow(new IOException("Mocked IOException Full Metadata")).when(mockedLogParserFullMetadata).parseLogFileMetadata(any());
 
-    assertThatThrownBy(() -> logsService.parseSelectively(mockedFileOnePath, true)).isInstanceOf(IOException.class).hasMessage("Mocked IOException Interval Only");
-    assertThatThrownBy(() -> logsService.parseSelectively(mockedFileTwoPath, false)).isInstanceOf(IOException.class).hasMessage("Mocked IOException Full Metadata");
+    ParsingResult<LogMetadata> intervalOnlyResult = intervalOnlyParserTask.call();
+    assertThat(intervalOnlyResult).isNotNull();
+    assertThat(intervalOnlyResult.isFailure()).isTrue();
+    assertThat(intervalOnlyResult.getException()).isInstanceOf(IOException.class).hasMessage("Mocked IOException Interval Only");
+
+    ParsingResult<LogMetadata> fullMetadataResult = fullMetadataParserTask.call();
+    assertThat(fullMetadataResult).isNotNull();
+    assertThat(fullMetadataResult.isFailure()).isTrue();
+    assertThat(fullMetadataResult.getException()).isInstanceOf(IOException.class).hasMessage("Mocked IOException Full Metadata");
   }
 
   @Test
-  public void parseSelectivelyShouldExecuteTheCorrectMethod() throws Exception {
-    when(mockedLogParser.parseLogFileInterval(mockedFileOnePath)).thenReturn(mock(LogMetadata.class));
-    assertThat(logsService.parseSelectively(mockedFileOnePath, true)).isNotNull();
-    verify(mockedLogParser, times(1)).parseLogFileInterval(mockedFileOnePath);
-    verify(mockedLogParser, times(0)).parseLogFileMetadata(mockedFileOnePath);
+  public void parserTaskShouldExecuteTheCorrectMethod() throws Exception {
+    when(mockedLogParserIntervalOnly.parseLogFileInterval(mockedFileOnePath)).thenReturn(mock(LogMetadata.class));
+    assertThat(intervalOnlyParserTask.call()).isNotNull();
+    verify(mockedLogParserIntervalOnly, times(1)).parseLogFileInterval(mockedFileOnePath);
+    verify(mockedLogParserIntervalOnly, times(0)).parseLogFileMetadata(mockedFileOnePath);
 
-    when(mockedLogParser.parseLogFileMetadata(mockedFileTwoPath)).thenReturn(mock(LogMetadata.class));
-    assertThat(logsService.parseSelectively(mockedFileTwoPath, false)).isNotNull();
-    verify(mockedLogParser, times(0)).parseLogFileInterval(mockedFileTwoPath);
-    verify(mockedLogParser, times(1)).parseLogFileMetadata(mockedFileTwoPath);
+    when(mockedLogParserFullMetadata.parseLogFileMetadata(mockedFileTwoPath)).thenReturn(mock(LogMetadata.class));
+    assertThat(fullMetadataParserTask.call()).isNotNull();
+    verify(mockedLogParserFullMetadata, times(0)).parseLogFileInterval(mockedFileTwoPath);
+    verify(mockedLogParserFullMetadata, times(1)).parseLogFileMetadata(mockedFileTwoPath);
   }
 
   @Test
@@ -130,10 +145,13 @@ public class DefaultLogsServiceTest {
 
   @Test
   @Parameters( { "true", "false" })
-  public void parseAllShouldReturnOnlyParsingErrorsWhenParseSelectivelyFailsForAllFiles(boolean intervalOnly) throws Exception {
-    doThrow(new IOException("Mocked Exception While Parsing File.")).when(logsService).parseSelectively(any(), anyBoolean());
-    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
+  public void parseAllShouldReturnOnlyParsingErrorsWhenAllParserTasksFail(boolean intervalOnly) throws Exception {
+    LogParser mockedLogParser = mock(LogParser.class);
+    doThrow(new IOException("Mocked Exception While Parsing File.")).when(mockedLogParser).parseLogFileInterval(any());
+    doThrow(new IOException("Mocked Exception While Parsing File.")).when(mockedLogParser).parseLogFileMetadata(any());
+    when(logsService.createParserTask(any(), anyBoolean())).thenAnswer(i -> new MultiThreadedLogsService.ParserTask((Path) i.getArguments()[0], mockedLogParser, intervalOnly));
 
+    List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(2);
 
@@ -155,8 +173,11 @@ public class DefaultLogsServiceTest {
   @Test
   @Parameters( { "true", "false" })
   public void parseAllShouldReturnOnlyParsingSuccessesWhenParseSelectivelySucceedsForAllFiles(boolean intervalOnly) throws Exception {
+    LogParser mockedLogParser = mock(LogParser.class);
     LogMetadata mockedMetadata = mock(LogMetadata.class);
-    doReturn(mockedMetadata).when(logsService).parseSelectively(any(), anyBoolean());
+    doReturn(mockedMetadata).when(mockedLogParser).parseLogFileInterval(any());
+    doReturn(mockedMetadata).when(mockedLogParser).parseLogFileMetadata(any());
+    when(logsService.createParserTask(any(), anyBoolean())).thenAnswer(i -> new MultiThreadedLogsService.ParserTask((Path) i.getArguments()[0], mockedLogParser, intervalOnly));
 
     List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
     assertThat(parsingResults).isNotNull();
@@ -178,14 +199,20 @@ public class DefaultLogsServiceTest {
   @Test
   @Parameters( { "true", "false" })
   public void parseAllShouldReturnBothParsingErrorsAndParsingSuccessesWhenParseSelectivelySucceedsForSomeFilesAndFailsForOthers(boolean intervalOnly) throws Exception {
+    LogParser successLogParser = mock(LogParser.class);
     LogMetadata mockedMetadata = mock(LogMetadata.class);
-    doReturn(mockedMetadata).when(logsService).parseSelectively(mockedFileOnePath, intervalOnly);
-    doThrow(new IOException("Mocked Exception While Parsing File.")).when(logsService).parseSelectively(mockedFileTwoPath, intervalOnly);
+    doReturn(mockedMetadata).when(successLogParser).parseLogFileInterval(any());
+    doReturn(mockedMetadata).when(successLogParser).parseLogFileMetadata(any());
+    when(logsService.createParserTask(mockedFileOnePath, intervalOnly)).thenAnswer(i -> new MultiThreadedLogsService.ParserTask(mockedFileOnePath, successLogParser, intervalOnly));
+
+    LogParser errorLogParser = mock(LogParser.class);
+    doThrow(new IOException("Mocked Exception While Parsing File.")).when(errorLogParser).parseLogFileInterval(any());
+    doThrow(new IOException("Mocked Exception While Parsing File.")).when(errorLogParser).parseLogFileMetadata(any());
+    when(logsService.createParserTask(mockedFileTwoPath, intervalOnly)).thenAnswer(i -> new MultiThreadedLogsService.ParserTask(mockedFileTwoPath, errorLogParser, intervalOnly));
 
     List<ParsingResult<LogMetadata>> parsingResults = logsService.parseAll(mockedDirectoryPath, intervalOnly);
     assertThat(parsingResults).isNotNull();
     assertThat(parsingResults.size()).isEqualTo(2);
-    verify(logsService, times(2)).parseSelectively(any(), anyBoolean());
 
     ParsingResult<LogMetadata> succeededResult = parsingResults.get(0);
     assertThat(succeededResult).isNotNull();

@@ -25,8 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.spi.LoggingEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import org.apache.geode.support.domain.logs.LogMetadata;
 import org.apache.geode.support.service.FilesService;
@@ -39,8 +37,7 @@ import org.apache.geode.support.service.FilesService;
  * Startup parameters and version information is logged around the 'Command Line Parameters:' string.
  * Complex Pattern to get metadata and properties: "(MSG ~= 'Command Line Parameters') || (MSG ~= 'Startup Configuration')".
  */
-@Component
-class Log4jParser extends AbstractLogParser {
+public class Log4jParser extends AbstractLogParser {
   private final static String SYSTEM_PROPERTIES = "System Properties:";
   private final static String LOG4J2_CONFIGURATION = "Log4J 2 Configuration:";
   private final static Pattern OPERATING_SYSTEM_PATTERN = Pattern.compile("Running on: .*,(.*)", Pattern.CASE_INSENSITIVE);
@@ -50,7 +47,6 @@ class Log4jParser extends AbstractLogParser {
     return () -> new IllegalArgumentException("Log format not recognized.");
   }
 
-  @Autowired
   public Log4jParser(FilesService filesService) {
     super(filesService);
   }
